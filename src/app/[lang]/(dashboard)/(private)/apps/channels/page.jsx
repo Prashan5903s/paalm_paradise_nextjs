@@ -1,9 +1,11 @@
-import PermissionGuardServer from '@/hocs/PermissionGuard'
+'use client'
+
+import PermissionGuardServer from '@/hocs/PermissionClientGuard'
 import Channel from '@views/apps/channel'
 
-export default async function ChannelApp({ params }) {
+export default async function ChannelApp() {
 
-    const locale = params.lang;
+    const { lang: locale } = useParams();
 
     return (
         <PermissionGuardServer locale={locale} element={'hasDepartmentPermission'}>

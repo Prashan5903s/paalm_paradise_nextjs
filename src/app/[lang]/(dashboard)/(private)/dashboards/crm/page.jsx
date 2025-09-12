@@ -1,3 +1,5 @@
+'use client'
+
 // MUI Imports
 import Grid from '@mui/material/Grid2'
 
@@ -14,11 +16,15 @@ import ActiveProjects from '@views/dashboards/crm/ActiveProjects'
 import LastTransaction from '@views/dashboards/crm/LastTransaction'
 import ActivityTimeline from '@views/dashboards/crm/ActivityTimeline'
 
-// Permission Guard
-import PermissionGuard from '@/hocs/PermissionGuard'
 
-export default function DashboardCRM({ params }) {
-  const locale = 'en';
+// Permission Guard
+import PermissionGuard from '@/hocs/PermissionClientGuard'
+
+import { useParams } from 'next/navigation'
+
+export default function DashboardCRM() {
+
+  const { lang: locale } = useParams();
 
   return (
     <PermissionGuard locale={locale} element="notUser">

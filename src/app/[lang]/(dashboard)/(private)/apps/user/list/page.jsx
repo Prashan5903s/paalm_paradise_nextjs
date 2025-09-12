@@ -1,13 +1,16 @@
+'use client'
+
 // Component Imports
-import PermissionGuard from '@/hocs/PermissionGuard'
+import PermissionGuard from '@/hocs/PermissionClientGuard'
 import UserList from '@/views/apps/user/list'
+import { useParams } from 'next/navigation';
 
-export default function UserListApp({ params }) {
+export default function () {
 
-  const locale = params.lang;
+  const { lang: locale } = useParams();
 
   return (
-    <PermissionGuard locale={locale} element={'hasUserPermission'}>
+    <PermissionGuard locale={locale} element={'isCompany'}>
       <UserList />
     </PermissionGuard>
   )

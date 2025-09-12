@@ -1,0 +1,382 @@
+'use client'
+
+// React Imports
+import { useEffect, useState } from 'react'
+
+// MUI Imports
+import {
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    Button,
+    CircularProgress,
+    MenuItem,
+    Skeleton
+} from '@mui/material'
+import Grid from '@mui/material/Grid2'
+
+// Hook Form + Validation
+import { useForm, Controller } from 'react-hook-form'
+import { valibotResolver } from '@hookform/resolvers/valibot'
+import { object, string, number, minLength, pipe } from 'valibot'
+
+// Components
+import { useSession } from 'next-auth/react'
+import { toast } from 'react-toastify'
+import CustomTextField from '@core/components/mui/TextField'
+import DialogCloseButton from '../DialogCloseButton'
+
+// ✅ Validation Schema
+const schema = object({
+    tower: string('Tower is required'),
+    floor: string('Floor is required'),
+    apartmentNumber: pipe(string(), minLength(1, 'Apartment number is required')),
+    area: pipe(string(), minLength(1, 'Area is required')), // keep as string since input type="number"
+    apartmentType: pipe(string('Apartment type is required')),
+    status: pipe(string('Status is required')),
+    // tower & parkingCode removed from schema since no input fields exist
+})
+
+const ApartmentDialog = ({ open, setOpen, selectedZone, fetchZoneData }) => {
+
+    const { data: session } = useSession()
+    const token = session?.user?.token
+    const API_URL = process.env.NEXT_PUBLIC_API_URL
+
+    const [createData, setCreateData] = useState([])
+    const [loading, setLoading] = useState(false)
+    const [towerId, setTowerId] = useState();
+    const [floor, setFloor] = useState();
+
+    const {
+        control,
+        handleSubmit,
+        reset,
+        formState: { errors }
+    } = useForm({
+        resolver: valibotResolver(schema),
+        defaultValues: {
+            tower: '',
+            floor: '',
+            apartmentNumber: '',
+            area: '',
+            apartmentType: '',
+            status: ''
+        }
+    })
+
+    useEffect(() => {
+        if (createData && towerId) {
+            const floor = createData.find(item => item._id == towerId);
+            setFloor(floor?.floors)
+        }
+    }, [createData, towerId]);
+
+    // ✅ Reset form when editing
+    useEffect(() => {
+        if (open && selectedZone) {
+            setTowerId(selectedZone?.tower_id.toString())
+            reset({
+                tower: selectedZone?.tower_id.toString() || '',
+                floor: selectedZone?.floor_id?.toString() || '',
+                apartmentNumber: selectedZone?.apartment_no.toString() || '',
+                apartmentType: selectedZone?.apartment_type || '',
+                area: selectedZone?.apartment_area?.toString() || '',
+                status: selectedZone?.status ? 'active' : 'inactive'
+            })
+        }
+    }, [open, selectedZone, reset])
+
+    const handleClose = () => {
+        reset()
+        setOpen(false)
+    }
+
+    // ✅ Fetch floors on mount
+    useEffect(() => {
+        let ignore = false
+
+        const fetchCreateData = async () => {
+            try {
+                const response = await fetch(`${API_URL}/company/apartment/create`, {
+                    method: 'GET',
+                    headers: { Authorization: `Bearer ${token}` }
+                })
+
+                const result = await response.json()
+                if (response.ok && !ignore) {
+                    setCreateData(result?.data || [])
+                }
+            } catch (error) {
+                console.error('Error fetching floors', error)
+            }
+        }
+
+        if (API_URL && token) {
+            fetchCreateData()
+        }
+
+        return () => {
+            ignore = true
+        }
+    }, [API_URL, token])
+
+    // ✅ Submit handler
+    const submitData = async (formData) => {
+        setLoading(true)
+        try {
+            const url = selectedZone
+                ? `${API_URL}/company/apartment/${selectedZone._id}`
+                : `${API_URL}/company/apartment`
+
+            const method = selectedZone ? 'PUT' : 'POST'
+
+            const response = await fetch(url, {
+                method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify(formData)
+            })
+
+            const data = await response.json()
+
+            if (response.ok) {
+                fetchZoneData()
+                toast.success(`Apartment ${selectedZone ? 'updated' : 'added'} successfully!`, { autoClose: 700 })
+                handleClose()
+            } else {
+                console.error('Server error:', data)
+                toast.error(data?.message || 'Something went wrong')
+            }
+        } catch (err) {
+            console.error('Submit error:', err)
+            toast.error('Failed to save apartment')
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    if (!createData) {
+        return (
+            <Dialog
+                fullWidth
+                maxWidth="md"
+                open={open}
+                scroll="body"
+                sx={{ '& .MuiDialog-paper': { overflow: 'visible' } }}
+            >
+                <DialogCloseButton onClick={handleClose}>
+                    <i className="tabler-x" />
+                </DialogCloseButton>
+
+                <DialogTitle variant="h4" className="text-center sm:pbs-16 sm:pbe-6 sm:pli-16">
+                    {selectedZone ? 'Edit Apartment' : 'Add Apartment'}
+                </DialogTitle>
+
+                <DialogContent className="overflow-visible flex flex-col gap-6 sm:pli-16">
+                    <Grid container spacing={3}>
+                        {/* Show skeleton loaders instead of crashing */}
+                        <Grid size={{ xs: 12 }}>
+                            <Skeleton variant="rectangular" height={26} />
+                        </Grid>
+                        <Grid  size={{ xs: 12 }}>
+                            <Skeleton variant="rectangular" height={26} />
+                        </Grid>
+                        <Grid size={{ xs: 12 }}>
+                            <Skeleton variant="rectangular" height={26} />
+                        </Grid>
+                    </Grid>
+                </DialogContent>
+            </Dialog>
+        )
+    }
+
+
+    return (
+        <Dialog
+            fullWidth
+            maxWidth="md"
+            open={open}
+            scroll="body"
+            sx={{ '& .MuiDialog-paper': { overflow: 'visible' } }}
+        >
+            <DialogCloseButton onClick={handleClose}>
+                <i className="tabler-x" />
+            </DialogCloseButton>
+
+            <DialogTitle variant="h4" className="text-center sm:pbs-16 sm:pbe-6 sm:pli-16">
+                {selectedZone ? 'Edit Apartment' : 'Add Apartment'}
+            </DialogTitle>
+
+            <form onSubmit={handleSubmit(submitData)} noValidate>
+                <DialogContent className="overflow-visible flex flex-col gap-6 sm:pli-16">
+                    <Grid container spacing={3}>
+                        {/* Tower */}
+                        <Grid size={{ xs: 12 }}>
+                            <Controller
+                                name="tower"
+                                control={control}
+                                render={({ field }) => (
+                                    <CustomTextField
+                                        {...field}
+                                        select
+                                        fullWidth
+                                        label="Select tower"
+                                        required
+                                        onChange={(e) => {
+                                            field.onChange(e); // update RHF form state
+                                            setTowerId(e.target.value); // update local state
+                                        }}
+                                        error={!!errors?.tower}
+                                        helperText={errors?.tower?.message}
+                                    >
+                                        <MenuItem value="">Select Tower</MenuItem>
+                                        {createData.map((item) => (
+                                            <MenuItem key={item._id} value={item._id}>
+                                                {item.name ?? 'Unnamed Tower'}
+                                            </MenuItem>
+                                        ))}
+                                    </CustomTextField>
+                                )}
+                            />
+                        </Grid>
+                        {/* Floor */}
+                        {floor && (
+
+
+                            <Grid size={{ xs: 12 }}>
+                                <Controller
+                                    name="floor"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <CustomTextField
+                                            {...field}
+                                            select
+                                            fullWidth
+                                            label="Select Floor"
+                                            required
+                                            error={!!errors?.floor}
+                                            helperText={errors?.floor?.message}
+                                        >
+                                            <MenuItem value="">Select Floor</MenuItem>
+                                            {floor.map((item) => (
+                                                <MenuItem key={item._id} value={item._id}>
+                                                    {item.floor_name ?? 'Unnamed Floor'}
+                                                </MenuItem>
+                                            ))}
+                                        </CustomTextField>
+                                    )}
+                                />
+                            </Grid>
+                        )}
+
+                        {/* Apartment Number */}
+                        <Grid size={{ xs: 12 }}>
+                            <Controller
+                                name="apartmentNumber"
+                                control={control}
+                                render={({ field }) => (
+                                    <CustomTextField
+                                        {...field}
+                                        fullWidth
+                                        required
+                                        label="Apartment Number"
+                                        placeholder="Enter apartment number"
+                                        error={!!errors?.apartmentNumber}
+                                        helperText={errors?.apartmentNumber?.message}
+                                    />
+                                )}
+                            />
+                        </Grid>
+
+                        {/* Area */}
+                        <Grid size={{ xs: 12 }}>
+                            <Controller
+                                name="area"
+                                control={control}
+                                render={({ field }) => (
+                                    <CustomTextField
+                                        {...field}
+                                        fullWidth
+                                        type="number"
+                                        required
+                                        label="Apartment Area (sqft)"
+                                        placeholder="Enter area in sqft"
+                                        error={!!errors?.area}
+                                        helperText={errors?.area?.message}
+                                    />
+                                )}
+                            />
+                        </Grid>
+
+                        {/* Apartment Type */}
+                        <Grid size={{ xs: 12 }}>
+                            <Controller
+                                name="apartmentType"
+                                control={control}
+                                render={({ field }) => (
+                                    <CustomTextField
+                                        {...field}
+                                        select
+                                        fullWidth
+                                        label="Apartment Type"
+                                        required
+                                        error={!!errors?.apartmentType}
+                                        helperText={errors?.apartmentType?.message}
+                                    >
+                                        <MenuItem value="">Select Apartment Type</MenuItem>
+                                        <MenuItem value="1BHK">1 BHK</MenuItem>
+                                        <MenuItem value="2BHK">2 BHK</MenuItem>
+                                        <MenuItem value="3BHK">3 BHK</MenuItem>
+                                    </CustomTextField>
+                                )}
+                            />
+                        </Grid>
+
+                        {/* Status */}
+                        <Grid size={{ xs: 12 }}>
+                            <Controller
+                                name="status"
+                                control={control}
+                                render={({ field }) => (
+                                    <CustomTextField
+                                        {...field}
+                                        select
+                                        fullWidth
+                                        label="Status"
+                                        required
+                                        error={!!errors?.status}
+                                        helperText={errors?.status?.message}
+                                    >
+                                        <MenuItem value="">Select Status</MenuItem>
+                                        <MenuItem value="inactive">Unsold</MenuItem>
+                                        <MenuItem value="active">Occupied</MenuItem>
+                                    </CustomTextField>
+                                )}
+                            />
+                        </Grid>
+                    </Grid>
+                </DialogContent>
+
+                <DialogActions className="justify-center sm:pbe-16 sm:pli-16">
+                    <Button variant="contained" type="submit" disabled={loading}>
+                        {loading ? (
+                            <CircularProgress
+                                size={24}
+                                sx={{ color: 'white', position: 'absolute', mt: '-12px', ml: '-12px' }}
+                            />
+                        ) : selectedZone ? 'Update' : 'Save'}
+                    </Button>
+                    <Button variant="tonal" color="secondary" onClick={handleClose}>
+                        Cancel
+                    </Button>
+                </DialogActions>
+            </form>
+        </Dialog>
+    )
+}
+
+export default ApartmentDialog

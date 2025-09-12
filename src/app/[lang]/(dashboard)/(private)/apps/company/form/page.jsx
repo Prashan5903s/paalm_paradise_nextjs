@@ -1,14 +1,16 @@
-// MUI Imports
+"use client"
+
 import Grid from '@mui/material/Grid2'
 
 // Component Imports
 import UserFormLayout from '@/components/company-form/page';
 
-import PermissionGuard from '@/hocs/PermissionGuard'
+import PermissionGuard from '@/hocs/PermissionClientGuard'
+import { useParams } from 'next/navigation';
 
-export default function UserFormLayouts({ params }) {
+export default function UserFormLayouts() {
 
-  const locale = params.lang;
+  const { lang: locale } = useParams();
 
   return (
     <Grid container spacing={6}>

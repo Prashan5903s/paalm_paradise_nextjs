@@ -1,9 +1,8 @@
 'use client'
 
-// MUI Imports
-
 import { useState, useEffect } from 'react'
 
+// MUI Imports
 import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
 import Grid from '@mui/material/Grid2'
@@ -14,8 +13,9 @@ import IconButton from '@mui/material/IconButton'
 import Button from '@mui/material/Button'
 
 // Component Imports
-import RoleDialog from '@components/dialogs/company-user-dialog'
+import ApartmentDialog from '@components/dialogs/apartment-dialog/page';
 import OpenDialogOnElementClick from '@components/dialogs/OpenDialogOnElementClick'
+
 import Link from '@components/Link'
 
 import { usePermissionList } from '@/utils/getPermission'
@@ -29,7 +29,7 @@ const cardData = [
   { totalUsers: 10, title: 'Restricted User', avatars: ['4.png', '5.png', '6.png'] }
 ]
 
-const RoleCards = ({ fetchRoleData, tableData }) => {
+const ApartmentCards = ({ fetchZoneData, tableData }) => {
 
   const getPermissions = usePermissionList(); // returns an async function
   const [permissions, setPermissions] = useState({});
@@ -48,7 +48,7 @@ const RoleCards = ({ fetchRoleData, tableData }) => {
     if (getPermissions) {
       fetchPermissions();
     }
-  }, [getPermissions]);
+  }, [getPermissions]); // Include in dependency array
 
   return (
     <Grid container spacing={6}>
@@ -77,14 +77,8 @@ const RoleCards = ({ fetchRoleData, tableData }) => {
                       color: 'primary',
                       onClick: e => e.preventDefault()
                     }}
-                    dialog={({ open, setOpen }) => (
-                      <RoleDialog
-                        tableData={tableData}
-                        open={open}
-                        setOpen={setOpen}
-                        title={item.title}
-                        fetchRoleData={fetchRoleData}
-                      />
+                    dialog={({ open, setOpen, tableData }) => (
+                      <ApartmentDialog open={open} setOpen={setOpen} title={item.title} fetchZoneData={fetchZoneData} tableData={tableData} />
                     )}
                   />
                 </div>
@@ -99,7 +93,7 @@ const RoleCards = ({ fetchRoleData, tableData }) => {
       ))}
 
       {/* Add Role Card */}
-      {/* {permissions && permissions?.['hasRoleAddPermission'] && ( */}
+      {/* {permissions && permissions?.['hasZoneAddPermission'] && ( */}
       <Grid xs={12} sm={6} lg={4}>
         <OpenDialogOnElementClick
           element={Card}
@@ -116,12 +110,8 @@ const RoleCards = ({ fetchRoleData, tableData }) => {
                   <CardContent>
                     <div className='flex flex-col items-end gap-4 text-right'>
                       <Button variant='contained' size='small'>
-                        Add Role
+                        Add Apartment
                       </Button>
-                      <Typography>
-                        Add new role, <br />
-                        if it doesn&apos;t exist.
-                      </Typography>
                     </div>
                   </CardContent>
                 </Grid>
@@ -129,12 +119,7 @@ const RoleCards = ({ fetchRoleData, tableData }) => {
             )
           }}
           dialog={({ open, setOpen }) => (
-            <RoleDialog
-              open={open}
-              setOpen={setOpen}
-              fetchRoleData={fetchRoleData}
-              tableData={tableData}
-            />
+            <ApartmentDialog open={open} setOpen={setOpen} fetchZoneData={fetchZoneData} tableData={tableData} />
           )}
         />
       </Grid>
@@ -143,4 +128,4 @@ const RoleCards = ({ fetchRoleData, tableData }) => {
   )
 }
 
-export default RoleCards
+export default ApartmentCards

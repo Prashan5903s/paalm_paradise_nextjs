@@ -10,7 +10,7 @@ export default function RoleApp({ params }) {
   const locale = params.lang;
 
   return (
-    <PermissionGuard locale={locale} element={'hasRolePermission'}>
+    <PermissionGuard locale={locale} element={'isCompany'}>
       <Role />
     </PermissionGuard>
   )

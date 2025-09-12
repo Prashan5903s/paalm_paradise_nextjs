@@ -423,16 +423,16 @@ const UserListTable = ({ userData, loadData, setIsUserCardShow, getStatsCount })
                 </Button>
               )}
 
-              {permissions && permissions['hasUserAddPermission'] && (
-                <Button
-                  variant='contained'
-                  startIcon={<i className='tabler-plus' />}
-                  onClick={() => router.push(`/${locale}/apps/user/form`)}
-                  className='max-sm:is-full'
-                >
-                  Add New User
-                </Button>
-              )}
+              {/* {permissions && permissions['hasUserAddPermission'] && ( */}
+              <Button
+                variant='contained'
+                startIcon={<i className='tabler-plus' />}
+                onClick={() => router.push(`/${locale}/apps/user/form`)}
+                className='max-sm:is-full'
+              >
+                Add New User
+              </Button>
+              {/* // )} */}
 
             </div>
           </div>

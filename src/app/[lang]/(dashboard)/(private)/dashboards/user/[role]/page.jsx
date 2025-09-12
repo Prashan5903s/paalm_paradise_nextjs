@@ -1,9 +1,11 @@
+'use client'
+
 import LogisticsDashboard from '../../../apps/dashboard/page'
-import PermissionGuard from '@/hocs/PermissionGuard';
+import PermissionGuard from '@/hocs/PermissionClientGuard';
 
-export default async function UserDashboard({ params }) {
+export default async function UserDashboard() {
 
-    const locale = await params?.lang;
+    const { lang: locale } = useParams();
 
     return (
         <>

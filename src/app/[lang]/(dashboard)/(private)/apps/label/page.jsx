@@ -1,12 +1,15 @@
+"use client"
+
 // MUI Imports
 import Grid from '@mui/material/Grid2'
 
 // Component Imports
 import LabelFormLayout from '@components/label-form/page';
-import PermissionGuard from '@/hocs/PermissionGuard';
+import PermissionGuard from '@/hocs/PermissionClientGuard';
 
-export default function UserFormLayouts({ params }) {
-    const locale = params.lang;
+export default function UserFormLayouts() {
+
+    const { lang: locale } = useParams();
 
     return (
         <PermissionGuard locale={locale} element={'isCompany'}>
