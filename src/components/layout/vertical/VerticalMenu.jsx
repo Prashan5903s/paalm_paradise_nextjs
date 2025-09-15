@@ -230,10 +230,13 @@ const VerticalMenu = ({ dictionary, scrollMenu }) => {
           )}
           {permissArray?.isUser && (
             <>
-              <MenuItem key="my_bills" href={`/${locale}/apps/leadership`}>
-                <i className="tabler-receipt-2" style={{ marginRight: 8, fontSize: '1.2rem' }} />
-                My Bills
-              </MenuItem>
+              {permissArray?.isUser && (
+                <SubMenu label={"Bill"} icon={<i className='tabler-receipt' />}>
+                  <MenuItem href={`/${locale}/apps/my-bill/utilityBills`}>{"Utility Bills"}</MenuItem>
+                  {/* <MenuItem href={`/${locale}/apps/my-bill/common-area-bill`}>{"Comman Area Bill"}</MenuItem> */}
+                  <MenuItem href={`/${locale}/apps/my-bill/maintenance`}>{"Maintenance"}</MenuItem>
+                </SubMenu>
+              )}
 
               <MenuItem key="camera" href={`/${locale}/apps/camera`}>
                 <i className="tabler-camera" style={{ marginRight: 8, fontSize: '1.2rem' }} />
