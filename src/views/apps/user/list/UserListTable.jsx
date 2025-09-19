@@ -218,29 +218,6 @@ const UserListTable = ({ userData, loadData, setIsUserCardShow, getStatsCount })
           </div>
         )
       }),
-
-      // columnHelper.accessor('role', {
-      //   header: 'Role',
-      //   cell: ({ row }) => (
-      //     <div className='flex items-center gap-2'>
-      //       <Icon
-      //         className={userRoleObj[row.original.role].icon}
-      //         sx={{ color: `var(--mui-palette-${userRoleObj[row.original.role].color}-main)` }}
-      //       />
-      //       <Typography className='capitalize' color='text.primary'>
-      //         {row.original.role}
-      //       </Typography>
-      //     </div>
-      //   )
-      // }),
-      // columnHelper.accessor('currentPlan', {
-      //   header: 'Plan',
-      //   cell: ({ row }) => (
-      //     <Typography className='capitalize' color='text.primary'>
-      //       {row.original.currentPlan}
-      //     </Typography>
-      //   )
-      // }),
       columnHelper.accessor('email', {
         header: 'Email',
         cell: ({ row }) => <Typography>{row.original.email}</Typography>
@@ -263,88 +240,90 @@ const UserListTable = ({ userData, loadData, setIsUserCardShow, getStatsCount })
       }),
       columnHelper.accessor('status', {
         header: 'Status',
-        cell: ({ row }) => (
-          <div className='flex items-center gap-3'>
-            <FormControlLabel control={
-              <Switch
-                defaultChecked={row.original.status}
-                color="success"
-                onChange={(e) => {
-                  handleStatusChange(row.original.id, e.target.checked);
-                }}
-                size="medium" />} />
-            {/* <Chip
-              variant='tonal'
-              label={row.original.status ? "Active" : "Inactive"}
-              size='small'
-              color={userStatusObj[row.original.status ? "active" : "inactive"]}
-              className='capitalize'
-            /> */}
-          </div>
-        )
+        cell: ({ row }) => {
+          return (
+
+            permissions && permissions?.['hasUserStatusPermission'] && (
+
+              < div className='flex items-center gap-3' >
+                <FormControlLabel control={
+                  <Switch
+                    defaultChecked={row.original.status}
+                    color="success"
+                    onChange={(e) => {
+                      handleStatusChange(row.original.id, e.target.checked);
+                    }}
+                    size="medium" />} />
+              </div >
+            )
+          )
+        }
       }),
-      columnHelper.accessor('action', {
-        header: 'Action',
-        cell: ({ row }) => (
-          <div className='flex items-center'>
-            {/* <IconButton>
-              <Link href={getLocalizedUrl('/apps/user/view', locale)} className='flex'>
-                <i className='tabler-eye text-textSecondary' />
-              </Link>
-            </IconButton> */}
-            <OptionMenu
-              iconButtonProps={{ size: 'medium' }}
-              iconClassName='text-textSecondary'
-              options={[
+      columnHelper.accessor("action", {
+        header: "Action",
+        cell: ({ row }) => {
+          const options = [
+            ...(permissions?.hasUserEditPermission
+              ? [
                 {
-                  text: 'Edit account',
-                  icon: 'tabler-edit',
+                  text: "Edit account",
+                  icon: "tabler-edit",
                   menuItemProps: {
-                    className: 'flex items-center gap-2 text-textSecondary',
-                    onClick: (() => {
-                      router.push(`/${locale}/apps/user/form/${row.original._id}`)
-                    })
-                  }
+                    className: "flex items-center gap-2 text-textSecondary",
+                    onClick: () => {
+                      router.push(`/${locale}/apps/user/form/${row.original._id}`);
+                    },
+                  },
                 },
-                {
-                  text: 'Update password',
-                  icon: 'tabler-lock',
-                  menuItemProps: {
-                    className: 'flex items-center gap-2 text-textSecondary',
-                    onClick: (() => {
-                      updateNewPasswordhandle(row.original);
-                    })
-                  }
+              ]
+              : []),
+            {
+              text: "Update password",
+              icon: "tabler-lock",
+              menuItemProps: {
+                className: "flex items-center gap-2 text-textSecondary",
+                onClick: () => {
+                  updateNewPasswordhandle(row.original);
                 },
-                {
-                  text: 'Manage employee ID',
-                  icon: 'tabler-user',
-                  menuItemProps: {
-                    className: 'flex items-center gap-2 text-textSecondary',
-                    onClick: (() => {
-                      handleManageEmpDialog(row.original);
-                    })
-                  }
+              },
+            },
+            {
+              text: "Manage employee ID",
+              icon: "tabler-user",
+              menuItemProps: {
+                className: "flex items-center gap-2 text-textSecondary",
+                onClick: () => {
+                  handleManageEmpDialog(row.original);
                 },
-                {
-                  text: 'Delete account',
-                  icon: 'tabler-trash',
-                  menuItemProps: {
-                    className: 'flex items-center gap-2 text-textSecondary',
-                    onClick: (() => {
-                      openDeleteDialogHandle(row.original)
-                    })
-                  }
+              },
+            },
+            {
+              text: "Delete account",
+              icon: "tabler-trash",
+              menuItemProps: {
+                className: "flex items-center gap-2 text-textSecondary",
+                onClick: () => {
+                  openDeleteDialogHandle(row.original);
                 },
-              ]}
-            />
-          </div>
-        ),
-        enableSorting: false
+              },
+            },
+          ];
+
+          return (
+            <div className="flex items-center">
+              <OptionMenu
+                iconButtonProps={{ size: "medium" }}
+                iconClassName="text-textSecondary"
+                options={options}
+              />
+            </div>
+          );
+        },
+        enableSorting: false,
       })
     ],
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [data, filteredData]
+    [data, filteredData, permissions]
   )
 
   const table = useReactTable({
@@ -423,16 +402,16 @@ const UserListTable = ({ userData, loadData, setIsUserCardShow, getStatsCount })
                 </Button>
               )}
 
-              {/* {permissions && permissions['hasUserAddPermission'] && ( */}
-              <Button
-                variant='contained'
-                startIcon={<i className='tabler-plus' />}
-                onClick={() => router.push(`/${locale}/apps/user/form`)}
-                className='max-sm:is-full'
-              >
-                Add New User
-              </Button>
-              {/* // )} */}
+              {permissions && permissions['hasUserAddPermission'] && (
+                <Button
+                  variant='contained'
+                  startIcon={<i className='tabler-plus' />}
+                  onClick={() => router.push(`/${locale}/apps/user/form`)}
+                  className='max-sm:is-full'
+                >
+                  Add New User
+                </Button>
+              )}
 
             </div>
           </div>

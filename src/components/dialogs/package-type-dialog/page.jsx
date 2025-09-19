@@ -254,6 +254,7 @@ const PackageTypeDialog = ({ open, setOpen, data, fetchPackage, nameData }) => {
 
   return (
     <Dialog
+      fullWidth
       open={open}
       onClose={handleClose}
       closeAfterTransition={false}

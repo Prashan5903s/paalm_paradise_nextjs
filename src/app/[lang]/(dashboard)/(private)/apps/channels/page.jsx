@@ -3,7 +3,7 @@
 import PermissionGuardServer from '@/hocs/PermissionClientGuard'
 import Channel from '@views/apps/channel'
 
-export default async function ChannelApp() {
+export default  function ChannelApp() {
 
     const { lang: locale } = useParams();
 

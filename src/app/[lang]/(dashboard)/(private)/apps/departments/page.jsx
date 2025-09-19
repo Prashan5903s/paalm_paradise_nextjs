@@ -1,7 +1,7 @@
 import PermissionGuardServer from '@/hocs/PermissionGuard'
 import Department from '@views/apps/departments'
 
-export default async function DepartmentApp({ params }) {
+export default  function DepartmentApp({ params }) {
 
     const locale = params.lang;
 

@@ -7,12 +7,12 @@ import Apartment from '@views/apps/apartment';
 import { useParams } from 'next/navigation';
 
 
-export default async function ApartmentApp() {
+export default function ApartmentApp() {
 
     const { lang: locale } = useParams();
 
     return (
-        <PermissionGuard locale={locale} element="isCompany">
+        <PermissionGuard locale={locale} element="hasApartmentPermission">
             <Apartment />
         </PermissionGuard>
     );

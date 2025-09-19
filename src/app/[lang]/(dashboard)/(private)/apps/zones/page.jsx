@@ -3,7 +3,7 @@
 import PermissionGuard from '@/hocs/PermissionGuard';
 import Zones from '@views/apps/zones';
 
-export default async function ZonesApp({ params }) {
+export default  function ZonesApp({ params }) {
   const locale = params.lang;
 
   return (

@@ -18,7 +18,7 @@ const teams = [
 ]
 
 
-export default async function MyTeam() {
+export default  function MyTeam() {
     return (
         <>
             <TeamCard teams={teams} />

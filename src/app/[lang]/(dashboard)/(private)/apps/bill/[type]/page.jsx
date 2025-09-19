@@ -2,12 +2,6 @@
 
 import { useParams } from "next/navigation";
 
-import {
-    Typography
-} from '@mui/material'
-
-import Grid from '@mui/material/Grid2';
-
 import Bill from "@views/apps/bill/index"
 
 import PermissionGuard from '@/hocs/PermissionClientGuard'
@@ -18,7 +12,7 @@ const BillType = () => {
 
     return (
         <>
-            <PermissionGuard locale={locale} element="isCompany">
+            <PermissionGuard locale={locale} element="hasBillingPermission">
                 <Bill type={type} />
             </PermissionGuard>
         </>

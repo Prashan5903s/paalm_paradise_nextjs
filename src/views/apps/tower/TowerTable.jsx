@@ -168,16 +168,16 @@ const TowerTable = ({ tableData, fetchZoneData }) => {
       header: 'Actions',
       cell: ({ row }) => (
         <div className='flex items-center'>
-          {/* {permissions && permissions?.['hasZoneEditPermission'] && ( */}
-          <IconButton
-            onClick={() => {
-              setSelectedZone(row.original)
-              setOpenDialog(true)
-            }}
-          >
-            <i className='tabler-edit text-textSecondary' />
-          </IconButton>
-          {/* )} */}
+          {permissions && permissions?.['hasTowerEditPermission'] && (
+            <IconButton
+              onClick={() => {
+                setSelectedZone(row.original)
+                setOpenDialog(true)
+              }}
+            >
+              <i className='tabler-edit text-textSecondary' />
+            </IconButton>
+          )}
         </div>
       ),
       enableSorting: false

@@ -2,7 +2,7 @@
 import PermissionGuard from '@/hocs/PermissionGuard'
 import Region from '@views/apps/region'
 
-export default async function RegionApp({ params }) {
+export default  function RegionApp({ params }) {
   const locale = params.lang;
   
   return (

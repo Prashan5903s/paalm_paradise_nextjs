@@ -182,18 +182,25 @@ const ApartmentTable = ({ tableData, fetchZoneData }) => {
     }),
     columnHelper.accessor('action', {
       header: 'Actions',
-      cell: ({ row }) => (
-        <div className='flex items-center'>
-          <IconButton
-            onClick={() => {
-              setSelectedZone(row.original)
-              setOpenDialog(true)
-            }}
-          >
-            <i className='tabler-edit text-textSecondary' />
-          </IconButton>
-        </div>
-      ),
+      cell: ({ row }) => {
+        return (
+          permissions && permissions?.['hasApartmentEditPermission'] && (
+
+            <>
+              <div className='flex items-center'>
+                <IconButton
+                  onClick={() => {
+                    setSelectedZone(row.original)
+                    setOpenDialog(true)
+                  }}
+                >
+                  <i className='tabler-edit text-textSecondary' />
+                </IconButton>
+              </div>
+            </>
+          )
+        )
+      },
       enableSorting: false
     })
   ], [permissions])

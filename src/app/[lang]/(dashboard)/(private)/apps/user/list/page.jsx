@@ -10,7 +10,7 @@ export default function () {
   const { lang: locale } = useParams();
 
   return (
-    <PermissionGuard locale={locale} element={'isCompany'}>
+    <PermissionGuard locale={locale} element={'hasUserPermission'}>
       <UserList />
     </PermissionGuard>
   )

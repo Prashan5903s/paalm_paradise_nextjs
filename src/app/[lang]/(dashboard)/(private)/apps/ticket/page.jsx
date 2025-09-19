@@ -2,21 +2,22 @@
 
 import { useParams } from "next/navigation";
 
-import Bill from "@views/apps/MyBill/page"
+import Complain from "@views/apps/MyComplainResolved/page"
 
 import PermissionGuard from '@/hocs/PermissionClientGuard'
 
-const BillType = () => {
+const MyComplainResolvedDashboard = () => {
 
     const { type, lang: locale } = useParams();
 
     return (
         <>
             <PermissionGuard locale={locale} element="isCompany">
-                <Bill type={type} />
+                <Complain type={type} />
             </PermissionGuard>
         </>
     )
 }
 
-export default BillType;
+export default MyComplainResolvedDashboard
+

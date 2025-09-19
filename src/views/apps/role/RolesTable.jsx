@@ -173,20 +173,24 @@ const RolesTable = ({ tableData, fetchRoleData }) => {
     }),
     columnHelper.accessor('action', {
       header: 'Actions',
-      cell: ({ row }) => (
-        <div className='flex items-center'>
-          {row.original.created_by != '6811ae35704460d978b84eaa' && permissions['hasRoleEditPermission'] && (
-            <IconButton
-              onClick={() => {
-                setSelectedRole(row.original)
-                setOpenDialog(true)
-              }}
-            >
-              <i className='tabler-edit text-textSecondary' />
-            </IconButton>
-          )}
-        </div>
-      ),
+      cell: ({ row }) => {
+
+        return (
+          permissions && permissions?.['hasRoleEditPermission'] && (
+            <div className='flex items-center'>
+              {row.original.created_by != '6811ae35704460d978b84eaa' && permissions['hasRoleEditPermission'] && (
+                <IconButton
+                  onClick={() => {
+                    setSelectedRole(row.original)
+                    setOpenDialog(true)
+                  }}
+                >
+                  <i className='tabler-edit text-textSecondary' />
+                </IconButton>
+              )}
+            </div>
+          ))
+      },
       enableSorting: false
     })
   ], [permissions])

@@ -16,6 +16,8 @@ import UserListCards from './UserListCards'
 
 import { useApi } from '../../../../utils/api';
 
+import { usePermissionList } from '@/utils/getPermission'
+
 // MUI Imports
 
 const UserList = () => {
@@ -27,6 +29,25 @@ const UserList = () => {
   const [statsData, setStatsData] = useState();
   const { doGet, doPost } = useApi();
   const [isUserCardShow, setIsUserCardShow] = useState(true);
+
+  const getPermissions = usePermissionList();
+  const [permissions, setPermissions] = useState({});
+
+  useEffect(() => {
+    const fetchPermissions = async () => {
+      try {
+        const result = await getPermissions();
+
+        setPermissions(result);
+      } catch (error) {
+        console.error('Error fetching permissions:', error);
+      }
+    };
+
+    if (getPermissions) {
+      fetchPermissions();
+    }
+  }, [getPermissions]); // Include in dependency array
 
   const loadData = async () => {
     try {
@@ -87,7 +108,7 @@ const UserList = () => {
         )}
       </Grid>
       <Grid size={{ xs: 12 }}>
-        <UserListTable userData={userData} loadData={loadData} setIsUserCardShow={setIsUserCardShow} getStatsCount={getStatsCount} />
+        <UserListTable userData={userData} loadData={loadData} setIsUserCardShow={setIsUserCardShow} getStatsCount={getStatsCount} permissions={permissions} />
       </Grid>
     </Grid>
   )

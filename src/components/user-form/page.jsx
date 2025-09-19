@@ -62,6 +62,9 @@ const UserFormLayout = () => {
     const URL = process.env.NEXT_PUBLIC_API_URL
     const public_url = process.env.NEXT_PUBLIC_ASSETS_URL;
     const { data: session } = useSession() || {}
+
+    const user_id = session?.user?.userId;
+
     const token = session?.user?.token
     const [createData, setCreateData] = useState({ 'country': [] }, { designations: [] });
     const [countryId, setCountryId] = useState();
@@ -1294,11 +1297,12 @@ const UserFormLayout = () => {
                                                 createData?.floor?.filter((f) => f.tower_id._id === currentTowerId) || [];
 
                                             const apartments = Array.isArray(createData?.apartment)
-                                                ? createData.apartment.filter(
-                                                    (a) => a.floor_id === currentFloorId && a.status === false
-                                                )
+                                                ? createData.apartment.filter((a) => a.floor_id === currentFloorId)
                                                 : [];
 
+                                            const selectedApartmentIds = (watchApartmentData || [])
+                                                .map((d) => d?.apartment_id)
+                                                .filter(Boolean);
 
                                             return (
                                                 <Grid container item size={{ xs: 12 }} spacing={2} key={item.id}>
@@ -1366,46 +1370,50 @@ const UserFormLayout = () => {
                                                     )}
 
                                                     {/* Apartment Select */}
-                                                    {/* Apartment Select */}
                                                     {apartments.length > 0 && (
                                                         <Grid item size={{ xs: 12, sm: 3 }}>
                                                             <Controller
                                                                 name={`apartment_data.${index}.apartment_id`}
                                                                 control={control}
-                                                                render={({ field }) => {
-                                                                    // Collect all selected apartment_ids
-                                                                    const selectedApartmentIds = (watchApartmentData || [])
-                                                                        .map((d) => d?.apartment_id)
-                                                                        .filter(Boolean);
+                                                                render={({ field }) => (
+                                                                    <CustomTextField
+                                                                        {...field}
+                                                                        select
+                                                                        fullWidth
+                                                                        label="Apartment*"
+                                                                        value={field.value ?? ""}
+                                                                        onChange={(e) => field.onChange(e.target.value || "")}
+                                                                        error={!!errors?.apartment_data?.[index]?.apartment_id}
+                                                                        helperText={
+                                                                            errors?.apartment_data?.[index]?.apartment_id?.message
+                                                                        }
+                                                                    >
+                                                                        {apartments.map((apt) => {
+                                                                            const isAlreadySelected =
+                                                                                selectedApartmentIds.includes(apt._id) &&
+                                                                                field.value !== apt._id;
 
-                                                                    return (
-                                                                        <CustomTextField
-                                                                            {...field}
-                                                                            select
-                                                                            fullWidth
-                                                                            label="Apartment*"
-                                                                            value={field.value ?? ""}
-                                                                            onChange={(e) => field.onChange(e.target.value || "")}
-                                                                            error={!!errors?.apartment_data?.[index]?.apartment_id}
-                                                                            helperText={errors?.apartment_data?.[index]?.apartment_id?.message}
-                                                                        >
-                                                                            {apartments.map((apt) => {
-                                                                                const isDisabled =
-                                                                                    selectedApartmentIds.includes(apt._id) && field.value !== apt._id;
+                                                                            // ✅ Only disable if assigned to another user OR status = true (but not current user’s assignment)
+                                                                            const isAssignedToOtherUser =
+                                                                                apt.assigned_to &&
+                                                                                apt.assigned_to.toString() !== user_id.toString();
 
-                                                                                return (
-                                                                                    <MenuItem key={apt._id} value={apt._id} disabled={isDisabled}>
-                                                                                        {apt.apartment_no}
-                                                                                    </MenuItem>
-                                                                                );
-                                                                            })}
-                                                                        </CustomTextField>
-                                                                    );
-                                                                }}
+                                                                            const isUnavailable =
+                                                                                isAlreadySelected || isAssignedToOtherUser || apt.status === true;
+
+                                                                            const isDisabled = isUnavailable && field.value !== apt._id;
+
+                                                                            return (
+                                                                                <MenuItem key={apt._id} value={apt._id} disabled={isDisabled}>
+                                                                                    {apt.apartment_no}
+                                                                                </MenuItem>
+                                                                            );
+                                                                        })}
+                                                                    </CustomTextField>
+                                                                )}
                                                             />
                                                         </Grid>
                                                     )}
-
 
                                                     {/* Remove button */}
                                                     <Grid item size={{ xs: 12, sm: 2 }} textAlign="center">
@@ -1416,6 +1424,8 @@ const UserFormLayout = () => {
                                                 </Grid>
                                             );
                                         })}
+
+
                                     </Grid>
                                 </Grid>
 

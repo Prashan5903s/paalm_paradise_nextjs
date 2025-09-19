@@ -196,12 +196,6 @@ const PayModal = ({ open, data, setPayDialog, setPayData, billId, fetchZoneData 
     }
   };
 
-  useEffect(() => {
-    if (errors) {
-      console.log("Error", errors);
-    }
-  }, [errors])
-
   return (
     <Dialog
       fullWidth
@@ -818,6 +812,733 @@ const ViewInvoiceModal = ({ open, setIsInvoiceOpen, selectedZone }) => {
   )
 }
 
+const PayMaintenanceModal = ({
+  open,
+  data,
+  setPayDialog,
+  setPayData,
+  apartmentId,
+  billId,
+  fetchZoneData,
+}) => {
+  const { data: session } = useSession();
+  const token = session?.user?.token;
+  const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+  const [paymentMode, setPaymentMode] = useState("");
+
+  // ✅ Schema inside useMemo so it re-calculates when paymentMode changes
+  const schema = useMemo(
+    () =>
+      object({
+        billId: pipe(string(), minLength(1, "Bill id is required")),
+        apartment_id: pipe(string(), minLength(1, "Apartment id is required")),
+        amount: pipe(string(), minLength(1, "Amount is required")),
+        status: pipe(string(), minLength(1, "Status is required")),
+        payment_mode: pipe(string(), minLength(1, "Payment mode is required")),
+        paid_remark: optional(string()),
+
+        bank_name:
+          ["1", "2", "3"].includes(paymentMode) // only required if mode is 1/2/3
+            ? pipe(string(), minLength(1, "Bank name is required"))
+            : optional(string()),
+
+        cheque_no:
+          paymentMode === "1"
+            ? pipe(string(), minLength(1, "Cheque no is required"))
+            : optional(string()),
+        cheque_date:
+          paymentMode === "1"
+            ? pipe(string(), minLength(1, "Cheque date is required"))
+            : optional(string()),
+
+        demand_draft_no:
+          paymentMode === "2"
+            ? pipe(string(), minLength(1, "Demand draft no is required"))
+            : optional(string()),
+        demand_draft_date:
+          paymentMode === "2"
+            ? pipe(string(), minLength(1, "Demand draft date is required"))
+            : optional(string()),
+
+        neft_no:
+          paymentMode === "3"
+            ? pipe(string(), minLength(1, "NEFT no is required"))
+            : optional(string()),
+        neft_date:
+          paymentMode === "3"
+            ? pipe(string(), minLength(1, "NEFT date is required"))
+            : optional(string()),
+      }),
+    [paymentMode]
+  );
+
+  const {
+    handleSubmit,
+    setValue,
+    control,
+    formState: { errors },
+  } = useForm({
+    resolver: valibotResolver(schema),
+    defaultValues: {
+      billId: "",
+      apartment_id: "",
+      amount: "",
+      status: "",
+      payment_mode: "",
+      paid_remark: "",
+      bank_name: "",
+      cheque_no: "",
+      cheque_date: "",
+      demand_draft_no: "",
+      demand_draft_date: "",
+      neft_no: "",
+      neft_date: "",
+    },
+  });
+
+  // set form values when modal data changes
+  useEffect(() => {
+    if (data) {
+      setValue("amount", data?.toString() || "");
+      setValue("billId", billId?.toString() || "");
+      setValue("apartment_id", apartmentId?.toString() || "");
+    }
+  }, [data, setValue, apartmentId, billId]);
+
+  const submitData = async (formData) => {
+    try {
+
+      const response = await fetch(`${API_URL}/company/user/bill/data/payment`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(formData)
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        toast.success('Payment created successfull', {
+          autoClose: 100
+        })
+        setPayDialog(false)
+        fetchZoneData()
+      } else {
+        console.error("Error:", result?.message || "Something went wrong");
+      }
+    } catch (error) {
+      console.error("Request failed:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (errors) {
+      console.log("Error", errors);
+    }
+  }, [errors])
+
+  return (
+    <Dialog
+      fullWidth
+      maxWidth="sm"
+      scroll="body"
+      open={open}
+      sx={{ "& .MuiDialog-paper": { overflow: "visible" } }}
+    >
+      <DialogCloseButton
+        onClick={() => {
+          setPayDialog(false);
+        }}
+      >
+        <i className="tabler-x" />
+      </DialogCloseButton>
+
+      <DialogTitle variant="h4" className="text-center">
+        Pay dialog
+      </DialogTitle>
+
+      <form onSubmit={handleSubmit(submitData)} method="POST" noValidate>
+        <DialogContent>
+          <Grid container spacing={4}>
+            {/* Amount */}
+            <Grid item size={{ xs: 12 }} >
+              <Controller
+                name="amount"
+                control={control}
+                render={({ field }) => (
+                  <CustomTextField
+                    {...field}
+                    fullWidth
+                    size="small"
+                    label="Amount"
+                    required
+                    error={!!errors.amount}
+                    helperText={errors.amount?.message}
+                    onChange={(e) => {
+                      let value = e.target.value;
+                      if (/^\d*$/.test(value)) {
+                        if (Number(value) <= (data || 0)) {
+                          field.onChange(value);
+                        } else {
+                          field.onChange(data?.toString() || "");
+                        }
+                      }
+                    }}
+                  />
+                )}
+              />
+            </Grid>
+
+            {/* Status */}
+            <Grid item size={{ xs: 12 }}>
+              <Controller
+                name="status"
+                control={control}
+                render={({ field }) => (
+                  <CustomTextField
+                    {...field}
+                    select
+                    fullWidth
+                    size="small"
+                    label="Change status"
+                    required
+                    error={!!errors.status}
+                    helperText={errors.status?.message}
+                  >
+                    <MenuItem value="1">Pending</MenuItem>
+                    <MenuItem value="2">Paid</MenuItem>
+                    <MenuItem value="3">Partial Paid</MenuItem>
+                  </CustomTextField>
+                )}
+              />
+            </Grid>
+
+            {/* Payment Mode */}
+            <Grid item size={{ xs: 12 }}>
+              <Controller
+                name="payment_mode"
+                control={control}
+                render={({ field }) => (
+                  <CustomTextField
+                    {...field}
+                    select
+                    fullWidth
+                    size="small"
+                    label="Payment mode"
+                    error={!!errors.payment_mode}
+                    helperText={errors.payment_mode?.message}
+                    onChange={(e) => {
+                      field.onChange(e.target.value);
+                      setPaymentMode(e.target.value);
+                    }}
+                  >
+                    <MenuItem value="1">Cheque</MenuItem>
+                    <MenuItem value="2">Demand draft</MenuItem>
+                    <MenuItem value="3">NEFT</MenuItem>
+                    <MenuItem value="4">Cash</MenuItem>
+                  </CustomTextField>
+                )}
+              />
+            </Grid>
+
+            {/* Bank name */}
+            {(paymentMode === "1" ||
+              paymentMode === "2" ||
+              paymentMode === "3") && (
+                <Grid item size={{ xs: 12 }}>
+                  <Controller
+                    name="bank_name"
+                    control={control}
+                    render={({ field }) => (
+                      <CustomTextField
+                        {...field}
+                        fullWidth
+                        size="small"
+                        label="Bank name"
+                        required
+                        error={!!errors.bank_name}
+                        helperText={errors.bank_name?.message}
+                      />
+                    )}
+                  />
+                </Grid>
+              )}
+
+            {/* Cheque */}
+            {paymentMode === "1" && (
+              <>
+                <Grid item size={{ xs: 12 }}>
+                  <Controller
+                    name="cheque_no"
+                    control={control}
+                    render={({ field }) => (
+                      <CustomTextField
+                        {...field}
+                        fullWidth
+                        size="small"
+                        label="Cheque no"
+                        required
+                        error={!!errors.cheque_no}
+                        helperText={errors.cheque_no?.message}
+                      />
+                    )}
+                  />
+                </Grid>
+                <Grid item size={{ xs: 12 }}>
+                  <Controller
+                    name="cheque_date"
+                    control={control}
+                    render={({ field }) => (
+                      <CustomTextField
+                        {...field}
+                        type="date"
+                        fullWidth
+                        label="Cheque Date"
+                        required
+                        InputLabelProps={{ shrink: true }}
+                        error={!!errors.cheque_date}
+                        helperText={errors.cheque_date?.message}
+                      />
+                    )}
+                  />
+                </Grid>
+              </>
+            )}
+
+            {/* Demand Draft */}
+            {paymentMode === "2" && (
+              <>
+                <Grid item size={{ xs: 12 }}>
+                  <Controller
+                    name="demand_draft_no"
+                    control={control}
+                    render={({ field }) => (
+                      <CustomTextField
+                        {...field}
+                        fullWidth
+                        size="small"
+                        label="Demand draft no"
+                        required
+                        error={!!errors.demand_draft_no}
+                        helperText={errors.demand_draft_no?.message}
+                      />
+                    )}
+                  />
+                </Grid>
+                <Grid item size={{ xs: 12 }}>
+                  <Controller
+                    name="demand_draft_date"
+                    control={control}
+                    render={({ field }) => (
+                      <CustomTextField
+                        {...field}
+                        type="date"
+                        fullWidth
+                        label="Demand Draft Date"
+                        required
+                        InputLabelProps={{ shrink: true }}
+                        error={!!errors.demand_draft_date}
+                        helperText={errors.demand_draft_date?.message}
+                      />
+                    )}
+                  />
+                </Grid>
+              </>
+            )}
+
+            {/* NEFT */}
+            {paymentMode === "3" && (
+              <>
+                <Grid item size={{ xs: 12 }}>
+                  <Controller
+                    name="neft_no"
+                    control={control}
+                    render={({ field }) => (
+                      <CustomTextField
+                        {...field}
+                        fullWidth
+                        size="small"
+                        label="NEFT no"
+                        required
+                        error={!!errors.neft_no}
+                        helperText={errors.neft_no?.message}
+                      />
+                    )}
+                  />
+                </Grid>
+                <Grid item size={{ xs: 12 }}>
+                  <Controller
+                    name="neft_date"
+                    control={control}
+                    render={({ field }) => (
+                      <CustomTextField
+                        {...field}
+                        type="date"
+                        fullWidth
+                        label="NEFT Date"
+                        required
+                        InputLabelProps={{ shrink: true }}
+                        error={!!errors.neft_date}
+                        helperText={errors.neft_date?.message}
+                      />
+                    )}
+                  />
+                </Grid>
+              </>
+            )}
+
+            {/* Paid Remark */}
+            <Grid item size={{ xs: 12 }}>
+              <Controller
+                name="paid_remark"
+                control={control}
+                render={({ field }) => (
+                  <CustomTextField
+                    {...field}
+                    fullWidth
+                    size="small"
+                    label="Paid remark"
+                    multiline
+                    rows={3}
+                    error={!!errors.paid_remark}
+                    helperText={errors.paid_remark?.message}
+                  />
+                )}
+              />
+            </Grid>
+          </Grid>
+        </DialogContent>
+
+        <DialogActions className="justify-center">
+          <Button variant="contained" type="submit">
+            Save
+          </Button>
+          <Button
+            variant="tonal"
+            color="secondary"
+            onClick={() => {
+              setPayDialog(false);
+              setPayData();
+            }}
+          >
+            Cancel
+          </Button>
+        </DialogActions>
+      </form>
+    </Dialog>
+  );
+};
+
+const ViewMaintenance = ({ open, setIsOpenDetail, selectedZone }) => {
+  const { data: session } = useSession();
+  const token = session?.user?.token;
+  const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+  const [data, setData] = useState([]);
+  const [rowSelection, setRowSelection] = useState({});
+  const [globalFilter, setGlobalFilter] = useState('');
+  const [openDialog, setOpenDialog] = useState(false)
+  const [payData, setPayData] = useState();
+  const [billId, setBillId] = useState()
+  const [apartmentId, setApartmentId] = useState()
+
+  // Fetch maintenance data
+  const fetchMaintenance = async () => {
+    try {
+      const response = await fetch(`${API_URL}/company/user/bill/${selectedZone._id}`, {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const result = await response.json();
+
+      if (response.ok) {
+        setData(result?.data || []);
+      } else {
+        console.error('Fetch maintenance failed:', result);
+      }
+    } catch (error) {
+      console.error('Fetch maintenance error:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (API_URL && token && selectedZone?._id) {
+      fetchMaintenance();
+    }
+  }, [API_URL, token, selectedZone?._id]);
+
+  // Prepare fixed cost map for faster lookup
+  const fixedCostMap = useMemo(() => {
+    const map = new Map();
+    data?.fixed_cost?.forEach(item => {
+      map.set(item.apartment_type, Number(item.unit_value || 0));
+    });
+    return map;
+  }, [data?.fixed_cost]);
+
+  // Table columns
+  const columns = useMemo(() => [
+    {
+      id: "select",
+      header: ({ table }) => (
+        <Checkbox
+          checked={table.getIsAllRowsSelected()}
+          indeterminate={table.getIsSomeRowsSelected()}
+          onChange={table.getToggleAllRowsSelectedHandler()}
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          checked={row.getIsSelected()}
+          disabled={!row.getCanSelect()}
+          indeterminate={row.getIsSomeSelected()}
+          onChange={row.getToggleSelectedHandler()}
+        />
+      ),
+    },
+    // Apartment No
+    columnHelper.accessor('apartment_no', {
+      header: 'Apartment No',
+      cell: ({ row }) => (
+        <Typography className="capitalize" color="text.primary">
+          {row.original?.apartment_no || '-'}
+        </Typography>
+      ),
+    }),
+    columnHelper.accessor('user', {
+      header: 'User',
+      cell: ({ row }) => (
+        <Typography className="capitalize" color="text.primary">
+          {row.original?.assigned_user?.first_name || '-'} {" "} {row.original?.assigned_user?.last_name || '_'}
+        </Typography>
+      ),
+    }),
+
+    // Total Cost
+    columnHelper.accessor('total_cost', {
+      header: 'Total cost',
+      cell: ({ row }) => {
+        const additionalCost = row.original?.user_bills?.[0]?.bill?.additional_cost || [];
+        const apartmentTypeRaw = row.original?.apartment_type || '';
+        const apartmentType = apartmentTypeRaw.replace(/[^\d]/g, '');
+        const fixedCost = fixedCostMap.get(apartmentType) || 0;
+        const additionalTotal = additionalCost.reduce((sum, val) => sum + (val.amount || 0), 0);
+
+        const leftCost = row?.original?.user_bills?.[0]?.amount || 0;
+
+        const finalCost = (fixedCost + additionalTotal) - leftCost;
+        return (
+          <Typography className="capitalize" color="text.primary">
+            {Number(fixedCost) + Number(additionalTotal)} {" "}
+            {finalCost > 0 && (
+              <Button
+                size='small'
+                variant="contained"
+                sx={{ ml: 1 }}
+                onClick={() => {
+                  setBillId(selectedZone.id);
+                  setApartmentId(row.original._id)
+                  setOpenDialog(true);
+                  setPayData(finalCost);
+                }}
+                disabled={finalCost <= 0}
+              >
+                Pay
+              </Button>
+
+            )}
+          </Typography>
+        );
+      },
+    }),
+    columnHelper.accessor('Paid cost', {
+      header: 'Paid cost',
+      cell: ({ row }) => {
+
+        const leftCost = row.original?.user_bills?.[0]?.amount || 0;
+
+        return (
+          <Typography className="capitalize" color="text.primary">
+            {leftCost}
+          </Typography>
+        );
+      },
+    }),
+    // Bill Payment Date
+    columnHelper.accessor('payment_due_date', {
+      header: 'Bill Payment Date',
+      cell: ({ row }) => (
+        <Typography className="capitalize" color="text.primary">
+          {row.original?.user_bills?.[0]?.bill.payment_due_date || 0 || '-'}
+        </Typography>
+      ),
+    }),
+    columnHelper.accessor('status', {
+      header: 'Status',
+      cell: ({ row }) => {
+
+
+
+        const additionalCost = row.original?.user_bills?.[0]?.bill?.additional_cost || [];
+        const apartmentTypeRaw = row.original?.apartment_type || '';
+        const apartmentType = apartmentTypeRaw.replace(/[^\d]/g, '');
+        const fixedCost = fixedCostMap.get(apartmentType) || 0;
+        const additionalTotal = additionalCost.reduce((sum, val) => sum + (val.amount || 0), 0);
+
+        const leftCost = row?.original?.user_bills?.[0]?.amount || 0;
+        const finalCost = (fixedCost + additionalTotal);
+
+        return (
+          <Typography className="capitalize" component="span" color="text.primary">
+            <Chip
+              label={leftCost == finalCost ? 'Paid' : 'Unpaid'}
+              color={leftCost == finalCost ? 'success' : 'error'}
+              variant="tonal"
+              size="small"
+            />
+          </Typography>
+        );
+      },
+    }),
+    // Status
+    // columnHelper.accessor('status', {
+    //   header: 'Status',
+    //   cell: ({ row }) => (
+    //     <Chip
+    //       label={row.original.status ? 'Paid' : 'Unpaid'}
+    //       color={row.original.status ? 'success' : 'error'}
+    //       variant="tonal"
+    //       size="small"
+    //     />
+    //   ),
+    // }),
+  ], [fixedCostMap]);
+
+  // React table instance
+  const table = useReactTable({
+    data: data?.userBill || [],
+    columns,
+    filterFns: { fuzzy: fuzzyFilter },
+    state: { rowSelection, globalFilter },
+    initialState: { pagination: { pageSize: 10 } },
+    enableRowSelection: true,
+    globalFilterFn: fuzzyFilter,
+    onRowSelectionChange: setRowSelection,
+    onGlobalFilterChange: setGlobalFilter,
+    getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getFacetedRowModel: getFacetedRowModel(),
+    getFacetedUniqueValues: getFacetedUniqueValues(),
+    getFacetedMinMaxValues: getFacetedMinMaxValues(),
+  });
+
+  const rows = table.getFilteredRowModel().rows;
+
+  return (
+    <Dialog
+      fullWidth
+      maxWidth="lg"
+      scroll="body"
+      open={open}
+      sx={{ '& .MuiDialog-paper': { overflow: 'visible' } }}
+    >
+      <DialogCloseButton onClick={() => setIsOpenDetail(false)}>
+        <i className="tabler-x" />
+      </DialogCloseButton>
+
+      <DialogTitle>Maintenance Detail</DialogTitle>
+
+      <DialogContent style={{ margin: "4px" }}>
+        <Card>
+          <CardContent className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div className="flex items-center gap-2">
+              <Typography>Show</Typography>
+              <CustomTextField
+                select
+                value={table.getState().pagination.pageSize}
+                onChange={e => table.setPageSize(Number(e.target.value))}
+                className="w-full sm:w-[70px]"
+              >
+                <MenuItem value={10}>10</MenuItem>
+                <MenuItem value={25}>25</MenuItem>
+                <MenuItem value={50}>50</MenuItem>
+              </CustomTextField>
+            </div>
+          </CardContent>
+
+          <div className="overflow-x-auto">
+            <table className="min-w-full">
+              <thead>
+                {table.getHeaderGroups().map(headerGroup => (
+                  <tr key={headerGroup.id}>
+                    {headerGroup.headers.map(header => (
+                      <th key={header.id}>
+                        {header.isPlaceholder ? null : (
+                          <div
+                            className={classnames(
+                              'flex items-center cursor-pointer select-none',
+                              { 'justify-between': header.column.getIsSorted() }
+                            )}
+                            onClick={header.column.getToggleSortingHandler()}
+                          >
+                            {flexRender(header.column.columnDef.header, header.getContext())}
+                            {{
+                              asc: <i className="tabler-chevron-up text-xl" />,
+                              desc: <i className="tabler-chevron-down text-xl" />
+                            }[header.column.getIsSorted()] ?? null}
+                          </div>
+                        )}
+                      </th>
+                    ))}
+                  </tr>
+                ))}
+              </thead>
+              <tbody>
+                {rows.length === 0 ? (
+                  <tr>
+                    <td colSpan={table.getVisibleFlatColumns().length} className="text-center">
+                      No data available
+                    </td>
+                  </tr>
+                ) : (
+                  rows.map(row => (
+                    <tr key={row.id} className={classnames({ selected: row.getIsSelected() })}>
+                      {row.getVisibleCells().map(cell => (
+                        <td key={cell.id}>
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </td>
+                      ))}
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          <TablePaginationComponent table={table} />
+        </Card>
+        {openDialog && (
+          <PayMaintenanceModal
+            open={openDialog}
+            data={payData}
+            setPayDialog={setOpenDialog}
+            setPayData={setPayData}
+            apartmentId={apartmentId}
+            billId={billId}
+            fetchZoneData={fetchMaintenance}
+          />
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+
 const BillTable = ({ tableData, fetchZoneData, type }) => {
 
   const [role, setRole] = useState('')
@@ -838,6 +1559,7 @@ const BillTable = ({ tableData, fetchZoneData, type }) => {
 
   const [isOpen, setIsOpen] = useState(false)
   const [paidData, setPaidData] = useState()
+  const [isOpenDetail, setIsOpenDetail] = useState(false)
 
   useEffect(() => {
     const fetchPermissions = async () => {
@@ -1093,8 +1815,7 @@ const BillTable = ({ tableData, fetchZoneData, type }) => {
 
     if (
       type === "common-area-bill" ||
-      type === "utilityBills" ||
-      type === "maintenance"
+      type === "utilityBills"
     ) {
       // Status column
       baseColumns.splice(
@@ -1112,6 +1833,16 @@ const BillTable = ({ tableData, fetchZoneData, type }) => {
           ),
         })
       );
+    }
+
+
+    if (
+      (type === "common-area-bill" ||
+        type === "utilityBills" ||
+        type === "maintenance") && (
+        permissions?.['hasBillingInvoicePermission'] || permissions?.['hasBillingEditPermission'] || permissions?.['hasBillingViewPermission']
+      )
+    ) {
 
       // Actions column
       baseColumns.splice(
@@ -1125,43 +1856,55 @@ const BillTable = ({ tableData, fetchZoneData, type }) => {
                 iconButtonProps={{ size: "medium" }}
                 iconClassName="text-textSecondary"
                 options={[
-                  {
-                    text: "Edit Bill",
-                    icon: "tabler-edit",
-                    menuItemProps: {
-                      className: "flex items-center gap-2 text-textSecondary",
-                      onClick: () => {
-                        setSelectedZone(row.original);
-                        setOpenDialog(true);
-                      },
-                    },
-                  },
-                  // ✅ only add Invoice if type !== "maintenance"
-                  ...(type !== "maintenance"
+                  // ✅ केवल "Edit Bill" अगर permission true है
+                  ...(permissions?.hasBillingEditPermission
                     ? [
                       {
-                        text: "Invoice",
-                        icon: "tabler-report",
+                        text: "Edit Bill",
+                        icon: "tabler-edit",
                         menuItemProps: {
-                          className: "flex items-center gap-2 text-textSecondary",
+                          className:
+                            "flex items-center gap-2 text-textSecondary",
                           onClick: () => {
                             setSelectedZone(row.original);
-                            setIsInvoiceOpen(true)
+                            setOpenDialog(true);
                           },
                         },
                       },
                     ]
                     : []),
-                  // ✅ only add View if type === "maintenance"
-                  ...(type === "maintenance"
+
+                  // ✅ केवल "Invoice" अगर type !== maintenance और permission है
+                  ...(type !== "maintenance" &&
+                    permissions?.hasBillingInvoicePermission
+                    ? [
+                      {
+                        text: "Invoice",
+                        icon: "tabler-report",
+                        menuItemProps: {
+                          className:
+                            "flex items-center gap-2 text-textSecondary",
+                          onClick: () => {
+                            setSelectedZone(row.original);
+                            setIsInvoiceOpen(true);
+                          },
+                        },
+                      },
+                    ]
+                    : []),
+
+                  // ✅ केवल "View" अगर type === maintenance
+                  ...(type === "maintenance" && permissions?.['hasBillingViewPermission']
                     ? [
                       {
                         text: "View",
                         icon: "tabler-eye",
                         menuItemProps: {
-                          className: "flex items-center gap-2 text-textSecondary",
+                          className:
+                            "flex items-center gap-2 text-textSecondary",
                           onClick: () => {
-                            alert('View')
+                            setIsOpenDetail(true);
+                            setSelectedZone(row.original);
                           },
                         },
                       },
@@ -1174,7 +1917,6 @@ const BillTable = ({ tableData, fetchZoneData, type }) => {
           enableSorting: false,
         })
       );
-
 
     }
 
@@ -1223,7 +1965,7 @@ const BillTable = ({ tableData, fetchZoneData, type }) => {
             onChange={value => setGlobalFilter(String(value))}
             placeholder='Search Role'
           />
-          {(type == 'maintenance' || type == "common-area-bill" || type == "utilityBills") && (
+          {permissions && permissions?.['hasBillingAddPermission'] && (type == 'maintenance' || type == "common-area-bill" || type == "utilityBills") && (
             <Button variant='contained' onClick={() => {
               setOpenDialog(true)
             }} size='small'>
@@ -1321,8 +2063,12 @@ const BillTable = ({ tableData, fetchZoneData, type }) => {
           open={isInvoiceOpen}
         />
       )}
+      {isOpenDetail && (
+        <ViewMaintenance open={isOpenDetail} setIsOpenDetail={setIsOpenDetail} selectedZone={selectedZone} />
+      )}
     </Card>
   )
 }
+
 
 export default BillTable

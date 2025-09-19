@@ -3,7 +3,7 @@
 import PermissionGuard from '@/hocs/PermissionGuard';
 import Parking from '@views/apps/parking';
 
-export default async function ParkingApp({ params }) {
+export default  function ParkingApp({ params }) {
     const locale = params.lang;
 
     return (

@@ -14,6 +14,11 @@ import {
 
 import Grid from "@mui/material/Grid2";
 
+import PermissionGuardClient from "@/hocs/PermissionClientGuard";
+
+import { useParams } from "next/navigation";
+
+
 const colors = [
     "#1976d2", // blue
     "#9c27b0", // purple
@@ -26,6 +31,8 @@ const colors = [
 ];
 
 const CameraDashboard = () => {
+
+    const { lang: locale } = useParams()
 
     const URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -64,61 +71,63 @@ const CameraDashboard = () => {
     }, [URL, token])
 
     return (
-        <Grid container spacing={4}>
-            {cameraData?.map((camera, index) => {
-                const color = colors[index % colors.length]; // cycle through colors
-                return (
-                    <Grid item size={{ xs: 12, sm: 6, md: 4, lg: 3 }} key={camera.id}>
-                        <Link
-                            href={camera.ip}
-                            color="inherit"
-                              target="_blank"
-                            sx={{
-                                textDecoration: "none",
-                                "&:hover": { color },
-                            }}
-                        >
-                            <Card
-                                elevation={3}
+        <PermissionGuardClient locale={locale} element={'hasCameraPermission'}>
+            <Grid container spacing={4}>
+                {cameraData?.map((camera, index) => {
+                    const color = colors[index % colors.length]; // cycle through colors
+                    return (
+                        <Grid item size={{ xs: 12, sm: 6, md: 4, lg: 3 }} key={camera.id}>
+                            <Link
+                                href={camera.ip}
+                                color="inherit"
+                                target="_blank"
                                 sx={{
-                                    textAlign: "center",
-                                    p: 2,
-                                    borderRadius: 3,
-                                    transition: "0.3s",
-                                    "&:hover": {
-                                        boxShadow: 6,
-                                        transform: "translateY(-4px)",
-                                    },
+                                    textDecoration: "none",
+                                    "&:hover": { color },
                                 }}
                             >
-                                <CardContent>
-                                    <IconButton
-                                        sx={{
-                                            bgcolor: color,
-                                            color: "white",
-                                            width: 64,
-                                            height: 64,
-                                            mb: 2,
-                                            "&:hover": {
+                                <Card
+                                    elevation={3}
+                                    sx={{
+                                        textAlign: "center",
+                                        p: 2,
+                                        borderRadius: 3,
+                                        transition: "0.3s",
+                                        "&:hover": {
+                                            boxShadow: 6,
+                                            transform: "translateY(-4px)",
+                                        },
+                                    }}
+                                >
+                                    <CardContent>
+                                        <IconButton
+                                            sx={{
                                                 bgcolor: color,
-                                                opacity: 0.9,
-                                            },
-                                        }}
-                                    >
-                                        <i className="tabler tabler-camera" style={{ fontSize: 28 }}></i>
-                                    </IconButton>
+                                                color: "white",
+                                                width: 64,
+                                                height: 64,
+                                                mb: 2,
+                                                "&:hover": {
+                                                    bgcolor: color,
+                                                    opacity: 0.9,
+                                                },
+                                            }}
+                                        >
+                                            <i className="tabler tabler-camera" style={{ fontSize: 28 }}></i>
+                                        </IconButton>
 
 
-                                    <Typography variant="h6" fontWeight={600}>
-                                        {camera.title}
-                                    </Typography>
-                                </CardContent>
-                            </Card>
-                        </Link>
-                    </Grid>
-                );
-            })}
-        </Grid >
+                                        <Typography variant="h6" fontWeight={600}>
+                                            {camera.title}
+                                        </Typography>
+                                    </CardContent>
+                                </Card>
+                            </Link>
+                        </Grid>
+                    );
+                })}
+            </Grid >
+        </PermissionGuardClient>
     );
 };
 

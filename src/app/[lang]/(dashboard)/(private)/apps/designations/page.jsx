@@ -1,7 +1,7 @@
 import PermissionGuardServer from '@/hocs/PermissionGuard'
 import DesignationComponent from '@/views/apps/designation/index'
 
-export default async function DesignationApp({ params }) {
+export default  function DesignationApp({ params }) {
 
   const locale = params.lang;
 

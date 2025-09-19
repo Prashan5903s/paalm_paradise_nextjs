@@ -3,7 +3,7 @@
 import PermissionGuard from '@/hocs/PermissionGuard';
 import Towers from '@views/apps/tower';
 
-export default async function TowerApp({ params }) {
+export default  function TowerApp({ params }) {
     const locale = params.lang;
 
     return (

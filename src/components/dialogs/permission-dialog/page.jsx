@@ -249,7 +249,6 @@ const EditContent = ({ control, errors, createData }) => (
 )
 
 const PermissionDialog = ({ open, setOpen, data, fetchPermissionModule, nameData }) => {
-  const handleClose = () => setOpen(false)
 
   const URL = process.env.NEXT_PUBLIC_API_URL
   const { data: session } = useSession() || {}
@@ -278,6 +277,15 @@ const PermissionDialog = ({ open, setOpen, data, fetchPermissionModule, nameData
 
     }
   })
+
+  const handleClose = () => {
+    setOpen(false)
+    reset({
+      name: "",
+      status: false,
+      permissionmodule: []
+    })
+  }
 
   useEffect(() => {
     if (open && data && editData) {
@@ -362,6 +370,7 @@ const PermissionDialog = ({ open, setOpen, data, fetchPermissionModule, nameData
         toast.success(`Permission ${data ? "updated" : "added"} successfully!`, {
           autoClose: 700, // in milliseconds
         });
+        handleClose()
       }
 
     } catch (error) {
@@ -409,6 +418,7 @@ const PermissionDialog = ({ open, setOpen, data, fetchPermissionModule, nameData
 
   return (
     <Dialog
+      fullWidth
       open={open}
       onClose={handleClose}
       closeAfterTransition={false}

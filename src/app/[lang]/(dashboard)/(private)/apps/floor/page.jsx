@@ -3,11 +3,11 @@
 import PermissionGuard from '@/hocs/PermissionGuard';
 import Floor from '@views/apps/floor';
 
-export default async function FloorApp({ params }) {
+export default  function FloorApp({ params }) {
     const locale = params.lang;
 
     return (
-        <PermissionGuard locale={locale} element="isCompany">
+        <PermissionGuard locale={locale} element="hasFloorPermission">
             <Floor />
         </PermissionGuard>
     );

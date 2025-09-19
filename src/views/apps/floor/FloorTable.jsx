@@ -174,19 +174,25 @@ const FloorTable = ({ tableData, fetchZoneData }) => {
     }),
     columnHelper.accessor('action', {
       header: 'Actions',
-      cell: ({ row }) => (
-        <div className='flex items-center'>
+      cell: ({ row }) => {
 
-          <IconButton
-            onClick={() => {
-              setSelectedZone(row.original)
-              setOpenDialog(true)
-            }}
-          >
-            <i className='tabler-edit text-textSecondary' />
-          </IconButton>
-        </div>
-      ),
+        return (
+          permissions && permissions?.['hasFloorEditPermission'] && (
+
+            <div className='flex items-center'>
+
+              <IconButton
+                onClick={() => {
+                  setSelectedZone(row.original)
+                  setOpenDialog(true)
+                }}
+              >
+                <i className='tabler-edit text-textSecondary' />
+              </IconButton>
+            </div>
+          )
+        )
+      },
       enableSorting: false
     })
   ], [permissions])

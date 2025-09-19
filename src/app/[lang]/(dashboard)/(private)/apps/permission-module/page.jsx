@@ -1,7 +1,7 @@
 import PermissionGuardServer from '@/hocs/PermissionGuard'
 import Permissions from '@views/apps/permission-module/index'
 
-export default async function PermissionApp({ params }) {
+export default  function PermissionApp({ params }) {
 
   const locale = params.lang;
 

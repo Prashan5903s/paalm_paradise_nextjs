@@ -63,18 +63,18 @@ export default function PermissionGuard({ children, locale, element }) {
                 (!Array.isArray(allowedPermissions) || allowedPermissions.includes(listingId));
 
             setIsAllowed(true);
-            // if (!allowed) {
+            if (!allowed) {
 
-            // //    if (permissions?.isUser) {
-            // //          router.push(`/${locale}/dashboards/user/${'learner'}`);
-            // //    }
+                   if (permissions?.isUser) {
+                         router.push(`/${locale}/dashboards/user/${'learner'}`);
+                   }
 
-            // //    if (permissions?.notUser) {
-            // //         router.push(`/${locale}/dashboards/crm`);
-            // //    }
+                   if (permissions?.notUser) {
+                        router.push(`/${locale}/dashboards/crm`);
+                   }
 
-            // } else {
-            // }
+            } else {
+            }
         };
 
         checkPermission();

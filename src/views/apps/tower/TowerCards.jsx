@@ -52,81 +52,42 @@ const TowerCards = ({ fetchZoneData, tableData }) => {
 
   return (
     <Grid container spacing={6}>
-      {cardData.map((item, index) => (
-        <Grid key={index} xs={12} sm={6} lg={4}>
-          <Card>
-            <CardContent className='flex flex-col gap-4'>
-              <div className='flex items-center justify-between'>
-                <Typography className='flex-grow'>{`Total ${item.totalUsers} users`}</Typography>
-                <AvatarGroup total={item.totalUsers}>
-                  {item.avatars.map((img, idx) => (
-                    <Avatar key={idx} alt={item.title} src={`/images/avatars/${img}`} />
-                  ))}
-                </AvatarGroup>
-              </div>
 
-              <div className='flex justify-between items-center'>
-                <div className='flex flex-col items-start gap-1'>
-                  <Typography variant='h5'>{item.title}</Typography>
-
-                  <OpenDialogOnElementClick
-                    element={Typography}
-                    elementProps={{
-                      children: 'Edit Role',
-                      component: Link,
-                      color: 'primary',
-                      onClick: e => e.preventDefault()
-                    }}
-                    dialog={({ open, setOpen, tableData }) => (
-                      <TowerDialog open={open} setOpen={setOpen} title={item.title} fetchZoneData={fetchZoneData} tableData={tableData} />
-                    )}
-                  />
-                </div>
-
-                <IconButton>
-                  <i className='tabler-copy text-secondary' />
-                </IconButton>
-              </div>
-            </CardContent>
-          </Card>
-        </Grid>
-      ))}
-
-      {/* Add Role Card */}
-      {/* {permissions && permissions?.['hasZoneAddPermission'] && ( */}
-      <Grid xs={12} sm={6} lg={4}>
-        <OpenDialogOnElementClick
-          element={Card}
-          elementProps={{
-            className: 'cursor-pointer bs-full',
-            children: (
-              <Grid container className='bs-full'>
-                <Grid xs={5}>
-                  <div className='flex items-end justify-center bs-full'>
-                    <img alt='add-role' src='/images/illustrations/characters/5.png' height={130} />
-                  </div>
-                </Grid>
-                <Grid xs={7}>
-                  <CardContent>
-                    <div className='flex flex-col items-end gap-4 text-right'>
-                      <Button variant='contained' size='small'>
-                        Add Tower
-                      </Button>
-                      <Typography>
-                        Add new zones, <br />
-                        if it doesn&apos;t exist.
-                      </Typography>
+      {permissions && permissions?.['hasTowerAddPermission'] && (
+        <Grid xs={12} sm={6} lg={4}>
+          <OpenDialogOnElementClick
+            element={Card}
+            elementProps={{
+              className: 'cursor-pointer bs-full',
+              children: (
+                <Grid container className='bs-full'>
+                  <Grid xs={5}>
+                    <div className='flex items-end justify-center bs-full'>
+                      <img alt='add-role' src='/images/illustrations/characters/5.png' height={130} />
                     </div>
-                  </CardContent>
+                  </Grid>
+                  <Grid xs={7}>
+                    <CardContent>
+                      <div className='flex flex-col items-end gap-4 text-right'>
+                        <Button variant='contained' size='small'>
+                          Add Tower
+                        </Button>
+                        <Typography>
+                          Add new zones, <br />
+                          if it doesn&apos;t exist.
+                        </Typography>
+                      </div>
+                    </CardContent>
+                  </Grid>
                 </Grid>
-              </Grid>
-            )
-          }}
-          dialog={({ open, setOpen }) => (
-            <TowerDialog open={open} setOpen={setOpen} fetchZoneData={fetchZoneData} tableData={tableData} />
-          )}
-        />
-      </Grid>
+              )
+            }}
+            dialog={({ open, setOpen }) => (
+              <TowerDialog open={open} setOpen={setOpen} fetchZoneData={fetchZoneData} tableData={tableData} />
+            )}
+          />
+        </Grid>
+      )}
       {/* )} */}
     </Grid>
   )
