@@ -1,5 +1,7 @@
 'use client'
 
+import { useParams } from 'next/navigation'
+
 // MUI Imports
 import Grid from '@mui/material/Grid2'
 
@@ -19,8 +21,6 @@ import ActivityTimeline from '@views/dashboards/crm/ActivityTimeline'
 
 // Permission Guard
 import PermissionGuard from '@/hocs/PermissionClientGuard'
-
-import { useParams } from 'next/navigation'
 
 export default function DashboardCRM() {
 

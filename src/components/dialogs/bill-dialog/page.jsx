@@ -28,9 +28,13 @@ import { object, string, minLength, pipe, optional, number, array, maxLength, mi
 
 // Components
 import { useSession } from 'next-auth/react'
+
 import { toast } from 'react-toastify'
+
 import CustomTextField from '@core/components/mui/TextField'
+
 import DialogCloseButton from '../DialogCloseButton'
+
 import AppReactDropzone from '@/libs/styles/AppReactDropzone'
 
 //  Month / Year Data (always defined)
@@ -158,9 +162,11 @@ const BillDialog = ({ open, setOpen, selectedZone, fetchZoneData, type }) => {
         onDrop: acceptedFiles => {
             if (!acceptedFiles.length) return
             const selectedFile = acceptedFiles[0]
+            
             setFile(selectedFile)
             setImageError('')
             const reader = new FileReader()
+            
             reader.onload = e => setPreview(e.target.result)
             reader.readAsDataURL(selectedFile)
         },
@@ -168,6 +174,7 @@ const BillDialog = ({ open, setOpen, selectedZone, fetchZoneData, type }) => {
             rejectedFiles.forEach(file => {
                 file.errors.forEach(error => {
                     let msg = ''
+                    
                     switch (error.code) {
                         case 'file-invalid-type':
                             msg = `Invalid file type. Allowed: JPG, PNG, GIF, WebP, SVG, BMP, TIFF, ICO`
@@ -181,6 +188,7 @@ const BillDialog = ({ open, setOpen, selectedZone, fetchZoneData, type }) => {
                         default:
                             msg = `There was an issue with the uploaded file.`
                     }
+                    
                     toast.error(msg)
                     setImageError(msg)
                 })
@@ -191,6 +199,7 @@ const BillDialog = ({ open, setOpen, selectedZone, fetchZoneData, type }) => {
     const formatDate = date => {
         if (!date) return "";
         const d = new Date(date);
+        
         return d.toISOString().split("T")[0];
     };
 
@@ -242,13 +251,17 @@ const BillDialog = ({ open, setOpen, selectedZone, fetchZoneData, type }) => {
     //  Fetch dropdown data
     useEffect(() => {
         let ignore = false
+
         const fetchCreateData = async () => {
+
             try {
                 const response = await fetch(`${API_URL}/company/bill/create`, {
                     method: 'GET',
                     headers: { Authorization: `Bearer ${token}` }
                 })
+
                 const result = await response.json()
+
                 if (response.ok && !ignore) {
                     setCreateData(result?.data || { apartment: [], billType: [] })
                 }
@@ -256,9 +269,11 @@ const BillDialog = ({ open, setOpen, selectedZone, fetchZoneData, type }) => {
                 console.error('Error fetching bill create data', error)
             }
         }
+
         if (API_URL && token) {
             fetchCreateData()
         }
+
         return () => {
             ignore = true
         }
@@ -268,6 +283,7 @@ const BillDialog = ({ open, setOpen, selectedZone, fetchZoneData, type }) => {
     const submitData = async formData => {
 
         setLoading(true)
+
         try {
             const url = selectedZone
                 ? `${API_URL}/company/bill/update/${selectedZone._id}`
@@ -276,6 +292,7 @@ const BillDialog = ({ open, setOpen, selectedZone, fetchZoneData, type }) => {
             const method = selectedZone ? 'PUT' : 'POST'
 
             const payload = new FormData()
+
             Object.entries(formData).forEach(([key, value]) => {
                 if (Array.isArray(value)) {
                     payload.append(key, JSON.stringify(value))
@@ -283,9 +300,11 @@ const BillDialog = ({ open, setOpen, selectedZone, fetchZoneData, type }) => {
                     payload.append(key, value)
                 }
             })
+
             if (type) {
                 payload.append('type', type)
             }
+
             if (file) {
                 payload.append('image', file)
             }
@@ -297,6 +316,7 @@ const BillDialog = ({ open, setOpen, selectedZone, fetchZoneData, type }) => {
             })
 
             const data = await response.json()
+
             if (response.ok) {
                 fetchZoneData()
                 toast.success(`Bill ${selectedZone ? 'updated' : 'added'} successfully!`, { autoClose: 700 })

@@ -21,8 +21,6 @@ import Grid from '@mui/material/Grid2'
 
 import { QRCodeCanvas } from "qrcode.react";
 
-import tableStyles from '@core/styles/table.module.css'
-
 import utc from "dayjs/plugin/utc";
 
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -30,8 +28,6 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
-
-import TablePaginationComponent from '@components/TablePaginationComponent'
 
 import { valibotResolver } from '@hookform/resolvers/valibot'
 
@@ -60,19 +56,21 @@ import { rankItem } from '@tanstack/match-sorter-utils'
 
 import { useForm, Controller } from 'react-hook-form'
 
-import CustomTextField from "@/@core/components/mui/TextField"
-
 import { useSession } from "next-auth/react"
-
-import DialogCloseButton from "@/components/dialogs/DialogCloseButton"
 
 import { toast } from "react-toastify"
 
 import dayjs from "dayjs"
 
+import tableStyles from '@core/styles/table.module.css'
+
+import TablePaginationComponent from '@components/TablePaginationComponent'
+
 import { usePermissionList } from '@/utils/getPermission'
 
-import PermissionGuardClient from "@/hocs/PermissionClientGuard";
+import CustomTextField from "@/@core/components/mui/TextField"
+
+import DialogCloseButton from "@/components/dialogs/DialogCloseButton"
 
 // Debounced Input
 const DebouncedInput = ({ value: initialValue, onChange, debounce = 500, ...props }) => {
@@ -98,7 +96,9 @@ const DebouncedInput = ({ value: initialValue, onChange, debounce = 500, ...prop
 // Filter function
 const fuzzyFilter = (row, columnId, value, addMeta) => {
     const itemRank = rankItem(row.getValue(columnId), value)
+    
     addMeta({ itemRank })
+    
     return itemRank.passed
 }
 
@@ -111,6 +111,7 @@ function formatTimeTo12Hour(timeStr) {
     const [hours, minutes] = timeStr.split(":").map(Number);
     let h = hours % 12 || 12; // 0 → 12
     let ampm = hours >= 12 ? "PM" : "AM";
+
     return `${String(h).padStart(2, "0")}:${String(minutes).padStart(2, "0")} ${ampm}`;
 }
 
@@ -255,6 +256,7 @@ const VisitorModal = ({
                 onClose();
             } else {
                 const errorData = await response.json().catch(() => ({}));
+                
                 toast.error(errorData?.message || "Failed to add visitor");
             }
         } catch (error) {
@@ -718,7 +720,9 @@ const VisitorTable = () => {
                 method: 'GET',
                 headers: { Authorization: `Bearer ${token}` }
             })
+
             const result = await response.json()
+
             if (response.ok) setData(result?.data || [])
         } catch (error) {
             console.error(error)
@@ -732,7 +736,9 @@ const VisitorTable = () => {
                 method: 'GET',
                 headers: { Authorization: `Bearer ${token}` }
             })
+
             const result = await response.json()
+
             if (response.ok) setCreateData(result?.data || null)
         } catch (error) {
             console.error(error)
@@ -744,6 +750,7 @@ const VisitorTable = () => {
             fetchComplain()
             fetchCreateData()
         }
+    
     }, [API_URL, token])
 
     const allowGateIn = async (id) => {
@@ -752,6 +759,7 @@ const VisitorTable = () => {
                 method: 'GET',
                 headers: { Authorization: `Bearer ${token}` }
             })
+            
             if (response.ok) {
                 toast.success('Visitor allowed successfully', { autoClose: 1000 })
                 fetchComplain()
@@ -766,11 +774,13 @@ const VisitorTable = () => {
         return data.filter((row) => {
             const otpMatch =
                 row?.otp?.toString().includes(globalFilter) || globalFilter === ''
-            const nameNoMatch =
+            
+                const nameNoMatch =
                 row?.visitor_name?.toLowerCase().includes(nameNo.toLowerCase()) ||
                 row?.visitor_contact_no?.toString()?.includes(nameNo) ||
                 nameNo === ''
-            const categoryMap = {
+
+                const categoryMap = {
                 '1': 'Allow kids',
                 '2': 'Courier',
                 '3': 'Driver',
@@ -779,8 +789,10 @@ const VisitorTable = () => {
                 '6': 'Others',
                 '7': 'Technician'
             }
+
             const categoryName = categoryMap[row.category] || ''
             const categoryMatch = !category || categoryName === category
+          
             return otpMatch && nameNoMatch && categoryMatch
         })
     }, [data, globalFilter, nameNo, category])
@@ -862,6 +874,7 @@ const VisitorTable = () => {
                     const times2 = row.original.check_in_to_time
                     const formatTime1 = formatTimeTo12Hour(times1)
                     const formatTime2 = formatTimeTo12Hour(times2)
+
                     return (
                         <Typography>
                             {row.original.check_in_date || '-'} <br />

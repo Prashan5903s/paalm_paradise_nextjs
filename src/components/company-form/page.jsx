@@ -470,12 +470,6 @@ const UserFormLayout = () => {
       return;
     }
 
-    useEffect(() => {
-      if (errors) {
-        console.log("Error", errors);
-      }
-    }, [errors])
-
     setFile(selectedFile); // Save the actual File object
 
     const reader = new FileReader();

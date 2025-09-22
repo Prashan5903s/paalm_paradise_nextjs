@@ -1,7 +1,9 @@
 import { redirect } from 'next/navigation'
+
 import { getServerSession } from 'next-auth'
 
 import PermissionGuardClient from '@/components/PermissionGuardClient'
+
 import { authOptions } from '@/libs/auth'
 
 const fetchPermission = async (url, token) => {
@@ -16,13 +18,16 @@ const fetchPermission = async (url, token) => {
 
         if (!response.ok) {
             console.error('Permission API error:', await response.text())
+            
             return null
         }
 
         const data = await response.json()
+        
         return data?.data || null
     } catch (error) {
         console.error('Permission fetch error:', error)
+        
         return null
     }
 }

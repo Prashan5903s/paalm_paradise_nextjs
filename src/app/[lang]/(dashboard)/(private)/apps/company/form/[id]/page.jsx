@@ -1,13 +1,13 @@
 // MUI Imports
 'use client'
 
+import { useParams } from 'next/navigation';
+
 import Grid from '@mui/material/Grid2'
 
 import UserFormLayout from '@/components/company-form/page';
 
 import PermissionGuard from '@/hocs/PermissionClientGuard'
-
-import { useParams } from 'next/navigation';
 
 export default function UserFormLayouts() {
 

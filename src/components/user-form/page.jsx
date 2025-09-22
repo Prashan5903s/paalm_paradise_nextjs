@@ -318,12 +318,15 @@ const UserFormLayout = () => {
         if (userRoles && userRoles.length > 0) {
             const is_office_bearer = userRoles.some(item => item == "68c01730556298d2b76244ac")
             const is_flat_owner = userRoles.some(item => item == "68bfdb861814836bc3393bdc")
+
             if (!is_office_bearer) {
                 setValue('user_type', '')
             }
+
             if (!is_flat_owner) {
                 setValue('apartment_data', [])
             }
+
             setIsOfficeBearer(is_office_bearer)
             setIsFlatOwner(is_flat_owner)
         } else {
@@ -474,6 +477,7 @@ const UserFormLayout = () => {
         // Roles
         if (Array.isArray(editData.roles) && editData.roles.length > 0) {
             const rolesIds = editData.roles.map((role) => role.role_id);
+
             setUserRoles(rolesIds);
             setValue('roles', rolesIds);
         } else {
@@ -489,6 +493,7 @@ const UserFormLayout = () => {
         if (editData.floor_id && createData?.apartment) {
             const branchData =
                 createData.apartment.filter((b) => b.floor_id === editData.floor_id) || [];
+
             setSelectedApartment(branchData);
         } else {
             setSelectedApartment([]);
@@ -521,6 +526,7 @@ const UserFormLayout = () => {
                     type: "manual",
                     message: "Please select at least one role.",
                 });
+
                 return;
             }
 
@@ -670,6 +676,7 @@ const UserFormLayout = () => {
             const select_floor = createData?.floor?.filter(
                 (item) => item.tower_id._id === selectTower
             )
+
             setSelectFloor(select_floor || []);
 
         }
@@ -943,6 +950,7 @@ const UserFormLayout = () => {
                                         label="Country"
                                         onChange={(e) => {
                                             const selectedCountryId = e.target.value;
+
                                             field.onChange(selectedCountryId);
                                             setCountryId(selectedCountryId);
                                         }}
@@ -971,6 +979,7 @@ const UserFormLayout = () => {
                                         label="State"
                                         onChange={(e) => {
                                             const selectStateId = e.target.value;
+
                                             field.onChange(selectStateId);
                                             setStateId(selectStateId);
                                         }}
@@ -1062,6 +1071,7 @@ const UserFormLayout = () => {
                                             multiple: true,
                                             onChange: (event) => {
                                                 const value = event.target.value;
+
                                                 setUserRoles(value);
                                                 field.onChange(value);
                                             },
@@ -1069,6 +1079,7 @@ const UserFormLayout = () => {
                                                 const selectedNames = createData.roles
                                                     .filter((role) => selectedIds.includes(role._id))
                                                     .map((role) => role.name);
+
                                                 return selectedNames.join(", ");
                                             },
                                         }}
@@ -1320,6 +1331,7 @@ const UserFormLayout = () => {
                                                                     value={field.value ?? ""}
                                                                     onChange={(e) => {
                                                                         const value = e.target.value || "";
+
                                                                         field.onChange(value);
                                                                         setValue(`apartment_data.${index}.floor_id`, "");
                                                                         setValue(`apartment_data.${index}.apartment_id`, "");
@@ -1352,6 +1364,7 @@ const UserFormLayout = () => {
                                                                         value={field.value ?? ""}
                                                                         onChange={(e) => {
                                                                             const value = e.target.value || "";
+
                                                                             field.onChange(value);
                                                                             setValue(`apartment_data.${index}.apartment_id`, "");
                                                                         }}

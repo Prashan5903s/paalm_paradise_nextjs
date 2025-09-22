@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 
+import { useParams } from "next/navigation";
+
 import { useSession } from "next-auth/react";
 
 import {
@@ -15,9 +17,6 @@ import {
 import Grid from "@mui/material/Grid2";
 
 import PermissionGuardClient from "@/hocs/PermissionClientGuard";
-
-import { useParams } from "next/navigation";
-
 
 const colors = [
     "#1976d2", // blue
@@ -56,6 +55,7 @@ const CameraDashboard = () => {
 
             if (response.ok) {
                 const value = result?.data;
+                
                 setCameraData(value)
             }
 
@@ -75,6 +75,7 @@ const CameraDashboard = () => {
             <Grid container spacing={4}>
                 {cameraData?.map((camera, index) => {
                     const color = colors[index % colors.length]; // cycle through colors
+                    
                     return (
                         <Grid item size={{ xs: 12, sm: 6, md: 4, lg: 3 }} key={camera.id}>
                             <Link

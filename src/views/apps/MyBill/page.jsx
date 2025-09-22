@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useMemo } from "react"
 
+import { useSession } from "next-auth/react"
+
 import { TabContext, TabList, TabPanel } from "@mui/lab"
 
 import {
@@ -15,11 +17,7 @@ import {
     Typography
 } from "@mui/material"
 
-import tableStyles from '@core/styles/table.module.css'
-
 import classnames from 'classnames'
-
-import TablePaginationComponent from '@components/TablePaginationComponent'
 
 import {
     createColumnHelper,
@@ -34,14 +32,18 @@ import {
     getSortedRowModel
 } from '@tanstack/react-table'
 
+import TablePaginationComponent from '@components/TablePaginationComponent'
+
 import CustomTextField from "@/@core/components/mui/TextField"
 
-import { useSession } from "next-auth/react"
+import tableStyles from '@core/styles/table.module.css'
 
 // Filter function
 const fuzzyFilter = (row, columnId, value, addMeta) => {
     const itemRank = rankItem(row.getValue(columnId), value)
+    
     addMeta({ itemRank })
+    
     return itemRank.passed
 }
 
@@ -80,9 +82,11 @@ const BillTable = ({ tableData, value, type }) => {
 
     const fixedCostMap = useMemo(() => {
         const map = new Map();
+        
         data?.fixed_cost?.forEach(item => {
             map.set(item.apartment_type, Number(item.unit_value || 0));
         });
+        
         return map;
     }, [data?.fixed_cost]);
 
@@ -271,6 +275,7 @@ const BillTable = ({ tableData, value, type }) => {
             baseColumns.splice(
                 1,
                 0,
+                
                 // Apartment No
                 columnHelper.accessor('apartment_no', {
                     header: 'Apartment No',
@@ -296,6 +301,7 @@ const BillTable = ({ tableData, value, type }) => {
             baseColumns.splice(
                 3,
                 0,
+                
                 // Total Cost
                 // Total Cost
                 columnHelper.accessor('total_cost', {
@@ -310,6 +316,7 @@ const BillTable = ({ tableData, value, type }) => {
                         const leftCost = row?.original?.amount || 0;
 
                         const finalCost = (fixedCost + additionalTotal) - leftCost;
+                        
                         return (
                             <Typography className="capitalize" color="text.primary">
                                 {Number(fixedCost) + Number(additionalTotal)} {" "}
@@ -338,6 +345,7 @@ const BillTable = ({ tableData, value, type }) => {
             baseColumns.splice(
                 5,
                 0,
+                
                 // Bill Payment Date
                 columnHelper.accessor('payment_due_date', {
                     header: 'Bill Payment Date',
@@ -503,6 +511,7 @@ const TypeMyBill = ({ type }) => {
                 const result = await response.json()
 
                 const value = result?.data
+                
                 setData(value)
             }
 

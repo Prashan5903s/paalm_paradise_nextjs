@@ -93,6 +93,7 @@ const FloorDialog = ({
             })
 
             const value = await response.json()
+            
             if (response.ok) {
                 setCreateData(value?.data || [])
             }
@@ -127,6 +128,7 @@ const FloorDialog = ({
                         type: 'manual',
                         message: 'This name already exists.',
                     })
+
                     return
                 }
             } else {
@@ -135,6 +137,7 @@ const FloorDialog = ({
                         zoneInTable.floor_name.trim().toLowerCase() ===
                         formData.name.trim().toLowerCase()
                 )
+
                 if (existsInTable) {
                     setError('name', {
                         type: 'manual',
@@ -142,11 +145,13 @@ const FloorDialog = ({
                     })
                     hasError = true
                 }
+
                 if (hasError) return
             }
         }
 
         setLoading(true)
+        
         try {
             const url = selectedZone
                 ? `${API_URL}/company/floor/${selectedZone._id}`
@@ -285,6 +290,7 @@ const FloorDialog = ({
                                                 fullWidth
                                                 onKeyDown={(e) => {
                                                     const key = e.key
+                                                    
                                                     const allowedKeys = [
                                                         'Backspace',
                                                         'Tab',
@@ -293,6 +299,7 @@ const FloorDialog = ({
                                                         'Delete',
                                                         ' ',
                                                     ]
+
                                                     if (
                                                         !/^[a-zA-Z ]$/.test(key) &&
                                                         !allowedKeys.includes(key)
@@ -302,6 +309,7 @@ const FloorDialog = ({
                                                 }}
                                                 onPaste={(e) => {
                                                     const paste = e.clipboardData.getData('text')
+
                                                     if (!/^[a-zA-Z ]+$/.test(paste)) {
                                                         e.preventDefault()
                                                     }

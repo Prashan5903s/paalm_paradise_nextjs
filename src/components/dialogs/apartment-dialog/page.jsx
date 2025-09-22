@@ -21,10 +21,12 @@ import { useForm, Controller } from 'react-hook-form'
 import { valibotResolver } from '@hookform/resolvers/valibot'
 import { object, string, number, minLength, pipe } from 'valibot'
 
-// Components
 import { useSession } from 'next-auth/react'
+
 import { toast } from 'react-toastify'
+
 import CustomTextField from '@core/components/mui/TextField'
+
 import DialogCloseButton from '../DialogCloseButton'
 
 // ✅ Validation Schema
@@ -35,6 +37,7 @@ const schema = object({
     area: pipe(string(), minLength(1, 'Area is required')), // keep as string since input type="number"
     apartmentType: pipe(string('Apartment type is required')),
     status: pipe(string('Status is required')),
+
     // tower & parkingCode removed from schema since no input fields exist
 })
 
@@ -69,6 +72,7 @@ const ApartmentDialog = ({ open, setOpen, selectedZone, fetchZoneData }) => {
     useEffect(() => {
         if (createData && towerId) {
             const floor = createData.find(item => item._id == towerId);
+            
             setFloor(floor?.floors)
         }
     }, [createData, towerId]);
@@ -105,6 +109,7 @@ const ApartmentDialog = ({ open, setOpen, selectedZone, fetchZoneData }) => {
                 })
 
                 const result = await response.json()
+                
                 if (response.ok && !ignore) {
                     setCreateData(result?.data || [])
                 }
@@ -125,6 +130,7 @@ const ApartmentDialog = ({ open, setOpen, selectedZone, fetchZoneData }) => {
     // ✅ Submit handler
     const submitData = async (formData) => {
         setLoading(true)
+        
         try {
             const url = selectedZone
                 ? `${API_URL}/company/apartment/${selectedZone._id}`

@@ -1838,11 +1838,13 @@ const SettingComponent = ({ activities }) => {
     // Fetch available designations, departments, groups, etc.
     const fetchCreateData = useCallback(async () => {
         if (!API_URL || !token) return;
+
         try {
             const res = await fetch(`${API_URL}/company/program/schedule/create`, {
                 method: "GET",
                 headers: { Authorization: `Bearer ${token}` },
             });
+
             const body = await res.json();
 
             if (res.ok) {
@@ -1853,7 +1855,9 @@ const SettingComponent = ({ activities }) => {
                     region: body?.data?.region || [],
                     user: body?.data?.user || [],
                 };
+
                 setCreateData(cd);
+
                 return cd;
             } else {
                 console.error("Error fetching create data:", body);
@@ -1861,6 +1865,7 @@ const SettingComponent = ({ activities }) => {
         } catch (err) {
             console.error("Error fetching create data:", err);
         }
+
         return null;
     }, [API_URL, token]);
 
@@ -1885,6 +1890,7 @@ const SettingComponent = ({ activities }) => {
 
                 if (!res.ok) {
                     const errText = await res.text();
+
                     throw new Error(
                         `Request failed with ${res.status} ${res.statusText}: ${errText}`
                     );
@@ -1911,8 +1917,10 @@ const SettingComponent = ({ activities }) => {
                 }
 
                 if (Array.isArray(result.targetPairs) && result.targetPairs.length > 0) {
+
                     const enriched = result.targetPairs.map((pair) => {
                         let secondOptions = [];
+
                         switch (pair.target) {
                             case "1":
                                 secondOptions = createData.designation || [];
@@ -1954,9 +1962,11 @@ const SettingComponent = ({ activities }) => {
 
     // Re-enrich secondOptions when createData changes
     useEffect(() => {
+
         setTargetOptionPairs((prev) =>
             prev.map((pair) => {
                 let secondOptions = [];
+
                 switch (pair.target) {
                     case "1":
                         secondOptions = createData.designation || [];
@@ -1976,6 +1986,7 @@ const SettingComponent = ({ activities }) => {
                     default:
                         secondOptions = [];
                 }
+
                 return { ...pair, secondOptions, options: normalizeOptions(pair.options) };
             })
         );
@@ -1988,13 +1999,17 @@ const SettingComponent = ({ activities }) => {
             selectedPairIndex !== null &&
             targetOptionPairs[selectedPairIndex]?.target === "5"
         ) {
+
             setTargetOptionPairs((prevPairs) => {
                 const updatedPairs = prevPairs.map((p, i) => ({ ...p }));
                 const users = updatedPairs[selectedPairIndex]?.secondOptions || [];
+
                 const selectedUsers = users
                     .filter((u) => allData.includes(String(u._id)))
                     .map((u) => String(u._id));
+
                 updatedPairs[selectedPairIndex].options = normalizeOptions(selectedUsers);
+
                 return updatedPairs;
             });
         }
@@ -2002,8 +2017,10 @@ const SettingComponent = ({ activities }) => {
 
     // Handlers
     const handleFirstChange = (index, value) => {
+
         setTargetOptionPairs((prev) => {
             const updated = prev.map((p) => ({ ...p }));
+
             updated[index].target = value;
             updated[index].options = [];
 
@@ -2026,6 +2043,7 @@ const SettingComponent = ({ activities }) => {
                 default:
                     updated[index].secondOptions = [];
             }
+
             return updated;
         });
     };
@@ -2033,7 +2051,9 @@ const SettingComponent = ({ activities }) => {
     const handleSecondChange = (index, value) => {
         setTargetOptionPairs((prev) => {
             const updated = prev.map((p) => ({ ...p }));
+
             updated[index].options = normalizeOptions(value);
+
             return updated;
         });
     };
@@ -2041,6 +2061,7 @@ const SettingComponent = ({ activities }) => {
     const handleAddClick = () => {
         setTargetOptionPairs((prev) => {
             if (prev.length >= MAX_PAIRS) return prev;
+
             return [...prev, { target: "", options: [], secondOptions: [] }];
         });
     };
@@ -2049,7 +2070,9 @@ const SettingComponent = ({ activities }) => {
         setTargetOptionPairs((prev) => {
             if (prev.length === 1) return prev;
             const copy = [...prev];
+
             copy.splice(index, 1);
+
             return copy;
         });
     };
@@ -2060,7 +2083,9 @@ const SettingComponent = ({ activities }) => {
     };
 
     const handleDataSave = async (value) => {
+
         if (!API_URL || !token || !mId) return;
+
         try {
             const res = await fetch(`${API_URL}/company/program/schedule/${mId}`, {
                 method: "POST",
@@ -2070,6 +2095,7 @@ const SettingComponent = ({ activities }) => {
                 },
                 body: JSON.stringify(value),
             });
+
             const body = await res.json();
 
             if (res.ok) {
@@ -2090,6 +2116,7 @@ const SettingComponent = ({ activities }) => {
 
         if (dueType === "fixed" && startDate > endDate) {
             toast.error("Start date cannot be later than end date");
+
             return;
         }
 

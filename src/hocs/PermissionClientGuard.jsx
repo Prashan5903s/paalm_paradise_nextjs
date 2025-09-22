@@ -63,6 +63,7 @@ export default function PermissionGuard({ children, locale, element }) {
                 (!Array.isArray(allowedPermissions) || allowedPermissions.includes(listingId));
 
             setIsAllowed(true);
+            
             if (!allowed) {
 
                    if (permissions?.isUser) {

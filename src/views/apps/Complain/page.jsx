@@ -18,11 +18,9 @@ import {
 
 import Grid from '@mui/material/Grid2'
 
-import tableStyles from '@core/styles/table.module.css'
 
 import classnames from 'classnames'
 
-import TablePaginationComponent from '@components/TablePaginationComponent'
 
 import { valibotResolver } from '@hookform/resolvers/valibot'
 
@@ -49,13 +47,17 @@ import {
 
 import { useForm, Controller } from 'react-hook-form'
 
-import CustomTextField from "@/@core/components/mui/TextField"
-
 import { useSession } from "next-auth/react"
 
-import DialogCloseButton from "@/components/dialogs/DialogCloseButton"
-
 import { toast } from "react-toastify"
+
+import tableStyles from '@core/styles/table.module.css'
+
+import TablePaginationComponent from '@components/TablePaginationComponent'
+
+import CustomTextField from "@/@core/components/mui/TextField"
+
+import DialogCloseButton from "@/components/dialogs/DialogCloseButton"
 
 import { usePermissionList } from '@/utils/getPermission'
 
@@ -80,7 +82,9 @@ function formatTimestamp(timestamp) {
 // Filter function
 const fuzzyFilter = (row, columnId, value, addMeta) => {
     const itemRank = rankItem(row.getValue(columnId), value)
+    
     addMeta({ itemRank })
+    
     return itemRank.passed
 }
 
@@ -191,6 +195,7 @@ const ComplainModal = ({ open, setIsOpen, fetchComplain, code, id, complainData 
                 onClose();
             } else {
                 const errorData = await response.json().catch(() => ({}));
+
                 toast.error(errorData?.message || "Failed to create complain");
             }
         } catch (error) {
@@ -357,6 +362,7 @@ const ComplainTableModal = ({ open, setOpen, complainData }) => {
                         3: "Resolved",
                         4: "In progress"
                     };
+
                     return (
                         <Typography style={{ textAlign: "center" }} color="error">
                             {statusMap[row.original?.complaint_status] || "-"}
@@ -686,6 +692,7 @@ const ComplainTable = () => {
                         5: "House Keeping / Guard",
                         6: "Others",
                     };
+
                     return (
                         <Typography style={{ textAlign: "center" }} color="text.primary">
                             {categoryMap?.[row.original.category] || "-"}
@@ -723,6 +730,7 @@ const ComplainTable = () => {
                         3: "Resolved",
                         4: "In progress"
                     };
+
                     return (
                         <Typography style={{ textAlign: "center" }} color="error">
                             {statusMap[row.original?.latest_complain_user?.complaint_status] || "Pending"}

@@ -1,9 +1,10 @@
 'use client'
 
-// Component Imports
-import PermissionGuard from '@/hocs/PermissionClientGuard'
-import UserList from '@/views/apps/user/list'
 import { useParams } from 'next/navigation';
+
+import PermissionGuard from '@/hocs/PermissionClientGuard'
+
+import UserList from '@/views/apps/user/list'
 
 export default function () {
 

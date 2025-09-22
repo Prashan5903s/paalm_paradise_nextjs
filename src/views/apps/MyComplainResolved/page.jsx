@@ -23,11 +23,7 @@ import {
 
 import Grid from '@mui/material/Grid2'
 
-import tableStyles from '@core/styles/table.module.css'
-
 import classnames from 'classnames'
-
-import TablePaginationComponent from '@components/TablePaginationComponent'
 
 import { valibotResolver } from '@hookform/resolvers/valibot'
 
@@ -54,18 +50,25 @@ import {
 
 import { useForm, Controller } from 'react-hook-form'
 
-import CustomTextField from "@/@core/components/mui/TextField"
 
 import { useSession } from "next-auth/react"
 
-import DialogCloseButton from "@/components/dialogs/DialogCloseButton"
-
 import { toast } from "react-toastify"
+
+import tableStyles from '@core/styles/table.module.css'
+
+import TablePaginationComponent from '@components/TablePaginationComponent'
+
+import CustomTextField from "@/@core/components/mui/TextField"
+
+import DialogCloseButton from "@/components/dialogs/DialogCloseButton"
 
 // Filter function
 const fuzzyFilter = (row, columnId, value, addMeta) => {
     const itemRank = rankItem(row.getValue(columnId), value)
+
     addMeta({ itemRank })
+
     return itemRank.passed
 }
 
@@ -183,11 +186,14 @@ const ComplainModal = ({ open, setIsOpen, fetchComplain, complainId, setComplain
                                         fullWidth
                                         select
                                         label="Change status*"
+
                                         onChange={(e) => {
                                             setCurrentStatus(e.target.value)
+
                                             if (e.target.value != "3") {
                                                 setValue('happy_code', "")
                                             }
+
                                             field.onChange(e.target.value)
 
                                         }}
@@ -232,10 +238,13 @@ const ComplainModal = ({ open, setIsOpen, fetchComplain, complainId, setComplain
                                             onInput={(e) => {
                                                 // prevent typing negative sign or non-numeric
                                                 e.target.value = e.target.value.replace(/[^0-9]/g, "");
+
                                                 // prevent more than 6 digits
+
                                                 if (e.target.value.length > 6) {
                                                     e.target.value = e.target.value.slice(0, 6);
                                                 }
+
                                                 field.onChange(e);
                                             }}
                                         />
@@ -370,6 +379,7 @@ const BillTable = () => {
             columnHelper.accessor("category", {
                 header: "Category",
                 cell: ({ row }) => {
+
                     const categoryMap = {
                         1: "Plumbing",
                         2: "Electricity",
@@ -378,6 +388,7 @@ const BillTable = () => {
                         5: "House Keeping / Guard",
                         6: "Others",
                     };
+
                     return (
                         <Typography className="capitalize" color="text.primary">
                             {categoryMap[row.original?.category] || "-"}

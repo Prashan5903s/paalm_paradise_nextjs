@@ -18,15 +18,14 @@ import {
   MenuItem
 } from '@mui/material'
 
-import OptionMenu from '@core/components/option-menu';
-
 import Grid from '@mui/material/Grid2'
 
 import { useForm, Controller } from 'react-hook-form'
 
-// Third-party Imports
 import classnames from 'classnames'
+
 import { rankItem } from '@tanstack/match-sorter-utils'
+
 import {
   createColumnHelper,
   flexRender,
@@ -40,16 +39,6 @@ import {
   getSortedRowModel
 } from '@tanstack/react-table'
 
-// Component Imports
-import CustomTextField from '@core/components/mui/TextField'
-import TablePaginationComponent from '@components/TablePaginationComponent'
-
-// Style Imports
-import tableStyles from '@core/styles/table.module.css'
-import BillDialog from '@/components/dialogs/bill-dialog/page'
-import { usePermissionList } from '@/utils/getPermission'
-import DialogCloseButton from '@/components/dialogs/DialogCloseButton'
-
 import {
   object,
   string,
@@ -59,14 +48,33 @@ import {
 } from 'valibot'
 
 import { valibotResolver } from '@hookform/resolvers/valibot'
+
 import { useSession } from 'next-auth/react'
+
 import { toast } from 'react-toastify'
+
+import OptionMenu from '@core/components/option-menu';
+
+import CustomTextField from '@core/components/mui/TextField'
+
+import TablePaginationComponent from '@components/TablePaginationComponent'
+
+import tableStyles from '@core/styles/table.module.css'
+
+import BillDialog from '@/components/dialogs/bill-dialog/page'
+
+import { usePermissionList } from '@/utils/getPermission'
+
+import DialogCloseButton from '@/components/dialogs/DialogCloseButton'
+
 import Logo from '@components/layout/shared/Logo'
 
 // Filter function
 const fuzzyFilter = (row, columnId, value, addMeta) => {
   const itemRank = rankItem(row.getValue(columnId), value)
+  
   addMeta({ itemRank })
+  
   return itemRank.passed
 }
 
@@ -235,6 +243,7 @@ const PayModal = ({ open, data, setPayDialog, setPayData, billId, fetchZoneData 
                     helperText={errors.amount?.message}
                     onChange={(e) => {
                       let value = e.target.value;
+                      
                       if (/^\d*$/.test(value)) {
                         if (Number(value) <= (data || 0)) {
                           field.onChange(value);
@@ -494,7 +503,9 @@ const PaidAmountModal = ({ open, data, setIsOpen }) => {
   const [rowSelection, setRowSelection] = useState({})
 
   const columns = useMemo(() => {
+    
     const baseColumns = [];
+    
     baseColumns.splice(
       1,
       0,
@@ -647,7 +658,8 @@ const ViewInvoiceModal = ({ open, setIsInvoiceOpen, selectedZone }) => {
         hour: "2-digit",
         minute: "2-digit",
       });
-    // DD/MM/YYYY
+    
+      // DD/MM/YYYY
   }
 
   const total = selectedZone.payments.reduce(
@@ -976,9 +988,12 @@ const PayMaintenanceModal = ({
                     label="Amount"
                     required
                     error={!!errors.amount}
+                    
                     helperText={errors.amount?.message}
+                    
                     onChange={(e) => {
                       let value = e.target.value;
+                      
                       if (/^\d*$/.test(value)) {
                         if (Number(value) <= (data || 0)) {
                           field.onChange(value);
@@ -1252,6 +1267,7 @@ const ViewMaintenance = ({ open, setIsOpenDetail, selectedZone }) => {
         method: 'GET',
         headers: { Authorization: `Bearer ${token}` },
       });
+      
       const result = await response.json();
 
       if (response.ok) {
@@ -1273,9 +1289,11 @@ const ViewMaintenance = ({ open, setIsOpenDetail, selectedZone }) => {
   // Prepare fixed cost map for faster lookup
   const fixedCostMap = useMemo(() => {
     const map = new Map();
+    
     data?.fixed_cost?.forEach(item => {
       map.set(item.apartment_type, Number(item.unit_value || 0));
     });
+    
     return map;
   }, [data?.fixed_cost]);
 
@@ -1299,6 +1317,7 @@ const ViewMaintenance = ({ open, setIsOpenDetail, selectedZone }) => {
         />
       ),
     },
+    
     // Apartment No
     columnHelper.accessor('apartment_no', {
       header: 'Apartment No',
@@ -1330,6 +1349,7 @@ const ViewMaintenance = ({ open, setIsOpenDetail, selectedZone }) => {
         const leftCost = row?.original?.user_bills?.[0]?.amount || 0;
 
         const finalCost = (fixedCost + additionalTotal) - leftCost;
+        
         return (
           <Typography className="capitalize" color="text.primary">
             {Number(fixedCost) + Number(additionalTotal)} {" "}
@@ -1367,6 +1387,7 @@ const ViewMaintenance = ({ open, setIsOpenDetail, selectedZone }) => {
         );
       },
     }),
+    
     // Bill Payment Date
     columnHelper.accessor('payment_due_date', {
       header: 'Bill Payment Date',
@@ -1403,6 +1424,7 @@ const ViewMaintenance = ({ open, setIsOpenDetail, selectedZone }) => {
         );
       },
     }),
+    
     // Status
     // columnHelper.accessor('status', {
     //   header: 'Status',
@@ -1798,6 +1820,7 @@ const BillTable = ({ tableData, fetchZoneData, type }) => {
           header: "Total Additional Cost",
           cell: ({ row }) => {
             const additionalCosts = row.original.additional_cost || [];
+            
             const total = additionalCosts.reduce(
               (sum, item) => sum + (Number(item.amount) || 0),
               0
