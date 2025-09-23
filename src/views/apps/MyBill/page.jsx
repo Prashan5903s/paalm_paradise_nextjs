@@ -41,9 +41,9 @@ import tableStyles from '@core/styles/table.module.css'
 // Filter function
 const fuzzyFilter = (row, columnId, value, addMeta) => {
     const itemRank = rankItem(row.getValue(columnId), value)
-    
+
     addMeta({ itemRank })
-    
+
     return itemRank.passed
 }
 
@@ -68,6 +68,22 @@ const DebouncedInput = ({ value: initialValue, onChange, debounce = 500, ...prop
 
 }
 
+function formatTimeDate(timestamp) {
+    if (!timestamp) return "";
+
+    const date = new Date(timestamp);
+
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    const seconds = String(date.getSeconds()).padStart(2, "0");
+
+    return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
+}
+
 const columnHelper = createColumnHelper()
 
 const BillTable = ({ tableData, value, type }) => {
@@ -82,11 +98,11 @@ const BillTable = ({ tableData, value, type }) => {
 
     const fixedCostMap = useMemo(() => {
         const map = new Map();
-        
+
         data?.fixed_cost?.forEach(item => {
             map.set(item.apartment_type, Number(item.unit_value || 0));
         });
-        
+
         return map;
     }, [data?.fixed_cost]);
 
@@ -178,7 +194,7 @@ const BillTable = ({ tableData, value, type }) => {
                     header: "Bill Date",
                     cell: ({ row }) => (
                         <Typography className="capitalize" color="text.primary">
-                            {row.original.bill_date}
+                            {formatTimeDate(row.original.bill_date)}
                         </Typography>
                     ),
                 })
@@ -192,7 +208,7 @@ const BillTable = ({ tableData, value, type }) => {
                     header: "Bill Due Date",
                     cell: ({ row }) => (
                         <Typography className="capitalize" color="text.primary">
-                            {row.original.bill_due_date}
+                            {formatTimeDate(row.original.bill_due_date)}
                         </Typography>
                     ),
                 })
@@ -275,7 +291,7 @@ const BillTable = ({ tableData, value, type }) => {
             baseColumns.splice(
                 1,
                 0,
-                
+
                 // Apartment No
                 columnHelper.accessor('apartment_no', {
                     header: 'Apartment No',
@@ -301,7 +317,7 @@ const BillTable = ({ tableData, value, type }) => {
             baseColumns.splice(
                 3,
                 0,
-                
+
                 // Total Cost
                 // Total Cost
                 columnHelper.accessor('total_cost', {
@@ -316,7 +332,7 @@ const BillTable = ({ tableData, value, type }) => {
                         const leftCost = row?.original?.amount || 0;
 
                         const finalCost = (fixedCost + additionalTotal) - leftCost;
-                        
+
                         return (
                             <Typography className="capitalize" color="text.primary">
                                 {Number(fixedCost) + Number(additionalTotal)} {" "}
@@ -345,13 +361,13 @@ const BillTable = ({ tableData, value, type }) => {
             baseColumns.splice(
                 5,
                 0,
-                
+
                 // Bill Payment Date
                 columnHelper.accessor('payment_due_date', {
                     header: 'Bill Payment Date',
                     cell: ({ row }) => (
                         <Typography className="capitalize" color="text.primary">
-                            {row.original?.bill_id.payment_due_date || 0 || '-'}
+                            {formatTimeDate(row.original?.bill_id.payment_due_date) || 0 || '-'}
                         </Typography>
                     ),
                 }),
@@ -511,7 +527,7 @@ const TypeMyBill = ({ type }) => {
                 const result = await response.json()
 
                 const value = result?.data
-                
+
                 setData(value)
             }
 

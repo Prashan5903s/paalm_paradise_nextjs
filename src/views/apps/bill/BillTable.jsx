@@ -72,10 +72,26 @@ import Logo from '@components/layout/shared/Logo'
 // Filter function
 const fuzzyFilter = (row, columnId, value, addMeta) => {
   const itemRank = rankItem(row.getValue(columnId), value)
-  
+
   addMeta({ itemRank })
-  
+
   return itemRank.passed
+}
+
+function formatTimeDate(timestamp) {
+  if (!timestamp) return "";
+
+  const date = new Date(timestamp);
+
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = date.getFullYear();
+
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  const seconds = String(date.getSeconds()).padStart(2, "0");
+
+  return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
 }
 
 // Debounced Input
@@ -243,7 +259,7 @@ const PayModal = ({ open, data, setPayDialog, setPayData, billId, fetchZoneData 
                     helperText={errors.amount?.message}
                     onChange={(e) => {
                       let value = e.target.value;
-                      
+
                       if (/^\d*$/.test(value)) {
                         if (Number(value) <= (data || 0)) {
                           field.onChange(value);
@@ -503,9 +519,9 @@ const PaidAmountModal = ({ open, data, setIsOpen }) => {
   const [rowSelection, setRowSelection] = useState({})
 
   const columns = useMemo(() => {
-    
+
     const baseColumns = [];
-    
+
     baseColumns.splice(
       1,
       0,
@@ -658,8 +674,8 @@ const ViewInvoiceModal = ({ open, setIsInvoiceOpen, selectedZone }) => {
         hour: "2-digit",
         minute: "2-digit",
       });
-    
-      // DD/MM/YYYY
+
+    // DD/MM/YYYY
   }
 
   const total = selectedZone.payments.reduce(
@@ -988,12 +1004,12 @@ const PayMaintenanceModal = ({
                     label="Amount"
                     required
                     error={!!errors.amount}
-                    
+
                     helperText={errors.amount?.message}
-                    
+
                     onChange={(e) => {
                       let value = e.target.value;
-                      
+
                       if (/^\d*$/.test(value)) {
                         if (Number(value) <= (data || 0)) {
                           field.onChange(value);
@@ -1267,7 +1283,7 @@ const ViewMaintenance = ({ open, setIsOpenDetail, selectedZone }) => {
         method: 'GET',
         headers: { Authorization: `Bearer ${token}` },
       });
-      
+
       const result = await response.json();
 
       if (response.ok) {
@@ -1289,11 +1305,11 @@ const ViewMaintenance = ({ open, setIsOpenDetail, selectedZone }) => {
   // Prepare fixed cost map for faster lookup
   const fixedCostMap = useMemo(() => {
     const map = new Map();
-    
+
     data?.fixed_cost?.forEach(item => {
       map.set(item.apartment_type, Number(item.unit_value || 0));
     });
-    
+
     return map;
   }, [data?.fixed_cost]);
 
@@ -1317,7 +1333,7 @@ const ViewMaintenance = ({ open, setIsOpenDetail, selectedZone }) => {
         />
       ),
     },
-    
+
     // Apartment No
     columnHelper.accessor('apartment_no', {
       header: 'Apartment No',
@@ -1349,7 +1365,7 @@ const ViewMaintenance = ({ open, setIsOpenDetail, selectedZone }) => {
         const leftCost = row?.original?.user_bills?.[0]?.amount || 0;
 
         const finalCost = (fixedCost + additionalTotal) - leftCost;
-        
+
         return (
           <Typography className="capitalize" color="text.primary">
             {Number(fixedCost) + Number(additionalTotal)} {" "}
@@ -1387,13 +1403,13 @@ const ViewMaintenance = ({ open, setIsOpenDetail, selectedZone }) => {
         );
       },
     }),
-    
+
     // Bill Payment Date
     columnHelper.accessor('payment_due_date', {
       header: 'Bill Payment Date',
       cell: ({ row }) => (
         <Typography className="capitalize" color="text.primary">
-          {row.original?.user_bills?.[0]?.bill.payment_due_date || 0 || '-'}
+          {formatTimeDate(row.original?.user_bills?.[0]?.bill.payment_due_date) || 0 || '-'}
         </Typography>
       ),
     }),
@@ -1424,7 +1440,7 @@ const ViewMaintenance = ({ open, setIsOpenDetail, selectedZone }) => {
         );
       },
     }),
-    
+
     // Status
     // columnHelper.accessor('status', {
     //   header: 'Status',
@@ -1677,7 +1693,7 @@ const BillTable = ({ tableData, fetchZoneData, type }) => {
           header: "Bill Date",
           cell: ({ row }) => (
             <Typography className="capitalize" color="text.primary">
-              {row.original.bill_date}
+              {formatTimeDate(row.original.bill_date)}
             </Typography>
           ),
         })
@@ -1691,7 +1707,7 @@ const BillTable = ({ tableData, fetchZoneData, type }) => {
           header: "Bill Due Date",
           cell: ({ row }) => (
             <Typography className="capitalize" color="text.primary">
-              {row.original.bill_due_date}
+              {formatTimeDate(row.original.bill_due_date)}
             </Typography>
           ),
         })
@@ -1808,7 +1824,7 @@ const BillTable = ({ tableData, fetchZoneData, type }) => {
           header: "Bill Payment Date",
           cell: ({ row }) => (
             <Typography className="capitalize" color="text.primary">
-              {row.original.payment_due_date}
+              {formatTimeDate(row.original.payment_due_date)}
             </Typography>
           ),
         })
@@ -1820,7 +1836,7 @@ const BillTable = ({ tableData, fetchZoneData, type }) => {
           header: "Total Additional Cost",
           cell: ({ row }) => {
             const additionalCosts = row.original.additional_cost || [];
-            
+
             const total = additionalCosts.reduce(
               (sum, item) => sum + (Number(item.amount) || 0),
               0
@@ -1879,7 +1895,7 @@ const BillTable = ({ tableData, fetchZoneData, type }) => {
                 iconButtonProps={{ size: "medium" }}
                 iconClassName="text-textSecondary"
                 options={[
-                  // ✅ केवल "Edit Bill" अगर permission true है
+
                   ...(permissions?.hasBillingEditPermission
                     ? [
                       {
@@ -1897,7 +1913,6 @@ const BillTable = ({ tableData, fetchZoneData, type }) => {
                     ]
                     : []),
 
-                  // ✅ केवल "Invoice" अगर type !== maintenance और permission है
                   ...(type !== "maintenance" &&
                     permissions?.hasBillingInvoicePermission
                     ? [
@@ -1916,7 +1931,6 @@ const BillTable = ({ tableData, fetchZoneData, type }) => {
                     ]
                     : []),
 
-                  // ✅ केवल "View" अगर type === maintenance
                   ...(type === "maintenance" && permissions?.['hasBillingViewPermission']
                     ? [
                       {
@@ -1989,9 +2003,12 @@ const BillTable = ({ tableData, fetchZoneData, type }) => {
             placeholder='Search Role'
           />
           {permissions && permissions?.['hasBillingAddPermission'] && (type == 'maintenance' || type == "common-area-bill" || type == "utilityBills") && (
-            <Button variant='contained' onClick={() => {
-              setOpenDialog(true)
-            }} size='small'>
+            <Button
+              variant="contained"
+              size="small"
+              onClick={() => setOpenDialog(true)}
+              className='max-sm:is-full'
+            >
               Add Bill
             </Button>
           )}

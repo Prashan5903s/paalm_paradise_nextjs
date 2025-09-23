@@ -64,10 +64,26 @@ import DialogCloseButton from "@/components/dialogs/DialogCloseButton"
 // Filter function
 const fuzzyFilter = (row, columnId, value, addMeta) => {
     const itemRank = rankItem(row.getValue(columnId), value)
-    
+
     addMeta({ itemRank })
-    
+
     return itemRank.passed
+}
+
+function formatTimeDate(timestamp) {
+    if (!timestamp) return "";
+
+    const date = new Date(timestamp);
+
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    const seconds = String(date.getSeconds()).padStart(2, "0");
+
+    return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
 }
 
 const columnHelper = createColumnHelper()
@@ -128,7 +144,7 @@ const ComplainModal = ({ open, setIsOpen, fetchComplain }) => {
                 reset();
             } else {
                 const errorData = await response.json().catch(() => ({}));
-                
+
                 toast.error(errorData?.message || "Failed to create complain");
             }
         } catch (error) {
@@ -387,7 +403,7 @@ const BillTable = ({ value, type }) => {
             if (response.ok) {
 
                 const data = result?.data;
-                
+
                 setData(data)
             }
 
@@ -506,7 +522,7 @@ const BillTable = ({ value, type }) => {
                         5: "House Keeping / Guard",
                         6: "Others",
                     };
-                    
+
                     return (
                         <Typography className="capitalize" color="text.primary">
                             {categoryMap[row.original?.category] || "-"}
@@ -529,14 +545,14 @@ const BillTable = ({ value, type }) => {
             columnHelper.accessor("complain_status", {
                 header: "Complaint Status",
                 cell: ({ row }) => {
-                    
+
                     const statusMap = {
                         1: "Pending",
                         2: "Assigned",
                         3: "Resolved",
                         4: "In progress"
                     };
-                    
+
                     return (
                         <Typography className="capitalize" color="text.primary">
                             {statusMap[row.original?.latest_complain_user?.complaint_status] || "Pending"}
@@ -550,7 +566,7 @@ const BillTable = ({ value, type }) => {
                 header: "Created At",
                 cell: ({ row }) => (
                     <Typography className="capitalize" color="text.primary">
-                        {row.original?.created_at || "-"}
+                        {formatTimeDate(row.original?.created_at) || "-"}
                     </Typography>
                 ),
             }),

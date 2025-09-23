@@ -70,9 +70,9 @@ const Bill = ({ type }) => {
           Bills
         </Typography>
       </Grid>
-      <Grid size={{ xs: 12 }}>
+      {/* <Grid size={{ xs: 12 }}>
         <BillCards fetchZoneData={fetchZoneData} tableData={zoneData} type={type} />
-      </Grid>
+      </Grid> */}
       <Grid size={{ xs: 12 }}>
         {zoneData ? (
           <BillTable tableData={zoneData} fetchZoneData={fetchZoneData} type={type} />

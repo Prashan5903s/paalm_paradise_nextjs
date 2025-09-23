@@ -93,12 +93,28 @@ const DebouncedInput = ({ value: initialValue, onChange, debounce = 500, ...prop
 
 }
 
+function formatTimeDate(timestamp) {
+    if (!timestamp) return "";
+
+    const date = new Date(timestamp);
+
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    const seconds = String(date.getSeconds()).padStart(2, "0");
+
+    return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
+}
+
 // Filter function
 const fuzzyFilter = (row, columnId, value, addMeta) => {
     const itemRank = rankItem(row.getValue(columnId), value)
-    
+
     addMeta({ itemRank })
-    
+
     return itemRank.passed
 }
 
@@ -256,7 +272,7 @@ const VisitorModal = ({
                 onClose();
             } else {
                 const errorData = await response.json().catch(() => ({}));
-                
+
                 toast.error(errorData?.message || "Failed to add visitor");
             }
         } catch (error) {
@@ -750,7 +766,7 @@ const VisitorTable = () => {
             fetchComplain()
             fetchCreateData()
         }
-    
+
     }, [API_URL, token])
 
     const allowGateIn = async (id) => {
@@ -759,7 +775,7 @@ const VisitorTable = () => {
                 method: 'GET',
                 headers: { Authorization: `Bearer ${token}` }
             })
-            
+
             if (response.ok) {
                 toast.success('Visitor allowed successfully', { autoClose: 1000 })
                 fetchComplain()
@@ -774,13 +790,13 @@ const VisitorTable = () => {
         return data.filter((row) => {
             const otpMatch =
                 row?.otp?.toString().includes(globalFilter) || globalFilter === ''
-            
-                const nameNoMatch =
+
+            const nameNoMatch =
                 row?.visitor_name?.toLowerCase().includes(nameNo.toLowerCase()) ||
                 row?.visitor_contact_no?.toString()?.includes(nameNo) ||
                 nameNo === ''
 
-                const categoryMap = {
+            const categoryMap = {
                 '1': 'Allow kids',
                 '2': 'Courier',
                 '3': 'Driver',
@@ -792,7 +808,7 @@ const VisitorTable = () => {
 
             const categoryName = categoryMap[row.category] || ''
             const categoryMatch = !category || categoryName === category
-          
+
             return otpMatch && nameNoMatch && categoryMatch
         })
     }, [data, globalFilter, nameNo, category])
@@ -904,7 +920,7 @@ const VisitorTable = () => {
             }),
             columnHelper.accessor('created_at', {
                 header: 'Created At',
-                cell: ({ row }) => <Typography>{row.original.created_at || '-'}</Typography>
+                cell: ({ row }) => <Typography>{formatTimeDate(row.original.created_at) || '-'}</Typography>
             }),
             columnHelper.display({
                 id: 'action',
