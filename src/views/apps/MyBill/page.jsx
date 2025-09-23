@@ -97,11 +97,9 @@ const BillTable = ({ tableData, value, type }) => {
             let processedData = tableData;
 
             if (type === "maintenance") {
-
                 const grouped = {};
 
                 tableData?.userBill?.forEach((row) => {
-
                     const billId = row?.bill_id?._id;
                     const apartmentId = row?.apartment_id?._id;
                     const key = `${billId}-${apartmentId}`;
@@ -116,15 +114,11 @@ const BillTable = ({ tableData, value, type }) => {
                     }
 
                     // total_cost calculation
-                    
                     const additionalCost = row?.bill_id?.additional_cost || [];
-                    
                     const apartmentTypeRaw = row?.apartment_id?.apartment_type || "";
-                    
                     const apartmentType = apartmentTypeRaw.replace(/[^\d]/g, "");
-                    
                     const fixedCost = fixedCostMap.get(apartmentType) || 0;
-                    
+
                     const additionalTotal = additionalCost.reduce(
                         (sum, val) => sum + (val.amount || 0),
                         0
@@ -145,10 +139,23 @@ const BillTable = ({ tableData, value, type }) => {
                 processedData = Object.values(grouped);
             }
 
+            // 🔹 filter logic based on "value"
+            let finalData = processedData;
+            
+            if (type === "maintenance") {
+                if (value === true) {
+                    finalData = processedData.filter(
+                        (row) => row.paid_cost === row.total_cost
+                    );
+                } else if (value === false) {
+                    finalData = processedData.filter(
+                        (row) => row.paid_cost !== row.total_cost
+                    );
+                }
+            }
 
             setData(tableData);
-
-            setFilteredData(processedData);
+            setFilteredData(finalData);
         }
     }, [tableData, type, value, fixedCostMap]);
 
