@@ -61,6 +61,8 @@ import CustomTextField from "@/@core/components/mui/TextField"
 
 import DialogCloseButton from "@/components/dialogs/DialogCloseButton"
 
+import FormatTime from '@/utils/formatTime';
+
 // Filter function
 const fuzzyFilter = (row, columnId, value, addMeta) => {
     const itemRank = rankItem(row.getValue(columnId), value)
@@ -68,22 +70,6 @@ const fuzzyFilter = (row, columnId, value, addMeta) => {
     addMeta({ itemRank })
 
     return itemRank.passed
-}
-
-function formatTimeDate(timestamp) {
-    if (!timestamp) return "";
-
-    const date = new Date(timestamp);
-
-    const day = String(date.getDate()).padStart(2, "0");
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const year = date.getFullYear();
-
-    const hours = String(date.getHours()).padStart(2, "0");
-    const minutes = String(date.getMinutes()).padStart(2, "0");
-    const seconds = String(date.getSeconds()).padStart(2, "0");
-
-    return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
 }
 
 const columnHelper = createColumnHelper()
@@ -566,7 +552,7 @@ const BillTable = ({ value, type }) => {
                 header: "Created At",
                 cell: ({ row }) => (
                     <Typography className="capitalize" color="text.primary">
-                        {formatTimeDate(row.original?.created_at) || "-"}
+                        {FormatTime(row.original?.created_at) || "-"}
                     </Typography>
                 ),
             }),

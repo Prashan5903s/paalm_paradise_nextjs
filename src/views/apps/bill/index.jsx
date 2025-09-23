@@ -14,8 +14,6 @@ import Grid from '@mui/material/Grid2'
 
 import BillTable from './BillTable'
 
-import BillCards from './BillCards'
-
 import SkeletonTableComponent from '@/components/skeleton/table/page'
 
 const Bill = ({ type }) => {

@@ -69,6 +69,8 @@ import DialogCloseButton from '@/components/dialogs/DialogCloseButton'
 
 import Logo from '@components/layout/shared/Logo'
 
+import FormatTime from '@/utils/formatTime';
+
 // Filter function
 const fuzzyFilter = (row, columnId, value, addMeta) => {
   const itemRank = rankItem(row.getValue(columnId), value)
@@ -76,22 +78,6 @@ const fuzzyFilter = (row, columnId, value, addMeta) => {
   addMeta({ itemRank })
 
   return itemRank.passed
-}
-
-function formatTimeDate(timestamp) {
-  if (!timestamp) return "";
-
-  const date = new Date(timestamp);
-
-  const day = String(date.getDate()).padStart(2, "0");
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const year = date.getFullYear();
-
-  const hours = String(date.getHours()).padStart(2, "0");
-  const minutes = String(date.getMinutes()).padStart(2, "0");
-  const seconds = String(date.getSeconds()).padStart(2, "0");
-
-  return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
 }
 
 // Debounced Input
@@ -1409,7 +1395,7 @@ const ViewMaintenance = ({ open, setIsOpenDetail, selectedZone }) => {
       header: 'Bill Payment Date',
       cell: ({ row }) => (
         <Typography className="capitalize" color="text.primary">
-          {formatTimeDate(row.original?.user_bills?.[0]?.bill.payment_due_date) || 0 || '-'}
+          {FormatTime(row.original?.user_bills?.[0]?.bill.payment_due_date) || 0 || '-'}
         </Typography>
       ),
     }),
@@ -1693,7 +1679,7 @@ const BillTable = ({ tableData, fetchZoneData, type }) => {
           header: "Bill Date",
           cell: ({ row }) => (
             <Typography className="capitalize" color="text.primary">
-              {formatTimeDate(row.original.bill_date)}
+              {FormatTime(row.original.bill_date)}
             </Typography>
           ),
         })
@@ -1707,7 +1693,7 @@ const BillTable = ({ tableData, fetchZoneData, type }) => {
           header: "Bill Due Date",
           cell: ({ row }) => (
             <Typography className="capitalize" color="text.primary">
-              {formatTimeDate(row.original.bill_due_date)}
+              {FormatTime(row.original.bill_due_date)}
             </Typography>
           ),
         })
@@ -1824,7 +1810,7 @@ const BillTable = ({ tableData, fetchZoneData, type }) => {
           header: "Bill Payment Date",
           cell: ({ row }) => (
             <Typography className="capitalize" color="text.primary">
-              {formatTimeDate(row.original.payment_due_date)}
+              {FormatTime(row.original.payment_due_date)}
             </Typography>
           ),
         })

@@ -38,6 +38,8 @@ import CustomTextField from "@/@core/components/mui/TextField"
 
 import tableStyles from '@core/styles/table.module.css'
 
+import FormatTime from '@/utils/formatTime';
+
 // Filter function
 const fuzzyFilter = (row, columnId, value, addMeta) => {
     const itemRank = rankItem(row.getValue(columnId), value)
@@ -66,22 +68,6 @@ const DebouncedInput = ({ value: initialValue, onChange, debounce = 500, ...prop
 
     return <CustomTextField {...props} value={value} onChange={e => setValue(e.target.value)} />
 
-}
-
-function formatTimeDate(timestamp) {
-    if (!timestamp) return "";
-
-    const date = new Date(timestamp);
-
-    const day = String(date.getDate()).padStart(2, "0");
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const year = date.getFullYear();
-
-    const hours = String(date.getHours()).padStart(2, "0");
-    const minutes = String(date.getMinutes()).padStart(2, "0");
-    const seconds = String(date.getSeconds()).padStart(2, "0");
-
-    return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
 }
 
 const columnHelper = createColumnHelper()
@@ -194,7 +180,7 @@ const BillTable = ({ tableData, value, type }) => {
                     header: "Bill Date",
                     cell: ({ row }) => (
                         <Typography className="capitalize" color="text.primary">
-                            {formatTimeDate(row.original.bill_date)}
+                            {FormatTime(row.original.bill_date)}
                         </Typography>
                     ),
                 })
@@ -208,7 +194,7 @@ const BillTable = ({ tableData, value, type }) => {
                     header: "Bill Due Date",
                     cell: ({ row }) => (
                         <Typography className="capitalize" color="text.primary">
-                            {formatTimeDate(row.original.bill_due_date)}
+                            {FormatTime(row.original.bill_due_date)}
                         </Typography>
                     ),
                 })
@@ -367,7 +353,7 @@ const BillTable = ({ tableData, value, type }) => {
                     header: 'Bill Payment Date',
                     cell: ({ row }) => (
                         <Typography className="capitalize" color="text.primary">
-                            {formatTimeDate(row.original?.bill_id.payment_due_date) || 0 || '-'}
+                            {FormatTime(row.original?.bill_id.payment_due_date) || 0 || '-'}
                         </Typography>
                     ),
                 }),
