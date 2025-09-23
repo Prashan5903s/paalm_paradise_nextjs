@@ -130,25 +130,25 @@ const VerticalMenu = ({ dictionary, scrollMenu }) => {
           {permissArray?.isUser && (
             <>
               {permissArray?.isUser && permissArray?.hasBillingPermission && (
-                <SubMenu label={"Bill"} icon={<i className='tabler-receipt' />}>
+                <SubMenu label={"Bills"} icon={<i className='tabler-receipt' />}>
                   <MenuItem href={`/${locale}/apps/my-bill/utilityBills`}>{"Utility Bills"}</MenuItem>
                   <MenuItem href={`/${locale}/apps/my-bill/common-area-bill`}>{"Comman Area Bill"}</MenuItem>
                   <MenuItem href={`/${locale}/apps/my-bill/maintenance`}>{"Maintenance"}</MenuItem>
                 </SubMenu>
               )}
 
-              {permissArray?.isUser && (
+              {permissArray?.isUser && permissArray?.['hasComplainPermission'] && (
                 <MenuItem key="Complain" href={`/${locale}/apps/my-complain`}>
                   <i className="tabler-report" style={{ marginRight: 8, fontSize: '1.2rem' }} />
-                  Complain
+                  Complains
                 </MenuItem>
               )}
 
 
-              {permissArray?.isUser && (
+              {permissArray?.isUser && permissArray?.['hasTicketPermission'] && (
                 <MenuItem key="Complain resolved" href={`/${locale}/apps/ticket`}>
                   <i className="tabler-ticket" style={{ marginRight: 8, fontSize: '1.2rem' }} />
-                  Ticket
+                  Tickets
                 </MenuItem>
               )}
 
@@ -176,33 +176,33 @@ const VerticalMenu = ({ dictionary, scrollMenu }) => {
             <SubMenu label={"Apartments"} icon={<i className="tabler-building" />}>
               {permissArray && permissArray?.['hasTowerPermission'] && (
                 <MenuItem href={`/${locale}/apps/tower`}>
-                  Tower
+                  Towers
                 </MenuItem>
               )}
               {permissArray && permissArray?.['hasFloorPermission'] && (
                 <MenuItem href={`/${locale}/apps/floor`}>
-                  Floor
+                  Floors
                 </MenuItem>
               )}
               {permissArray && permissArray?.['hasApartmentPermission'] && (
                 <MenuItem href={`/${locale}/apps/apartment`}>
-                  Apartment
+                  Apartments
                 </MenuItem>
               )}
             </SubMenu>
           )}
           {permissArray?.isSuperAdmin && (
-            <SubMenu label={"Company"} icon={<i className='tabler-user' />}>
-              <MenuItem href={`/${locale}/apps/company/list`}>List</MenuItem>
+            <SubMenu label={"Society"} icon={<i className='tabler-user' />}>
+              <MenuItem href={`/${locale}/apps/society/list`}>List</MenuItem>
             </SubMenu>
           )}
           {permissArray?.isCompany && permissArray?.['hasUserPermission'] && (
-            <SubMenu label={"User list"} icon={<i className='tabler-user' />}>
-              <MenuItem href={`/${locale}/apps/user/list`}>{"List"}</MenuItem>
+            <SubMenu label={"Users list"} icon={<i className='tabler-user' />}>
+              <MenuItem href={`/${locale}/apps/user/list`}>{"View Users"}</MenuItem>
             </SubMenu>
           )}
           {permissArray?.isCompany && permissArray?.hasBillingPermission && (
-            <SubMenu label={"Bill"} icon={<i className='tabler-receipt' />}>
+            <SubMenu label={"Bills"} icon={<i className='tabler-receipt' />}>
               <MenuItem href={`/${locale}/apps/bill/utilityBills`}>{"Utility Bills"}</MenuItem>
               <MenuItem href={`/${locale}/apps/bill/common-area-bill`}>{"Comman Area Bill"}</MenuItem>
               <MenuItem href={`/${locale}/apps/bill/maintenance`}>{"Maintenance"}</MenuItem>
@@ -213,23 +213,6 @@ const VerticalMenu = ({ dictionary, scrollMenu }) => {
               <i className="tabler-report" style={{ marginRight: 8, fontSize: '1.2rem' }} />
               Complain
             </MenuItem>
-          )}
-          {((permissArray?.isCompany && permissArray?.hasLabelPermission) || permissArray?.isSuperAdmin) && (
-            <SubMenu label="Settings" icon={<i className="tabler-settings" />}>
-              {permissArray?.isSuperAdmin && (
-                [
-                  <MenuItem key="language" href={`/${locale}/apps/language`}>Language</MenuItem>,
-                  <MenuItem key="terminology" href={`/${locale}/apps/terminology`}>Terminology</MenuItem>,
-                  <MenuItem key="notification_templates" href={`/${locale}/apps/admin/notification`}>Notification</MenuItem>
-                ]
-              )}
-              {permissArray?.isCompany && permissArray?.hasLabelPermission && (
-                <MenuItem href={`/${locale}/apps/label`}>Label</MenuItem>
-              )}
-              {permissArray?.isCompany && (
-                <MenuItem href={`/${locale}/apps/notification`}>Notification</MenuItem>
-              )}
-            </SubMenu>
           )}
         </MenuSection>
       </Menu>

@@ -149,7 +149,7 @@ const UserListTable = ({ userData }) => {
         )
       },
       columnHelper.accessor('first_name', {
-        header: 'User',
+        header: 'Society',
         cell: ({ row }) => (
           <div className='flex items-center gap-4'>
             {getAvatar({ avatar: row.original.photo, fullName: row.original.first_name + " " + row.original.last_name })}
@@ -162,29 +162,6 @@ const UserListTable = ({ userData }) => {
           </div>
         )
       }),
-
-      // columnHelper.accessor('role', {
-      //   header: 'Role',
-      //   cell: ({ row }) => (
-      //     <div className='flex items-center gap-2'>
-      //       <Icon
-      //         className={userRoleObj[row.original.role].icon}
-      //         sx={{ color: `var(--mui-palette-${userRoleObj[row.original.role].color}-main)` }}
-      //       />
-      //       <Typography className='capitalize' color='text.primary'>
-      //         {row.original.role}
-      //       </Typography>
-      //     </div>
-      //   )
-      // }),
-      // columnHelper.accessor('currentPlan', {
-      //   header: 'Plan',
-      //   cell: ({ row }) => (
-      //     <Typography className='capitalize' color='text.primary'>
-      //       {row.original.currentPlan}
-      //     </Typography>
-      //   )
-      // }),
       columnHelper.accessor('company_name', {
         header: 'Company Name',
         cell: ({ row }) => <Typography>{row.original.company_name}</Typography>
@@ -215,30 +192,17 @@ const UserListTable = ({ userData }) => {
         header: 'Action',
         cell: ({ row }) => (
           <div className='flex items-center'>
-            <IconButton onClick={() => setData(data?.filter(product => product.id !== row.original.id))}>
-              <i className='tabler-trash text-textSecondary' />
-            </IconButton>
-            <IconButton>
-              <Link href={getLocalizedUrl('/apps/company/view', locale)} className='flex'>
-                <i className='tabler-eye text-textSecondary' />
-              </Link>
-            </IconButton>
             <OptionMenu
               iconButtonProps={{ size: 'medium' }}
               iconClassName='text-textSecondary'
               options={[
-                {
-                  text: 'Download',
-                  icon: 'tabler-download',
-                  menuItemProps: { className: 'flex items-center gap-2 text-textSecondary' }
-                },
                 {
                   text: 'Edit',
                   icon: 'tabler-edit',
                   menuItemProps: {
                     className: 'flex items-center gap-2 text-textSecondary',
                     onClick: (() => {
-                      router.push(`/${locale}/apps/company/form/${row.original._id}`)
+                      router.push(`/${locale}/apps/society/form/${row.original._id}`)
                     })
                   }
                 }
@@ -295,8 +259,6 @@ const UserListTable = ({ userData }) => {
   return (
     <>
       <Card>
-        <CardHeader title='Filters' className='pbe-4' />
-        <TableFilters setData={setFilteredData} tableData={data} />
         <div className='flex justify-between flex-col items-start md:flex-row md:items-center p-6 border-bs gap-4'>
           <CustomTextField
             select
@@ -312,24 +274,16 @@ const UserListTable = ({ userData }) => {
             <DebouncedInput
               value={globalFilter ?? ''}
               onChange={value => setGlobalFilter(String(value))}
-              placeholder='Search User'
+              placeholder='Search Society'
               className='max-sm:is-full'
             />
             <Button
-              color='secondary'
-              variant='tonal'
-              startIcon={<i className='tabler-upload' />}
-              className='max-sm:is-full'
-            >
-              Export
-            </Button>
-            <Button
               variant='contained'
               startIcon={<i className='tabler-plus' />}
-              onClick={() => router.push(`/${locale}/apps/company/form`)}
+              onClick={() => router.push(`/${locale}/apps/society/form`)}
               className='max-sm:is-full'
             >
-              Add New Company
+              Add New Society
             </Button>
 
           </div>

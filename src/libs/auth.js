@@ -23,42 +23,47 @@ export const authOptions = {
        * username or password attributes manually in following credentials object.
        */
       credentials: {},
+
       async authorize(credentials) {
-        /*
-         * You need to provide your own logic here that takes the credentials submitted and returns either
-         * an object representing a user or value that is false/null if the credentials are invalid.
-         * For e.g. return { id: 1, name: 'J Smith', email: 'jsmith@example.com' }
-         * You can also use the `req` object to obtain additional parameters (i.e., the request IP address)
-         */
-        const { email, password } = credentials
+        
+        const { email, password } = credentials;
 
         try {
-          // ** Login API Call to match the user credentials and receive user data in response along with his role
+        
           const res = await fetch(`${process.env.API_URL}/auth/login`, {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password })
-          })
+          });
 
-          const data = await res.json()
-
-
-          
+          const data = await res.json();
 
           if (!res.ok) {
-
-            throw new Error(JSON.stringify(data?.message))
-
-          } else {
-
-            return data
+        
+            console.log('Invalid login:', data?.message);
+        
+            return null;
           }
-        } catch (e) {
-          throw new Error(e.message)
+
+          // Return user object
+          return {
+            name: data.name,
+            email: data.email,
+            token: data.token,
+            userId: data.userId,
+            expiresAt: data.expiresAt
+          };
+
+        } catch (err) {
+        
+          console.error('Authorize error:', err);
+
+          return null; // prevents redirect
+        
         }
       }
+
+
     }),
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID,

@@ -112,8 +112,8 @@ const Login = ({ mode }) => {
   } = useForm({
     resolver: valibotResolver(schema),
     defaultValues: {
-      email: 'email@dw.com',
-      password: 'emailDW'
+      email: '',
+      password: ''
     }
   })
 
@@ -127,43 +127,36 @@ const Login = ({ mode }) => {
 
   const handleClickShowPassword = () => setIsPasswordShown(show => !show)
 
-  const onSubmit = async data => {
-    setLoading(true)
-    setErrorState(null)
+  const onSubmit = async (data) => {
 
-    try {
-      const res = await signIn('credentials', {
-        email: data.email,
-        password: data.password,
-        redirect: false
-      })
+    setLoading(true);
+    
+    setErrorState(null);
 
-      console.log("Res", res);
+    const res = await signIn('credentials', {
+      email: data.email,
+      password: data.password,
+      redirect: false
+    });
 
-      setLoading(false)
+    setLoading(false);
 
-      if (res && res?.ok && !res.error) {
+    if (res?.error) {
 
-        const redirectURL = searchParams.get('redirectTo') ?? '/'
+      setErrorState(res.error);
 
+      return;
 
-        router.replace(getLocalizedUrl(redirectURL, locale))
-
-      } else {
-
-        // Do not edit this code
-        const message = JSON.parse(res?.error) || 'Login failed. Please try again.'
-
-        setErrorState(message)
-        console.log('Login error:', message)
-      }
-    } catch (err) {
-      setLoading(false)
-      setErrorState({ message: 'Something went wrong. Please try again.' })
-      console.error('Unexpected error:', err)
     }
-  }
 
+    if (res?.ok) {
+
+      const redirectURL = searchParams.get('redirectTo') ?? '/';
+
+      router.replace(getLocalizedUrl(redirectURL, locale));
+
+    }
+  };
 
   return (
     <div className='flex bs-full justify-center'>
@@ -259,17 +252,7 @@ const Login = ({ mode }) => {
                 />
               )}
             />
-            <div className='flex justify-between items-center gap-x-3 gap-y-1 flex-wrap'>
-              <FormControlLabel control={<Checkbox defaultChecked />} label='Remember me' />
-              <Typography
-                className='text-end'
-                color='primary.main'
-                component={Link}
-                href={getLocalizedUrl('/forgot-password', locale)}
-              >
-                Forgot password?
-              </Typography>
-            </div>
+            
             <Button
               fullWidth
               variant="contained"
@@ -292,22 +275,6 @@ const Login = ({ mode }) => {
               ) : (
                 'Login'
               )}
-            </Button>
-            <div className='flex justify-center items-center flex-wrap gap-2'>
-              <Typography>New on our platform?</Typography>
-              <Typography component={Link} href={getLocalizedUrl('/register', locale)} color='primary.main'>
-                Create an account
-              </Typography>
-            </div>
-            <Divider className='gap-2'>or</Divider>
-            <Button
-              color='secondary'
-              className='self-center text-textPrimary'
-              startIcon={<img src='/images/logos/google.png' alt='Google' width={22} />}
-              sx={{ '& .MuiButton-startIcon': { marginInlineEnd: 3 } }}
-              onClick={() => signIn('google')}
-            >
-              Sign in with Google
             </Button>
           </form>
         </div>

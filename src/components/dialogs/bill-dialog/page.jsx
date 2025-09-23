@@ -263,6 +263,10 @@ const BillDialog = ({ open, setOpen, selectedZone, fetchZoneData, type }) => {
                 const result = await response.json()
 
                 if (response.ok && !ignore) {
+
+                    console.log("Result", result?.data);
+                    
+
                     setCreateData(result?.data || { apartment: [], billType: [] })
                 }
             } catch (error) {

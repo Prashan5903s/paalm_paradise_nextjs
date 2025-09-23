@@ -67,7 +67,7 @@ const Bill = ({ type }) => {
     <Grid container spacing={6}>
       <Grid size={{ xs: 12 }}>
         <Typography variant='h4' className='mbe-1'>
-          Bill List
+          Bills
         </Typography>
       </Grid>
       <Grid size={{ xs: 12 }}>

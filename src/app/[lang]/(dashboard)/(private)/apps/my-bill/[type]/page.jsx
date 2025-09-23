@@ -12,7 +12,7 @@ const BillType = () => {
 
     return (
         <>
-            <PermissionGuard locale={locale} element="isCompany">
+            <PermissionGuard locale={locale} element="hasBillingPermission">
                 <Bill type={type} />
             </PermissionGuard>
         </>

@@ -11,7 +11,7 @@ const MyComplainPage = () => {
 
     return (
         <>
-            <PermissionGuard locale={locale} element="isCompany">
+            <PermissionGuard locale={locale} element="hasComplainPermission">
                 <Complain type={type} />
             </PermissionGuard>
         </>

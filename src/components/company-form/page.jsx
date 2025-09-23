@@ -394,7 +394,7 @@ const UserFormLayout = () => {
 
       if (response.ok) {
         router.push(`/${locale}/apps/company/list`)
-        toast.success(`Company ${id ? "updated" : "added"} successfully!`, {
+        toast.success(`Society ${id ? "updated" : "added"} successfully!`, {
           autoClose: 700, // in milliseconds
         });
       } else {
@@ -501,7 +501,7 @@ const UserFormLayout = () => {
     <PermissionGuard locale={locale} element={'isSuperAdmin'}>
 
       <Card>
-        <CardHeader title='Company Form' />
+        <CardHeader title={id ? "Add new society" : "Edit society"} />
         <Divider />
         <form onSubmit={handleSubmit(onSubmit)} noValidate encType="multipart/form-data">
           <CardContent>
@@ -973,7 +973,7 @@ const UserFormLayout = () => {
           <Divider />
           <CardActions>
             <Button variant="contained" type="submit">Submit</Button>
-            <Button variant="tonal" color="error" type="reset" onClick={() => router.push(`/${locale}/apps/company/list`)}>
+            <Button variant="tonal" color="error" type="reset" onClick={() => router.push(`/${locale}/apps/society/list`)}>
               Cancel
             </Button>
           </CardActions>

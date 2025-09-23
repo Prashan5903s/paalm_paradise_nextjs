@@ -12,7 +12,7 @@ const MyComplainResolvedDashboard = () => {
 
     return (
         <>
-            <PermissionGuard locale={locale} element="isCompany">
+            <PermissionGuard locale={locale} element="hasTicketPermission">
                 <Complain type={type} />
             </PermissionGuard>
         </>

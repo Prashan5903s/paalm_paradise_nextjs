@@ -287,26 +287,6 @@ const UserListTable = ({ userData, loadData, setIsUserCardShow, getStatsCount })
                 },
               },
             },
-            {
-              text: "Manage employee ID",
-              icon: "tabler-user",
-              menuItemProps: {
-                className: "flex items-center gap-2 text-textSecondary",
-                onClick: () => {
-                  handleManageEmpDialog(row.original);
-                },
-              },
-            },
-            {
-              text: "Delete account",
-              icon: "tabler-trash",
-              menuItemProps: {
-                className: "flex items-center gap-2 text-textSecondary",
-                onClick: () => {
-                  openDeleteDialogHandle(row.original);
-                },
-              },
-            },
           ];
 
           return (
