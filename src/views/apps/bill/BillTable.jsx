@@ -1811,7 +1811,7 @@ const BillTable = ({ tableData, fetchZoneData, type }) => {
           header: "Bill Payment Date",
           cell: ({ row }) => (
             <Typography className="capitalize" color="text.primary">
-              {FormatTime(row.original.payment_due_date)}
+              {row.original.payment_due_date ? FormatTime(row.original.payment_due_date) : ""}
             </Typography>
           ),
         })

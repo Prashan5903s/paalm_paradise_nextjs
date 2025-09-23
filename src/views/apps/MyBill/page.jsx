@@ -94,29 +94,56 @@ const BillTable = ({ tableData, value, type }) => {
 
     useEffect(() => {
         if (tableData) {
+            let processedData = tableData;
 
-            console.log("Table data", tableData?.userBill);
+            if (type === "maintenance") {
+
+                const grouped = {};
+
+                tableData?.userBill?.forEach((row) => {
+
+                    const billId = row?.bill_id?._id;
+                    const apartmentId = row?.apartment_id?._id;
+                    const key = `${billId}-${apartmentId}`;
+
+                    if (!grouped[key]) {
+                        grouped[key] = {
+                            ...row,
+                            paid_cost: 0,
+                            total_cost: 0,
+                            status: "Unpaid",
+                        };
+                    }
+
+                    // total_cost calculation
+                    const additionalCost = row?.bill_id?.additional_cost || [];
+                    const apartmentTypeRaw = row?.apartment_id?.apartment_type || "";
+                    const apartmentType = apartmentTypeRaw.replace(/[^\d]/g, "");
+                    const fixedCost = fixedCostMap.get(apartmentType) || 0;
+                    const additionalTotal = additionalCost.reduce(
+                        (sum, val) => sum + (val.amount || 0),
+                        0
+                    );
+
+                    grouped[key].total_cost = fixedCost + additionalTotal;
+
+                    // sum paid cost
+                    grouped[key].paid_cost += Number(row?.amount) || 0;
+
+                    // status
+                    grouped[key].status =
+                        grouped[key].paid_cost >= grouped[key].total_cost
+                            ? "Paid"
+                            : "Unpaid";
+                });
+
+                processedData = Object.values(grouped);
+            }
+
 
             setData(tableData);
 
-            if (type === "maintenance") {
-                const filtered = tableData?.userBill?.filter(row => {
-                    const additionalCost = row?.bill_id?.additional_cost || [];
-                    const apartmentTypeRaw = row?.apartment_id?.apartment_type || '';
-                    const apartmentType = apartmentTypeRaw.replace(/[^\d]/g, '');
-                    const fixedCost = fixedCostMap.get(apartmentType) || 0;
-                    const additionalTotal = additionalCost.reduce((sum, val) => sum + (val.amount || 0), 0);
-
-                    const leftCost = row?.amount || 0;
-                    const finalCost = (fixedCost + additionalTotal);
-
-                    return value ? leftCost === finalCost : leftCost !== finalCost;
-                }) || [];
-
-                setFilteredData(filtered);
-            } else {
-                setFilteredData(tableData);
-            }
+            setFilteredData(processedData);
         }
     }, [tableData, type, value, fixedCostMap]);
 
@@ -213,8 +240,6 @@ const BillTable = ({ tableData, value, type }) => {
                                 0
                             ) || 0;
 
-                        const remaining = row.original.bill_amount - totalPaid;
-
                         return (
                             <Typography className="capitalize" color="text.primary">
                                 {row.original.bill_amount}
@@ -309,19 +334,12 @@ const BillTable = ({ tableData, value, type }) => {
                 columnHelper.accessor('total_cost', {
                     header: 'Total cost',
                     cell: ({ row }) => {
-                        const additionalCost = row.original?.bill_id?.additional_cost || [];
-                        const apartmentTypeRaw = row.original?.apartment_id.apartment_type || '';
-                        const apartmentType = apartmentTypeRaw.replace(/[^\d]/g, '');
-                        const fixedCost = fixedCostMap.get(apartmentType) || 0;
-                        const additionalTotal = additionalCost.reduce((sum, val) => sum + (val.amount || 0), 0);
 
-                        const leftCost = row?.original?.amount || 0;
-
-                        const finalCost = (fixedCost + additionalTotal) - leftCost;
+                        const leftCost = row?.original?.total_cost || 0;
 
                         return (
                             <Typography className="capitalize" color="text.primary">
-                                {Number(fixedCost) + Number(additionalTotal)} {" "}
+                                {leftCost}
                             </Typography>
                         );
                     },
@@ -334,7 +352,7 @@ const BillTable = ({ tableData, value, type }) => {
                     header: 'Paid cost',
                     cell: ({ row }) => {
 
-                        const leftCost = row.original?.amount || 0;
+                        const leftCost = row.original?.paid_cost || 0;
 
                         return (
                             <Typography className="capitalize" color="text.primary">
@@ -345,36 +363,14 @@ const BillTable = ({ tableData, value, type }) => {
                 }),
             );
             baseColumns.splice(
-                5,
-                0,
-
-                // Bill Payment Date
-                columnHelper.accessor('payment_due_date', {
-                    header: 'Bill Payment Date',
-                    cell: ({ row }) => (
-                        <Typography className="capitalize" color="text.primary">
-                            {FormatTime(row.original?.bill_id.payment_due_date) || 0 || '-'}
-                        </Typography>
-                    ),
-                }),
-            );
-            baseColumns.splice(
                 6,
                 0,
                 columnHelper.accessor('status', {
                     header: 'Status',
                     cell: ({ row }) => {
 
-
-
-                        const additionalCost = row.original?.bill_id?.additional_cost || [];
-                        const apartmentTypeRaw = row.original?.apartment_id?.apartment_type || '';
-                        const apartmentType = apartmentTypeRaw.replace(/[^\d]/g, '');
-                        const fixedCost = fixedCostMap.get(apartmentType) || 0;
-                        const additionalTotal = additionalCost.reduce((sum, val) => sum + (val.amount || 0), 0);
-
-                        const leftCost = row?.original?.amount || 0;
-                        const finalCost = (fixedCost + additionalTotal);
+                        const leftCost = row?.original?.paid_cost || 0;
+                        const finalCost = row?.original?.total_cost || 0;
 
                         return (
                             <Typography className="capitalize" component="span" color="text.primary">
