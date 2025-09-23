@@ -1273,6 +1273,7 @@ const ViewMaintenance = ({ open, setIsOpenDetail, selectedZone }) => {
       const result = await response.json();
 
       if (response.ok) {
+        console.log("Data", result?.data);
         setData(result?.data || []);
       } else {
         console.error('Fetch maintenance failed:', result);
@@ -1348,7 +1349,7 @@ const ViewMaintenance = ({ open, setIsOpenDetail, selectedZone }) => {
         const fixedCost = fixedCostMap.get(apartmentType) || 0;
         const additionalTotal = additionalCost.reduce((sum, val) => sum + (val.amount || 0), 0);
 
-        const leftCost = row?.original?.user_bills?.[0]?.amount || 0;
+        const leftCost = row.original?.user_bills?.reduce((sum, p) => sum + p.amount, 0);
 
         const finalCost = (fixedCost + additionalTotal) - leftCost;
 
@@ -1380,7 +1381,7 @@ const ViewMaintenance = ({ open, setIsOpenDetail, selectedZone }) => {
       header: 'Paid cost',
       cell: ({ row }) => {
 
-        const leftCost = row.original?.user_bills?.[0]?.amount || 0;
+        const leftCost = row.original?.user_bills?.reduce((sum, p) => sum + p.amount, 0);
 
         return (
           <Typography className="capitalize" color="text.primary">
@@ -1411,7 +1412,7 @@ const ViewMaintenance = ({ open, setIsOpenDetail, selectedZone }) => {
         const fixedCost = fixedCostMap.get(apartmentType) || 0;
         const additionalTotal = additionalCost.reduce((sum, val) => sum + (val.amount || 0), 0);
 
-        const leftCost = row?.original?.user_bills?.[0]?.amount || 0;
+        const leftCost = row.original?.user_bills?.reduce((sum, p) => sum + p.amount, 0);
         const finalCost = (fixedCost + additionalTotal);
 
         return (
