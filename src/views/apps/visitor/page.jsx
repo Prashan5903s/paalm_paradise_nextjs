@@ -296,7 +296,7 @@ const VisitorModal = ({
             >
                 <i className="tabler-x" />
             </DialogCloseButton>
-            <DialogTitle>Visitor Dialog</DialogTitle>
+            <DialogTitle>{!datass ? "Add New Visitor" : "Edit Visitor"}</DialogTitle>
 
             {/*  form wrapper */}
             <form onSubmit={handleSubmit(onSubmit)}>

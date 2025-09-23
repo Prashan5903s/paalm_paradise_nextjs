@@ -237,7 +237,7 @@ const PayModal = ({ open, data, setPayDialog, setPayData, billId, fetchZoneData 
       </DialogCloseButton>
 
       <DialogTitle variant="h4" className="text-center">
-        Pay dialog
+        Add New Payment
       </DialogTitle>
 
       <form onSubmit={handleSubmit(submitData)} method="POST" noValidate>
@@ -985,7 +985,7 @@ const PayMaintenanceModal = ({
       </DialogCloseButton>
 
       <DialogTitle variant="h4" className="text-center">
-        Pay dialog
+        Add new Payment
       </DialogTitle>
 
       <form onSubmit={handleSubmit(submitData)} method="POST" noValidate>

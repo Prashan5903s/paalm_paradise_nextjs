@@ -501,7 +501,7 @@ const UserFormLayout = () => {
     <PermissionGuard locale={locale} element={'isSuperAdmin'}>
 
       <Card>
-        <CardHeader title={id ? "Add new society" : "Edit society"} />
+        <CardHeader title={id ? "Edit society" : "Add new society"} />
         <Divider />
         <form onSubmit={handleSubmit(onSubmit)} noValidate encType="multipart/form-data">
           <CardContent>
