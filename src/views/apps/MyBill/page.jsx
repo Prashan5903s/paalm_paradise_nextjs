@@ -116,10 +116,15 @@ const BillTable = ({ tableData, value, type }) => {
                     }
 
                     // total_cost calculation
+                    
                     const additionalCost = row?.bill_id?.additional_cost || [];
+                    
                     const apartmentTypeRaw = row?.apartment_id?.apartment_type || "";
+                    
                     const apartmentType = apartmentTypeRaw.replace(/[^\d]/g, "");
+                    
                     const fixedCost = fixedCostMap.get(apartmentType) || 0;
+                    
                     const additionalTotal = additionalCost.reduce(
                         (sum, val) => sum + (val.amount || 0),
                         0
