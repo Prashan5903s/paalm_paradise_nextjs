@@ -93,19 +93,9 @@ const DebouncedInput = ({ value: initialValue, onChange, debounce = 500, ...prop
 
     return <CustomTextField {...props} value={value} onChange={e => setValue(e.target.value)} />
 
-}
-
-// Filter function
-const fuzzyFilter = (row, columnId, value, addMeta) => {
-    const itemRank = rankItem(row.getValue(columnId), value)
-
-    addMeta({ itemRank })
-
-    return itemRank.passed
-}
+}   
 
 dayjs.extend(utc);
-
 
 function formatTimeTo12Hour(timeStr) {
     if (!timeStr) return "-";
@@ -116,7 +106,6 @@ function formatTimeTo12Hour(timeStr) {
 
     return `${String(h).padStart(2, "0")}:${String(minutes).padStart(2, "0")} ${ampm}`;
 }
-
 
 const columnHelper = createColumnHelper()
 
