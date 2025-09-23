@@ -470,7 +470,7 @@ const BillTable = ({ value, type }) => {
                         }}
                         onClick={() => {
                             setCode(row.original.happy_code)
-                            setComplainId(row.original._id)
+                            setComplainId(row.original.complain_no)
                             setOpenDialog(true)
                         }}
                         onMouseEnter={(e) => {

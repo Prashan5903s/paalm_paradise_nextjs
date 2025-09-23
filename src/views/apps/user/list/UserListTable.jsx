@@ -230,14 +230,6 @@ const UserListTable = ({ userData, loadData, setIsUserCardShow, getStatsCount })
         header: 'Address',
         cell: ({ row }) => <Typography>{row.original.address}</Typography>
       }),
-      columnHelper.accessor('role', {
-        header: 'Role',
-        cell: ({ row }) => <Typography>{row.original.role}</Typography>
-      }),
-      columnHelper.accessor('emp_id', {
-        header: 'Employee ID',
-        cell: ({ row }) => <Typography>{row.original.emp_id}</Typography>
-      }),
       columnHelper.accessor('status', {
         header: 'Status',
         cell: ({ row }) => {

@@ -1986,14 +1986,15 @@ const BillTable = ({ tableData, fetchZoneData, type }) => {
             value={globalFilter ?? ''}
             className='max-sm:is-full min-is-[250px]'
             onChange={value => setGlobalFilter(String(value))}
-            placeholder='Search Role'
+            placeholder='Search Bill'
           />
           {permissions && permissions?.['hasBillingAddPermission'] && (type == 'maintenance' || type == "common-area-bill" || type == "utilityBills") && (
             <Button
               variant="contained"
               size="small"
               onClick={() => setOpenDialog(true)}
-              className='max-sm:is-full'
+              className='max-sm:is-full min-is-[250px]'
+
             >
               Add Bill
             </Button>
