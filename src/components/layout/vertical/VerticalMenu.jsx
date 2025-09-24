@@ -107,14 +107,13 @@ const VerticalMenu = ({ dictionary, scrollMenu }) => {
         <SubMenu
           label="Dashboards"
           icon={<i className='tabler-smart-home' />}
-          suffix={<CustomChip label='5' size='small' color='error' round='true' />}
         >
           {(permissArray?.notUser) && (
-            <MenuItem href={`/${locale}/dashboards/crm`}>Crm</MenuItem>
+            <MenuItem href={`/${locale}/dashboards/society`}>Society</MenuItem>
           )}
 
           {permissArray?.isUser && (
-            <MenuItem href={`/${locale}/dashboards/user/society`}>Society</MenuItem>
+            <MenuItem href={`/${locale}/dashboards/user/owner`}>Owner</MenuItem>
           )}
         </SubMenu>
         <MenuSection label="App Pages">

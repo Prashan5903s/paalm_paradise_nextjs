@@ -17,7 +17,7 @@
  */
 const themeConfig = {
   templateName: 'Society portal',
-  homePageUrl: '/dashboards/crm',
+  homePageUrl: '/dashboards/society',
   settingsCookieName: 'vuexy-mui-next-demo-1',
   mode: 'light', // 'system', 'light', 'dark'
   skin: 'default', // 'default', 'bordered'

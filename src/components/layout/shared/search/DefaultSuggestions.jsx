@@ -19,7 +19,7 @@ const defaultSuggestions = [
       },
       {
         label: 'CRM',
-        href: '/dashboards/crm',
+        href: '/dashboards/society',
         icon: 'tabler-chart-pie-2'
       },
       {

@@ -67,11 +67,11 @@ export default function PermissionGuard({ children, locale, element }) {
             if (!allowed) {
 
                    if (permissions?.isUser) {
-                         router.push(`/${locale}/dashboards/user/society`);
+                         router.push(`/${locale}/dashboards/user/owner`);
                    }
 
                    if (permissions?.notUser) {
-                        router.push(`/${locale}/dashboards/crm`);
+                        router.push(`/${locale}/dashboards/society`);
                    }
 
             } else {
