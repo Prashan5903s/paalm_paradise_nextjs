@@ -67,7 +67,7 @@ export default function PermissionGuard({ children, locale, element }) {
             if (!allowed) {
 
                    if (permissions?.isUser) {
-                         router.push(`/${locale}/dashboards/user/${'learner'}`);
+                         router.push(`/${locale}/dashboards/user/society`);
                    }
 
                    if (permissions?.notUser) {
