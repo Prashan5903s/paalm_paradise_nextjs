@@ -114,7 +114,7 @@ const VerticalMenu = ({ dictionary, scrollMenu }) => {
           )}
 
           {permissArray?.isUser && (
-            <MenuItem href={`/${locale}/dashboards/user/learner`}>Learner</MenuItem>
+            <MenuItem href={`/${locale}/dashboards/user/society`}>Society</MenuItem>
           )}
         </SubMenu>
         <MenuSection label="App Pages">
