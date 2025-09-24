@@ -37,14 +37,22 @@ const StyledCard = ({ children }) => (
 
 )
 
+function formatTimeTo12Hour(timeStr) {
+    if (!timeStr) return "-";
 
+    const [hours, minutes] = timeStr.split(":").map(Number);
+    let h = hours % 12 || 12; // 0 → 12
+    let ampm = hours >= 12 ? "PM" : "AM";
+
+    return `${String(h).padStart(2, "0")}:${String(minutes).padStart(2, "0")} ${ampm}`;
+}
 
 const UserDashboard = () => {
 
     const URL = process.env.NEXT_PUBLIC_API_URL
     const { data: session } = useSession() || {}
     const token = session?.user?.token
-    
+
     const [billData, setBillData] = useState({
         'pendingBill': 0,
         'paidBill': 0
@@ -65,7 +73,7 @@ const UserDashboard = () => {
 
             if (response.ok) {
                 const value = result?.data;
-                
+
                 setDashboardData(value)
             }
 
@@ -424,8 +432,11 @@ const UserDashboard = () => {
                                         <Typography fontWeight={600}>
                                             {val?.visitor_name}
                                         </Typography>
-                                        <Typography variant="body2" color="text.secondary">
-                                            {FormatTime(val?.created_at)}
+                                        <Typography>
+                                            {val?.check_in_date}
+                                        </Typography>
+                                        <Typography>
+                                            {formatTimeTo12Hour(val?.check_in_from_time)}-{formatTimeTo12Hour(val?.check_in_to_time)}
                                         </Typography>
                                     </Grid>
                                 </Box>
