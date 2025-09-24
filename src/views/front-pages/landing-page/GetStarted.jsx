@@ -50,7 +50,7 @@ const GetStarted = ({ mode }) => {
         </div>
         <div className='flex pbs-4 lg:pbs-[60px] md:pie-4 z-[1]'>
           <img
-            src='/images/front-pages/landing-page/crm-dashboard.png'
+            src='/images/front-pages/landing-page/society-dashboard.png'
             alt='dashboard-image'
             className='max-is-[600px] is-full rounded-bs'
           />

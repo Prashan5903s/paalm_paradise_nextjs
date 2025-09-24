@@ -153,7 +153,7 @@ const Login = ({ mode }) => {
 
       const redirectURL = searchParams.get('redirectTo') ?? '/';
 
-      router.replace(getLocalizedUrl(redirectURL, locale));
+      router.replace(`/${locale}/dashboards/society`);
 
     }
   };

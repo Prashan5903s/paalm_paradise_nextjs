@@ -20,7 +20,7 @@ const noResultData = [
     icon: 'tabler-user'
   },
   {
-    label: 'CRM',
+    label: 'Society',
     href: '/dashboards/society',
     icon: 'tabler-chart-donut-3'
   }

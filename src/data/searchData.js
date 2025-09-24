@@ -1,7 +1,7 @@
 const data = [
   {
     id: '1',
-    name: 'CRM Dashboard',
+    name: 'Society Dashboard',
     url: '/dashboards/society',
     icon: 'tabler-chart-pie-2',
     section: 'Dashboards'

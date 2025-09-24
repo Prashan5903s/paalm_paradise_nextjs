@@ -18,7 +18,7 @@ const defaultSuggestions = [
         icon: 'tabler-trending-up'
       },
       {
-        label: 'CRM',
+        label: 'Society',
         href: '/dashboards/society',
         icon: 'tabler-chart-pie-2'
       },

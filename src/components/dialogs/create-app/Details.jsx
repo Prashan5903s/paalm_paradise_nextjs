@@ -16,7 +16,7 @@ import themeConfig from '@configs/themeConfig'
 
 const Details = ({ activeStep, isLastStep, handleNext, handlePrev }) => {
   // States
-  const [value, setValue] = useState('crm')
+  const [value, setValue] = useState('society')
 
   const handleChange = event => {
     setValue(event.target.value)
@@ -27,19 +27,19 @@ const Details = ({ activeStep, isLastStep, handleNext, handlePrev }) => {
       <CustomTextField fullWidth label='Application Name' placeholder={`${themeConfig.templateName}`} />
       <div className='flex flex-col gap-4'>
         <Typography variant='h5'>Category</Typography>
-        <div onClick={() => setValue('crm')} className='flex items-center justify-between cursor-pointer gap-4'>
+        <div onClick={() => setValue('society')} className='flex items-center justify-between cursor-pointer gap-4'>
           <div className='flex items-center gap-3'>
             <CustomAvatar skin='light' color='info' variant='rounded' size={46}>
               <i className='tabler-file-text text-3xl' />
             </CustomAvatar>
             <div className='flex flex-col gap-1'>
               <Typography color='text.primary' className='font-medium'>
-                CRM Application
+                society Application
               </Typography>
               <Typography variant='body2'>Scales with any business</Typography>
             </div>
           </div>
-          <Radio value='crm' onChange={handleChange} checked={value === 'crm'} />
+          <Radio value='society' onChange={handleChange} checked={value === 'society'} />
         </div>
         <div onClick={() => setValue('eCommerce')} className='flex items-center justify-between cursor-pointer gap-4'>
           <div className='flex items-center gap-3'>

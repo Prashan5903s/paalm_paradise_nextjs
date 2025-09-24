@@ -6,7 +6,7 @@ const horizontalMenuData = dictionary => [
     children: [
       // This is how you will normally render menu item
       {
-        label: dictionary['navigation'].crm,
+        label: "Society",
         icon: 'tabler-chart-pie-2',
         href: '/dashboards/society'
       },
