@@ -56,7 +56,7 @@ export default async function PermissionGuardServer({
             !allowedPermissions.includes(listingId))
     ) {
         if (permissions?.isUser) {
-            redirect(`/${locale}/dashboards/user/learner`)
+            redirect(`/${locale}/dashboards/user/society`)
         }
 
         if (permissions?.notUser) {
