@@ -1,14 +1,22 @@
 "use client"
 
-// MUI Imports
+import { useEffect, useState, useMemo } from 'react'
+
+import { useSession } from 'next-auth/react'
+
 import Grid from '@mui/material/Grid2'
-import Card from '@mui/material/Card'
-import CardContent from '@mui/material/CardContent'
-import Typography from '@mui/material/Typography'
-import Divider from '@mui/material/Divider'
-import Box from '@mui/material/Box'
-import Chip from '@mui/material/Chip'
-import Avatar from '@mui/material/Avatar'
+import {
+    Card,
+    CardContent,
+    Typography,
+    Divider,
+    Box,
+    Chip,
+    Avatar,
+    Skeleton
+} from '@mui/material'
+
+import FormatTime from '@/utils/formatTime'
 
 import LogisticsStatisticsCard from '@/views/pages/widget-examples/statistics/LogisticsStatisticsCard'
 
@@ -29,52 +37,256 @@ const StyledCard = ({ children }) => (
 
 )
 
-const data = [
-    {
-        title: 'Open complain',
-        stats: 42,
-        trendNumber: 18.2,
-        avatarIcon: 'tabler-report',
-        color: 'primary'
-    },
-    {
-        title: 'Resolved complain',
-        stats: 8,
-        trendNumber: -8.7,
-        avatarIcon: 'tabler-checklist',
-        color: 'success'
-    },
-    {
-        title: 'Unpaid bill',
-        stats: 27,
-        trendNumber: 4.3,
-        avatarIcon: 'tabler-receipt',
-        color: 'error'
-    },
-    {
-        title: 'Paid bill',
-        stats: 13,
-        trendNumber: 2.5,
-        avatarIcon: 'tabler-receipt',
-        color: 'info'
-    },
-    {
-        title: 'Camera',
-        stats: 13,
-        trendNumber: 2.5,
-        avatarIcon: 'tabler-camera',
-        color: 'info'
-    },
-    {
-        title: 'Visitor',
-        stats: 13,
-        trendNumber: 2.5,
-        avatarIcon: 'tabler-user',
-        color: 'info'
-    }
-]
+
 
 const UserDashboard = () => {
+
+    const URL = process.env.NEXT_PUBLIC_API_URL
+    const { data: session } = useSession() || {}
+    const token = session?.user?.token
+    
+    const [billData, setBillData] = useState({
+        'pendingBill': 0,
+        'paidBill': 0
+    })
+
+    const [dashboardData, setDashboardData] = useState()
+
+    const fetchDashboardData = async () => {
+        try {
+            const response = await fetch(`${URL}/user/dashboard`, {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            })
+
+            const result = await response.json()
+
+            if (response.ok) {
+                const value = result?.data;
+                
+                setDashboardData(value)
+            }
+
+        } catch (error) {
+            throw new Error(error)
+        }
+    }
+
+    useEffect(() => {
+        if (URL && token) {
+            fetchDashboardData()
+        }
+    }, [URL, token])
+
+    const fixedCostMap = useMemo(() => {
+        const map = new Map();
+
+        dashboardData?.fixedCost?.forEach(item => {
+            map.set(item.apartment_type, Number(item.unit_value || 0));
+        });
+
+        return map;
+    }, [dashboardData?.fixedCost]);
+
+    useEffect(() => {
+        if (dashboardData) {
+            let unpaid = dashboardData?.['unpaidUtilityBill']?.length + dashboardData?.['unpaidCommanAreaBill']?.length
+            let paid = dashboardData?.['paidUtilityBill']?.length + dashboardData?.['paidCommanAreaBill']?.length
+
+
+            let processedData = {};
+
+            const grouped = {};
+
+            dashboardData?.userBill?.forEach((row) => {
+                const billId = row?.bill_id?._id;
+                const apartmentId = row?.apartment_id?._id;
+                const key = `${billId}-${apartmentId}`;
+
+                if (!grouped[key]) {
+                    grouped[key] = {
+                        ...row,
+                        paid_cost: 0,
+                        total_cost: 0,
+                        status: "Unpaid",
+                    };
+                }
+
+                // total_cost calculation
+                const additionalCost = row?.bill_id?.additional_cost || [];
+                const apartmentTypeRaw = row?.apartment_id?.apartment_type || "";
+                const apartmentType = apartmentTypeRaw.replace(/[^\d]/g, "");
+                const fixedCost = fixedCostMap.get(apartmentType) || 0;
+
+                const additionalTotal = additionalCost.reduce(
+                    (sum, val) => sum + (val.amount || 0),
+                    0
+                );
+
+                grouped[key].total_cost = fixedCost + additionalTotal;
+
+                // sum paid cost
+                grouped[key].paid_cost += Number(row?.amount) || 0;
+
+                // status
+                grouped[key].status =
+                    grouped[key].paid_cost >= grouped[key].total_cost
+                        ? "Paid"
+                        : "Unpaid";
+            });
+
+            processedData = Object.values(grouped);
+
+            const paidUserBill = processedData.filter(
+                (row) => row.paid_cost === row.total_cost
+            );
+
+            const unpaidUserBill = processedData.filter(
+                (row) => row.paid_cost !== row.total_cost
+            );
+
+            paid += paidUserBill?.length;
+            unpaid += unpaidUserBill?.length;
+
+            setBillData({
+                'pendingBill': unpaid,
+                'paidBill': paid
+            })
+        }
+    }, [dashboardData])
+
+
+    const data = [
+        {
+            title: 'Open complain',
+            stats: dashboardData?.['pendingComplain'].length || 0,
+            trendNumber: 18.2,
+            avatarIcon: 'tabler-report',
+            color: 'primary'
+        },
+        {
+            title: 'Resolved complain',
+            stats: dashboardData?.['resolvedComplain'].length || 0,
+            trendNumber: -8.7,
+            avatarIcon: 'tabler-checklist',
+            color: 'success'
+        },
+        {
+            title: 'Unpaid bill',
+            stats: billData?.pendingBill,
+            trendNumber: 4.3,
+            avatarIcon: 'tabler-receipt',
+            color: 'error'
+        },
+        {
+            title: 'Paid bill',
+            stats: billData?.paidBill,
+            trendNumber: 2.5,
+            avatarIcon: 'tabler-receipt',
+            color: 'info'
+        },
+        {
+            title: 'Camera',
+            stats: dashboardData?.camera?.length || 0,
+            trendNumber: 2.5,
+            avatarIcon: 'tabler-camera',
+            color: 'info'
+        },
+        {
+            title: 'Visitor',
+            stats: dashboardData?.visitor?.length || 0,
+            trendNumber: 2.5,
+            avatarIcon: 'tabler-user',
+            color: 'info'
+        }
+    ]
+
+    if (!dashboardData) {
+        return (
+            <Grid container spacing={6}>
+                {/* Row 1 - Stats placeholder */}
+                <Grid size={{ xs: 12 }}>
+                    <StyledCard>
+                        <CardContent>
+                            <Skeleton variant="text" width={200} height={30} />
+                            <Skeleton variant="rectangular" height={120} sx={{ mt: 2, borderRadius: 2 }} />
+                        </CardContent>
+                    </StyledCard>
+                </Grid>
+
+                {/* Row 2 */}
+                <Grid size={{ xs: 12, md: 6 }}>
+                    <StyledCard>
+                        <CardContent>
+                            <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+                                <Skeleton variant="text" width={180} height={30} />
+                                <Box display="flex" gap={1}>
+                                    <Skeleton variant="rectangular" width={60} height={24} />
+                                    <Skeleton variant="rectangular" width={60} height={24} />
+                                </Box>
+                            </Box>
+
+                            {/* Tickets Skeleton */}
+                            <Box display="flex" flexDirection="column" gap={2}>
+                                {[1, 2].map((i) => (
+                                    <Skeleton key={i} variant="rectangular" height={60} sx={{ borderRadius: 2 }} />
+                                ))}
+                            </Box>
+                        </CardContent>
+                    </StyledCard>
+                </Grid>
+
+                <Grid size={{ xs: 12, md: 6 }}>
+                    <StyledCard>
+                        <CardContent>
+                            <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+                                <Skeleton variant="text" width={180} height={30} />
+                                <Skeleton variant="rectangular" width={100} height={28} />
+                            </Box>
+
+                            {/* Bills Skeleton */}
+                            <Box display="flex" flexDirection="column" gap={2}>
+                                {[1, 2, 3].map((i) => (
+                                    <Skeleton key={i} variant="rectangular" height={60} sx={{ borderRadius: 2 }} />
+                                ))}
+                            </Box>
+                        </CardContent>
+                    </StyledCard>
+                </Grid>
+
+                {/* Row 3 */}
+                <Grid size={{ xs: 12, md: 6 }}>
+                    <StyledCard>
+                        <CardContent>
+                            <Skeleton variant="text" width={150} height={30} />
+                            <Skeleton variant="text" width={120} height={20} sx={{ mb: 2 }} />
+                            <Box display="flex" flexDirection="column" gap={2}>
+                                {[1, 2, 3].map((i) => (
+                                    <Skeleton key={i} variant="rectangular" height={60} sx={{ borderRadius: 2 }} />
+                                ))}
+                            </Box>
+                        </CardContent>
+                    </StyledCard>
+                </Grid>
+
+                <Grid size={{ xs: 12, md: 6 }}>
+                    <StyledCard>
+                        <CardContent>
+                            <Skeleton variant="text" width={150} height={30} sx={{ mb: 2 }} />
+                            <Box display="flex" flexDirection="column" gap={1}>
+                                {[1, 2, 3, 4].map((i) => (
+                                    <Skeleton key={i} variant="rectangular" height={50} sx={{ borderRadius: 2 }} />
+                                ))}
+                            </Box>
+                        </CardContent>
+                    </StyledCard>
+                </Grid>
+            </Grid>
+        );
+    }
+
     return (
         <Grid container spacing={6}>
             {/* Row 1 - Stats placeholder */}
@@ -89,66 +301,41 @@ const UserDashboard = () => {
                         <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
                             <Typography variant="h6">Open and Pending Tickets</Typography>
                             <Box>
-                                <Chip label="0 Pending" color="warning" size="small" sx={{ mr: 1 }} />
-                                <Chip label="2 Open" color="primary" size="small" />
+                                <Chip label={`${dashboardData?.['inProgressComplain']?.length || 0} Pending`} color="warning" size="small" sx={{ mr: 1 }} />
+                                <Chip label={`${dashboardData?.['pendingComplain']?.length || 0} open`} color="primary" size="small" />
                             </Box>
                         </Box>
                         <Divider sx={{ mb: 2 }} />
 
-                        {/* Ticket Item */}
-                        <Box
-                            display="flex"
-                            justifyContent="space-between"
-                            alignItems="center"
-                            sx={{
-                                p: 2,
-                                border: '1px solid #eee',
-                                borderRadius: 2,
-                                mb: 2,
-                                transition: '0.3s',
-                                '&:hover': { backgroundColor: '#fafafa' },
-                            }}
-                        >
-                            <Box display="flex" alignItems="center">
-                                <Avatar sx={{ mr: 2 }}>
-                                    <i className='tabler-report'></i>
-                                </Avatar>
-                                <Box>
-                                    <Typography fontWeight={600}>65949064</Typography>
-                                    <Typography variant="body2" color="text.secondary">
-                                        Owner
-                                    </Typography>
+                        {dashboardData?.['pendingComplain']?.map((item, index) => (
+                            <Box
+                                key={index}
+                                display="flex"
+                                justifyContent="space-between"
+                                alignItems="center"
+                                sx={{
+                                    p: 2,
+                                    border: '1px solid #eee',
+                                    borderRadius: 2,
+                                    mb: 2,
+                                    transition: '0.3s',
+                                    '&:hover': { backgroundColor: '#fafafa' },
+                                }}
+                            >
+                                <Box display="flex" alignItems="center">
+                                    <Avatar sx={{ mr: 2 }}>
+                                        <i className='tabler-report'></i>
+                                    </Avatar>
+                                    <Box>
+                                        <Typography fontWeight={600}>{item.complain_no}</Typography>
+                                        <Typography variant="body2" color="text.secondary">
+                                            Owner
+                                        </Typography>
+                                    </Box>
                                 </Box>
+                                <Chip label="Open" color="primary" variant="outlined" size="small" />
                             </Box>
-                            <Chip label="Open" color="primary" variant="outlined" size="small" />
-                        </Box>
-
-                        {/* Another Ticket */}
-                        <Box
-                            display="flex"
-                            justifyContent="space-between"
-                            alignItems="center"
-                            sx={{
-                                p: 2,
-                                border: '1px solid #eee',
-                                borderRadius: 2,
-                                transition: '0.3s',
-                                '&:hover': { backgroundColor: '#fafafa' },
-                            }}
-                        >
-                            <Box display="flex" alignItems="center">
-                                <Avatar sx={{ mr: 2 }}>
-                                    <i className='tabler-report'></i>
-                                </Avatar>
-                                <Box>
-                                    <Typography fontWeight={600}>74127357</Typography>
-                                    <Typography variant="body2" color="text.secondary">
-                                        Owner
-                                    </Typography>
-                                </Box>
-                            </Box>
-                            <Chip label="Open" color="primary" variant="outlined" size="small" />
-                        </Box>
+                        ))}
                     </CardContent>
                 </StyledCard>
             </Grid>
@@ -158,15 +345,18 @@ const UserDashboard = () => {
                     <CardContent>
                         <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
                             <Typography variant="h6">Utility Bills Payments Due</Typography>
-                            <Chip label="$894.82 Total Due" />
+                            <Chip
+                                label={`₹${(
+                                    dashboardData?.unpaidUtilityBill?.reduce(
+                                        (sum, bill) => sum + (bill.bill_amount || 0),
+                                        0
+                                    ) || 0
+                                ) || 0} Total Due`}
+                            />
                         </Box>
                         <Divider sx={{ mb: 2 }} />
 
-                        {[
-                            { date: "04 September 2025", amount: "$387.72" },
-                            { date: "10 September 2025", amount: "$364.02" },
-                            { date: "20 September 2025", amount: "$143.08" },
-                        ].map((bill, i) => (
+                        {dashboardData && dashboardData?.['unpaidUtilityBill'].map((bill, i) => (
                             <Box
                                 key={i}
                                 display="flex"
@@ -186,15 +376,15 @@ const UserDashboard = () => {
                                         <i className='tabler-invoice'></i>
                                     </Avatar>
                                     <Box>
-                                        <Typography fontWeight={600}>101 Water Bill</Typography>
+                                        <Typography fontWeight={600}>{bill?.bill_type?.name}</Typography>
                                         <Typography variant="body2" color="text.secondary">
-                                            {bill.date}
+                                            &#8377;{bill?.bill_amount}
                                         </Typography>
                                     </Box>
                                 </Box>
                                 <Box textAlign="right">
                                     <Typography fontWeight={600}>{bill.amount}</Typography>
-                                    <Chip label="Unpaid" color="primary" size="small" />
+                                    <Chip label={bill?.status ? "Paid" : "Unpaid"} color={bill?.status ? "success" : "warning"} size="small" />
                                 </Box>
                             </Box>
                         ))}
@@ -210,15 +400,46 @@ const UserDashboard = () => {
                             Today&apos;s Visitors
                         </Typography>
                         <Typography variant="body2" color="text.secondary" gutterBottom>
-                            Wednesday, 24 Sep 2025
+                            {FormatTime(Date.now())}
                         </Typography>
                         <Divider sx={{ mb: 4 }} />
-                        <Box display="flex" flexDirection="column" alignItems="center" py={6}>
-                            <Avatar sx={{ width: 56, height: 56, mb: 2 }}>
-                                <i className='tabler-user'></i>
-                            </Avatar>
-                            <Typography color="text.secondary">No visitors found</Typography>
-                        </Box>
+                        {dashboardData?.visitor?.length ? dashboardData?.visitor?.map((val, i) => (
+                            <Box
+                                key={i}
+                                display="flex"
+                                flexDirection="column"
+                                sx={{
+                                    p: 2,
+                                    borderRadius: 2,
+                                    mb: 1,
+                                    transition: '0.3s',
+                                    '&:hover': { backgroundColor: '#fafafa' },
+                                }}
+                            >
+                                <Box display="flex" alignItems="center" mb={1}>
+                                    <Avatar sx={{ mr: 2, width: 42, height: 42 }}>
+                                        <i className="tabler-users"></i>
+                                    </Avatar>
+                                    <Grid>
+                                        <Typography fontWeight={600}>
+                                            {val?.visitor_name}
+                                        </Typography>
+                                        <Typography variant="body2" color="text.secondary">
+                                            {FormatTime(val?.created_at)}
+                                        </Typography>
+                                    </Grid>
+                                </Box>
+                            </Box>
+                        ))
+                            :
+                            <Box display="flex" flexDirection="column" alignItems="center" py={6}>
+                                <Avatar sx={{ width: 56, height: 56, mb: 2 }}>
+                                    <i className='tabler-user'></i>
+                                </Avatar>
+                                <Typography color="text.secondary">No visitors found</Typography>
+                            </Box>
+
+                        }
                     </CardContent>
                 </StyledCard>
             </Grid>
@@ -249,7 +470,7 @@ const UserDashboard = () => {
                                     '&:hover': { backgroundColor: '#fafafa' },
                                 }}
                             >
-                                <Avatar sx={{ mr: 2, width: 32, height: 32 }}>
+                                <Avatar sx={{ mr: 2, width: 42, height: 42 }}>
                                     <i className='tabler-bell'></i>
                                 </Avatar>
                                 <Typography>{notice}</Typography>
@@ -258,7 +479,7 @@ const UserDashboard = () => {
                     </CardContent>
                 </StyledCard>
             </Grid>
-        </Grid>
+        </Grid >
     )
 }
 
