@@ -16,9 +16,36 @@ import {
     Skeleton
 } from '@mui/material'
 
+import { format } from "date-fns";
+
 import FormatTime from '@/utils/formatTime'
 
 import LogisticsStatisticsCard from '@/views/pages/widget-examples/statistics/LogisticsStatisticsCard'
+
+const monthMap = {
+    Jan: "Jan",
+    Feb: "Feb",
+    Mar: "Mar",
+    Apr: "Apr",
+    May: "May",
+    Jun: "Jun",
+    Jul: "Jul",
+    Aug: "Aug",
+    Sep: "Sept",
+    Oct: "Oct",
+    Nov: "Nov",
+    Dec: "Dec"
+};
+
+function formatDateCustom(date) {
+    if (!date) return "-";
+    const d = new Date(date);
+    const day = format(d, "dd");
+    const month = monthMap[format(d, "MMM")];
+    const year = format(d, "yyyy");
+    
+    return `${day} ${month} ${year}`;
+}
 
 const StyledCard = ({ children }) => (
     <Card
@@ -433,7 +460,7 @@ const UserDashboard = () => {
                                             {val?.visitor_name}
                                         </Typography>
                                         <Typography>
-                                            {val?.check_in_date}
+                                            {formatDateCustom(val.check_in_date)}
                                         </Typography>
                                         <Typography>
                                             {formatTimeTo12Hour(val?.check_in_from_time)}-{formatTimeTo12Hour(val?.check_in_to_time)}
