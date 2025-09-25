@@ -1,7 +1,7 @@
 'use client'
 
 // React Imports
-import { useState ,useEffect, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 import { useSession } from 'next-auth/react'
 
@@ -93,17 +93,9 @@ const Logo = ({ color }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isHovered, layout, isBreakpointReached])
 
-  if (!permissArray) {
-    return (
-      <>
-        <Skeleton />
-      </>
-    )
-  }
-
   return (
     <div className='flex items-center'>
-      {permissArray?.['isSuperAdmin'] && (
+      {(!permissArray || permissArray?.['isSuperAdmin']) && (
         <img src={`${asset_url}/company_logo/demo39.svg`} alt="DW" width={120} height={80} />
       )}
       {!permissArray?.['isSuperAdmin'] && (
