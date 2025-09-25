@@ -1,16 +1,16 @@
 'use client'
 
 // React Imports
-import { useEffect, useRef } from 'react'
+import { useState ,useEffect, useRef } from 'react'
+
+import { useSession } from 'next-auth/react'
 
 // Third-party Imports
 import styled from '@emotion/styled'
 
-// Component Imports
-import VuexyLogo from '@core/svg/Logo'
-
-// Config Imports
-import themeConfig from '@configs/themeConfig'
+import {
+  Skeleton
+} from '@mui/material'
 
 // Hook Imports
 import useVerticalNav from '@menu/hooks/useVerticalNav'
@@ -32,7 +32,40 @@ const LogoText = styled.span`
 `
 
 const Logo = ({ color }) => {
-  
+
+  const [permissArray, setPermissArray] = useState()
+
+  const { data: session } = useSession()
+  const token = session?.user?.token
+  const API_URL = process.env.NEXT_PUBLIC_API_URL
+
+  const fetchPermissionList = async () => {
+    try {
+      const response = await fetch(`${API_URL}/admin/role/allow/permission`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        setPermissArray(data?.data || [])
+      } else {
+        console.error('Failed to fetch permissions:', data?.message)
+      }
+    } catch (error) {
+      console.error('Error fetching permissions:', error)
+    }
+  }
+
+  useEffect(() => {
+    if (API_URL && token) {
+      fetchPermissionList()
+    }
+  }, [API_URL, token])
+
   // Refs
   const logoTextRef = useRef(null)
 
@@ -60,9 +93,22 @@ const Logo = ({ color }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isHovered, layout, isBreakpointReached])
 
+  if (!permissArray) {
+    return (
+      <>
+        <Skeleton />
+      </>
+    )
+  }
+
   return (
     <div className='flex items-center'>
-      <img src={`${asset_url}/company_logo/demo39.svg`} alt="DW" width={120} height={80} />
+      {permissArray?.['isSuperAdmin'] && (
+        <img src={`${asset_url}/company_logo/demo39.svg`} alt="DW" width={120} height={80} />
+      )}
+      {!permissArray?.['isSuperAdmin'] && (
+        <img src={`/images/company_logo.png`} alt="DW" width={120} height={80} />
+      )}
       {/* <VuexyLogo className='text-2xl text-primary' /> */}
       {/* <LogoText
         color={color}
