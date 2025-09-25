@@ -151,8 +151,6 @@ const Login = ({ mode }) => {
 
     if (res?.ok) {
 
-      const redirectURL = searchParams.get('redirectTo') ?? '/';
-
       router.replace(`/${locale}/dashboards/society`);
 
     }

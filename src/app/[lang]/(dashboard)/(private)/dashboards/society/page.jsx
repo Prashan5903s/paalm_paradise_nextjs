@@ -96,7 +96,7 @@ const UserDashboard = () => {
 
     const fetchDashboardData = async () => {
         try {
-            const response = await fetch(`${URL}/user/dashboard`, {
+            const response = await fetch(`${URL}/company/dashboard`, {
                 method: "GET",
                 headers: {
                     Authorization: `Bearer ${token}`
@@ -202,43 +202,36 @@ const UserDashboard = () => {
 
     const data = [
         {
-            title: 'Open complain',
-            stats: dashboardData?.['pendingComplain'].length || 0,
+            title: 'Tower',
+            stats: dashboardData?.['tower'].length || 0,
             trendNumber: 18.2,
             avatarIcon: 'tabler-report',
             color: 'primary'
         },
         {
-            title: 'Resolved complain',
-            stats: dashboardData?.['resolvedComplain'].length || 0,
+            title: 'Apartment',
+            stats: dashboardData?.['apartment'].length || 0,
             trendNumber: -8.7,
             avatarIcon: 'tabler-checklist',
             color: 'success'
         },
         {
-            title: 'Unpaid bill',
-            stats: billData?.pendingBill,
+            title: 'Unsold apartment',
+            stats: dashboardData?.['unsoldApartment'].length || 0,
             trendNumber: 4.3,
             avatarIcon: 'tabler-receipt',
             color: 'error'
         },
         {
-            title: 'Paid bill',
+            title: 'Maintenance dues',
             stats: billData?.paidBill,
             trendNumber: 2.5,
             avatarIcon: 'tabler-receipt',
             color: 'info'
         },
         {
-            title: 'Camera',
-            stats: dashboardData?.camera?.length || 0,
-            trendNumber: 2.5,
-            avatarIcon: 'tabler-camera',
-            color: 'info'
-        },
-        {
-            title: 'Visitor',
-            stats: dashboardData?.visitor?.length || 0,
+            title: 'Owner',
+            stats: dashboardData?.owner?.length || 0,
             trendNumber: 2.5,
             avatarIcon: 'tabler-user',
             color: 'info'
@@ -404,6 +397,58 @@ const UserDashboard = () => {
                             <Divider sx={{ mb: 2 }} />
 
                             {dashboardData && dashboardData?.['unpaidUtilityBill'].map((bill, i) => (
+                                <Box
+                                    key={i}
+                                    display="flex"
+                                    justifyContent="space-between"
+                                    alignItems="center"
+                                    sx={{
+                                        p: 2,
+                                        border: '1px solid #eee',
+                                        borderRadius: 2,
+                                        mb: 2,
+                                        transition: '0.3s',
+                                        '&:hover': { backgroundColor: '#fafafa' },
+                                    }}
+                                >
+                                    <Box display="flex" alignItems="center">
+                                        <Avatar sx={{ mr: 2 }}>
+                                            <i className='tabler-invoice'></i>
+                                        </Avatar>
+                                        <Box>
+                                            <Typography fontWeight={600}>{bill?.bill_type?.name}</Typography>
+                                            <Typography variant="body2" color="text.secondary">
+                                                &#8377;{bill?.bill_amount}
+                                            </Typography>
+                                        </Box>
+                                    </Box>
+                                    <Box textAlign="right">
+                                        <Typography fontWeight={600}>{bill.amount}</Typography>
+                                        <Chip label={bill?.status ? "Paid" : "Unpaid"} color={bill?.status ? "success" : "warning"} size="small" />
+                                    </Box>
+                                </Box>
+                            ))}
+                        </CardContent>
+                    </StyledCard>
+                </Grid>
+
+                <Grid size={{ xs: 12, md: 6 }}>
+                    <StyledCard>
+                        <CardContent>
+                            <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+                                <Typography variant="h6">Common Area Bills Payments Due</Typography>
+                                <Chip
+                                    label={`₹${(
+                                        dashboardData?.unpaidCommanAreaBill?.reduce(
+                                            (sum, bill) => sum + (bill.bill_amount || 0),
+                                            0
+                                        ) || 0
+                                    ) || 0} Total Due`}
+                                />
+                            </Box>
+                            <Divider sx={{ mb: 2 }} />
+
+                            {dashboardData && dashboardData?.['unpaidCommanAreaBill'].map((bill, i) => (
                                 <Box
                                     key={i}
                                     display="flex"
