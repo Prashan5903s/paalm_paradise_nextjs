@@ -31,12 +31,12 @@ import DialogCloseButton from '../DialogCloseButton'
 
 // ✅ Validation Schema
 const schema = object({
-    tower: string('Tower is required'),
-    floor: string('Floor is required'),
+    tower: pipe(string(), minLength(1, 'Tower is required')),
+    floor: pipe(string(), minLength(1, 'Floor is required')),
     apartmentNumber: pipe(string(), minLength(1, 'Apartment number is required')),
     area: pipe(string(), minLength(1, 'Area is required')), // keep as string since input type="number"
-    apartmentType: pipe(string('Apartment type is required')),
-    status: pipe(string('Status is required')),
+    apartmentType: pipe(string(), minLength(1, 'Apartment type is required')),
+    status: pipe(string(), minLength(1, 'Status is required')),
 
     // tower & parkingCode removed from schema since no input fields exist
 })
