@@ -69,14 +69,10 @@ const Towers = () => {
         <Typography variant='h4' className='mbe-1'>
           Tower List
         </Typography>
-        <Typography>
-          A role provided access to predefined menus and features so that depending on assigned role an administrator
-          can have access to what he need
-        </Typography>
       </Grid>
-      <Grid size={{ xs: 12 }}>
+      {/* <Grid size={{ xs: 12 }}>
         <TowerCards fetchZoneData={fetchTowerData} tableData={towerData} />
-      </Grid>
+      </Grid> */}
       <Grid size={{ xs: 12 }}>
         {towerData ? (
           <TowerTable tableData={towerData} fetchZoneData={fetchTowerData} />

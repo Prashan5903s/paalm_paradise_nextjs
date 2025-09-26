@@ -214,7 +214,7 @@ const VerticalMenu = ({ dictionary, scrollMenu }) => {
               sx={{ display: 'flex', alignItems: 'center' }}
             >
               <i className="tabler-notes" style={{ marginRight: 8, fontSize: '1.2rem' }} />
-              Notice
+              Notices
             </MenuItem>
           )}
           {permissArray?.isCompany && (
@@ -224,13 +224,13 @@ const VerticalMenu = ({ dictionary, scrollMenu }) => {
               sx={{ display: 'flex', alignItems: 'center' }}
             >
               <i className="tabler-calendar-event" style={{ marginRight: 8, fontSize: '1.2rem' }} />
-              Event
+              Events
             </MenuItem>
           )}
           {permissArray?.isCompany && permissArray?.hasComplainPermission && (
             <MenuItem key="Complain" href={`/${locale}/apps/complain`}>
               <i className="tabler-report" style={{ marginRight: 8, fontSize: '1.2rem' }} />
-              Complain
+              Complains
             </MenuItem>
           )}
         </MenuSection>

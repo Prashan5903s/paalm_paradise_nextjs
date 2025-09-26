@@ -72,9 +72,9 @@ const Floors = () => {
           Floor List
         </Typography>
       </Grid>
-      <Grid size={{ xs: 12 }}>
+      {/* <Grid size={{ xs: 12 }}>
         <FloorCard fetchZoneData={fetchZoneData} tableData={zoneData} />
-      </Grid>
+      </Grid> */}
       <Grid size={{ xs: 12 }}>
         {zoneData ? (
           <FloorTable tableData={zoneData} fetchZoneData={fetchZoneData} />

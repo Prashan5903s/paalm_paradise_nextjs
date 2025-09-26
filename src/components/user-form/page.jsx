@@ -117,19 +117,15 @@ const UserFormLayout = () => {
                 maxLength(255, 'Password can be a maximum of 255 characters')
             ),
 
-        qnap_username: pipe(
+        qnap_username: optional(
             string(),
-            minLength(1, 'Qnap Username is required'),
             maxLength(255, 'Qnap Username can be a maximum of 255 characters')
         ),
 
-        qnap_password: id
-            ? optional(string())
-            : pipe(
-                string(),
-                minLength(6, 'Password min length should be 6'),
-                maxLength(255, 'Password can be a maximum of 255 characters')
-            ),
+        qnap_password: optional(
+            string(),
+            maxLength(255, 'Password can be a maximum of 255 characters')
+        ),
 
         sip_extension: pipe(
             string(),
@@ -1222,7 +1218,7 @@ const UserFormLayout = () => {
                                     <CustomTextField
                                         {...field}
                                         fullWidth
-                                        label="Qnap Username*"
+                                        label="Qnap Username"
                                         error={!!errors.qnap_username}
                                         helperText={errors.qnap_username?.message}
                                     />
@@ -1238,7 +1234,7 @@ const UserFormLayout = () => {
                                     render={({ field }) => (
                                         <CustomTextField
                                             fullWidth
-                                            label="Qnap Password*"
+                                            label="Qnap Password"
                                             type={formData.isPasswordShown ? "text" : "password"}
                                             {...field}
                                             InputProps={{

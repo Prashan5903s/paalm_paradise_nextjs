@@ -185,9 +185,10 @@ const TowerDialog = ({ open, setOpen, title = '', fetchZoneData, selectedZone, t
                                         const allowedKeys = ['Backspace', 'Tab', 'ArrowLeft', 'ArrowRight', 'Delete', ' ']; // include space
 
                                         // Allow A-Z, a-z, and space
-                                        if (!/^[a-zA-Z ]$/.test(key) && !allowedKeys.includes(key)) {
+                                        if (!/^[a-zA-Z0-9 ]$/.test(key) && !allowedKeys.includes(key)) {
                                             e.preventDefault();
                                         }
+
                                     }}
 
                                     onPaste={(e) => {

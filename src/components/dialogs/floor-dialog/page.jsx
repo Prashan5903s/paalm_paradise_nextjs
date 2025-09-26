@@ -301,7 +301,7 @@ const FloorDialog = ({
                                                     ]
 
                                                     if (
-                                                        !/^[a-zA-Z ]$/.test(key) &&
+                                                        !/^[a-zA-Z0-9 ]$/.test(key) &&
                                                         !allowedKeys.includes(key)
                                                     ) {
                                                         e.preventDefault()

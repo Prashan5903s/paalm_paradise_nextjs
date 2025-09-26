@@ -72,9 +72,9 @@ const Apartment = () => {
           Apartment List
         </Typography>
       </Grid>
-      <Grid size={{ xs: 12 }}>
+      {/* <Grid size={{ xs: 12 }}>
         <ApartmentCards fetchZoneData={fetchZoneData} tableData={zoneData} />
-      </Grid>
+      </Grid> */}
       <Grid size={{ xs: 12 }}>
         {zoneData ? (
           <ApartmentTable tableData={zoneData} fetchZoneData={fetchZoneData} />

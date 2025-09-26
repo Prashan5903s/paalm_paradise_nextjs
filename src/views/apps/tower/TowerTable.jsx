@@ -7,13 +7,16 @@ import { useState, useMemo, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 
 // MUI Imports
-import Card from '@mui/material/Card'
-import CardContent from '@mui/material/CardContent'
-import MenuItem from '@mui/material/MenuItem'
-import Chip from '@mui/material/Chip'
-import Typography from '@mui/material/Typography'
-import Checkbox from '@mui/material/Checkbox'
-import IconButton from '@mui/material/IconButton'
+import {
+  IconButton,
+  Checkbox,
+  Typography,
+  Button,
+  Chip,
+  MenuItem,
+  CardContent,
+  Card
+} from '@mui/material'
 
 // Third-party Imports
 import classnames from 'classnames'
@@ -224,9 +227,16 @@ const TowerTable = ({ tableData, fetchZoneData }) => {
             value={globalFilter ?? ''}
             className='max-sm:is-full min-is-[250px]'
             onChange={value => setGlobalFilter(String(value))}
-            placeholder='Search Role'
+            placeholder='Search Tower'
           />
-          <CustomTextField
+          <Button variant='contained' size='small' onClick={() => {
+            setOpenDialog(true)
+            setSelectedZone()
+            setSelectedRegion()
+          }}>
+            Add Tower
+          </Button>
+          {/* <CustomTextField
             select
             value={role}
             onChange={e => setRole(e.target.value)}
@@ -242,7 +252,7 @@ const TowerTable = ({ tableData, fetchZoneData }) => {
                 </MenuItem>
               );
             })}
-          </CustomTextField>
+          </CustomTextField> */}
         </div>
       </CardContent>
 
