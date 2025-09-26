@@ -347,35 +347,46 @@ const UserDashboard = () => {
                             </Box>
                             <Divider sx={{ mb: 2 }} />
 
-                            {dashboardData?.['pendingComplain']?.map((item, index) => (
-                                <Box
-                                    key={index}
-                                    display="flex"
-                                    justifyContent="space-between"
-                                    alignItems="center"
-                                    sx={{
-                                        p: 2,
-                                        border: '1px solid #eee',
-                                        borderRadius: 2,
-                                        mb: 2,
-                                        transition: '0.3s',
-                                        '&:hover': { backgroundColor: '#fafafa' },
-                                    }}
-                                >
-                                    <Box display="flex" alignItems="center">
-                                        <Avatar sx={{ mr: 2 }}>
+                            {(dashboardData && dashboardData?.['pendingComplain'].length > 0) ?
+                                dashboardData?.['pendingComplain']?.map((item, index) => (
+                                    <Box
+                                        key={index}
+                                        display="flex"
+                                        justifyContent="space-between"
+                                        alignItems="center"
+                                        sx={{
+                                            p: 2,
+                                            border: '1px solid #eee',
+                                            borderRadius: 2,
+                                            mb: 2,
+                                            transition: '0.3s',
+                                            '&:hover': { backgroundColor: '#fafafa' },
+                                        }}
+                                    >
+                                        <Box display="flex" alignItems="center">
+                                            <Avatar sx={{ mr: 2 }}>
+                                                <i className='tabler-report'></i>
+                                            </Avatar>
+                                            <Box>
+                                                <Typography fontWeight={600}>{item.complain_no}</Typography>
+                                                <Typography variant="body2" color="text.secondary">
+                                                    Owner
+                                                </Typography>
+                                            </Box>
+                                        </Box>
+                                        <Chip label="Open" color="primary" variant="outlined" size="small" />
+                                    </Box>
+                                ))
+                                :
+                                (
+                                    <Box display="flex" flexDirection="column" alignItems="center" py={6}>
+                                        <Avatar sx={{ width: 56, height: 56, mb: 2 }}>
                                             <i className='tabler-report'></i>
                                         </Avatar>
-                                        <Box>
-                                            <Typography fontWeight={600}>{item.complain_no}</Typography>
-                                            <Typography variant="body2" color="text.secondary">
-                                                Owner
-                                            </Typography>
-                                        </Box>
+                                        <Typography color="text.secondary">No complain found</Typography>
                                     </Box>
-                                    <Chip label="Open" color="primary" variant="outlined" size="small" />
-                                </Box>
-                            ))}
+                                )
+                            }
                         </CardContent>
                     </StyledCard>
                 </Grid>
@@ -396,38 +407,50 @@ const UserDashboard = () => {
                             </Box>
                             <Divider sx={{ mb: 2 }} />
 
-                            {dashboardData && dashboardData?.['unpaidUtilityBill'].map((bill, i) => (
-                                <Box
-                                    key={i}
-                                    display="flex"
-                                    justifyContent="space-between"
-                                    alignItems="center"
-                                    sx={{
-                                        p: 2,
-                                        border: '1px solid #eee',
-                                        borderRadius: 2,
-                                        mb: 2,
-                                        transition: '0.3s',
-                                        '&:hover': { backgroundColor: '#fafafa' },
-                                    }}
-                                >
-                                    <Box display="flex" alignItems="center">
-                                        <Avatar sx={{ mr: 2 }}>
-                                            <i className='tabler-invoice'></i>
-                                        </Avatar>
-                                        <Box>
-                                            <Typography fontWeight={600}>{bill?.bill_type?.name}</Typography>
-                                            <Typography variant="body2" color="text.secondary">
-                                                &#8377;{bill?.bill_amount}
-                                            </Typography>
+                            {(dashboardData && dashboardData?.['unpaidUtilityBill'].length > 0)
+                                ?
+                                dashboardData?.['unpaidUtilityBill'].map((bill, i) => (
+                                    <Box
+                                        key={i}
+                                        display="flex"
+                                        justifyContent="space-between"
+                                        alignItems="center"
+                                        sx={{
+                                            p: 2,
+                                            border: '1px solid #eee',
+                                            borderRadius: 2,
+                                            mb: 2,
+                                            transition: '0.3s',
+                                            '&:hover': { backgroundColor: '#fafafa' },
+                                        }}
+                                    >
+                                        <Box display="flex" alignItems="center">
+                                            <Avatar sx={{ mr: 2 }}>
+                                                <i className='tabler-invoice'></i>
+                                            </Avatar>
+                                            <Box>
+                                                <Typography fontWeight={600}>{bill?.bill_type?.name}</Typography>
+                                                <Typography variant="body2" color="text.secondary">
+                                                    &#8377;{bill?.bill_amount}
+                                                </Typography>
+                                            </Box>
+                                        </Box>
+                                        <Box textAlign="right">
+                                            <Typography fontWeight={600}>{bill.amount}</Typography>
+                                            <Chip label={bill?.status ? "Paid" : "Unpaid"} color={bill?.status ? "success" : "warning"} size="small" />
                                         </Box>
                                     </Box>
-                                    <Box textAlign="right">
-                                        <Typography fontWeight={600}>{bill.amount}</Typography>
-                                        <Chip label={bill?.status ? "Paid" : "Unpaid"} color={bill?.status ? "success" : "warning"} size="small" />
+                                ))
+                                :
+                                (
+                                    <Box display="flex" flexDirection="column" alignItems="center" py={6}>
+                                        <Avatar sx={{ width: 56, height: 56, mb: 2 }}>
+                                            <i className='tabler-receipt'></i>
+                                        </Avatar>
+                                        <Typography color="text.secondary">No Bills found</Typography>
                                     </Box>
-                                </Box>
-                            ))}
+                                )
+                            }
                         </CardContent>
                     </StyledCard>
                 </Grid>
@@ -448,38 +471,50 @@ const UserDashboard = () => {
                             </Box>
                             <Divider sx={{ mb: 2 }} />
 
-                            {dashboardData && dashboardData?.['unpaidCommanAreaBill'].map((bill, i) => (
-                                <Box
-                                    key={i}
-                                    display="flex"
-                                    justifyContent="space-between"
-                                    alignItems="center"
-                                    sx={{
-                                        p: 2,
-                                        border: '1px solid #eee',
-                                        borderRadius: 2,
-                                        mb: 2,
-                                        transition: '0.3s',
-                                        '&:hover': { backgroundColor: '#fafafa' },
-                                    }}
-                                >
-                                    <Box display="flex" alignItems="center">
-                                        <Avatar sx={{ mr: 2 }}>
-                                            <i className='tabler-invoice'></i>
-                                        </Avatar>
-                                        <Box>
-                                            <Typography fontWeight={600}>{bill?.bill_type?.name}</Typography>
-                                            <Typography variant="body2" color="text.secondary">
-                                                &#8377;{bill?.bill_amount}
-                                            </Typography>
+                            {(dashboardData && dashboardData?.['unpaidCommanAreaBill'].length > 0)
+                                ?
+                                dashboardData?.['unpaidCommanAreaBill'].map((bill, i) => (
+                                    <Box
+                                        key={i}
+                                        display="flex"
+                                        justifyContent="space-between"
+                                        alignItems="center"
+                                        sx={{
+                                            p: 2,
+                                            border: '1px solid #eee',
+                                            borderRadius: 2,
+                                            mb: 2,
+                                            transition: '0.3s',
+                                            '&:hover': { backgroundColor: '#fafafa' },
+                                        }}
+                                    >
+                                        <Box display="flex" alignItems="center">
+                                            <Avatar sx={{ mr: 2 }}>
+                                                <i className='tabler-invoice'></i>
+                                            </Avatar>
+                                            <Box>
+                                                <Typography fontWeight={600}>{bill?.bill_type?.name}</Typography>
+                                                <Typography variant="body2" color="text.secondary">
+                                                    &#8377;{bill?.bill_amount}
+                                                </Typography>
+                                            </Box>
+                                        </Box>
+                                        <Box textAlign="right">
+                                            <Typography fontWeight={600}>{bill.amount}</Typography>
+                                            <Chip label={bill?.status ? "Paid" : "Unpaid"} color={bill?.status ? "success" : "warning"} size="small" />
                                         </Box>
                                     </Box>
-                                    <Box textAlign="right">
-                                        <Typography fontWeight={600}>{bill.amount}</Typography>
-                                        <Chip label={bill?.status ? "Paid" : "Unpaid"} color={bill?.status ? "success" : "warning"} size="small" />
+                                ))
+                                :
+                                (
+                                    <Box display="flex" flexDirection="column" alignItems="center" py={6}>
+                                        <Avatar sx={{ width: 56, height: 56, mb: 2 }}>
+                                            <i className='tabler-receipt'></i>
+                                        </Avatar>
+                                        <Typography color="text.secondary">No Bills found</Typography>
                                     </Box>
-                                </Box>
-                            ))}
+                                )
+                            }
                         </CardContent>
                     </StyledCard>
                 </Grid>
@@ -527,12 +562,14 @@ const UserDashboard = () => {
                                 </Box>
                             ))
                                 :
-                                <Box display="flex" flexDirection="column" alignItems="center" py={6}>
-                                    <Avatar sx={{ width: 56, height: 56, mb: 2 }}>
-                                        <i className='tabler-user'></i>
-                                    </Avatar>
-                                    <Typography color="text.secondary">No visitors found</Typography>
-                                </Box>
+                                (
+                                    <Box display="flex" flexDirection="column" alignItems="center" py={6}>
+                                        <Avatar sx={{ width: 56, height: 56, mb: 2 }}>
+                                            <i className='tabler-user'></i>
+                                        </Avatar>
+                                        <Typography color="text.secondary">No visitors found</Typography>
+                                    </Box>
+                                )
 
                             }
                         </CardContent>
