@@ -1404,8 +1404,6 @@ const ViewMaintenance = ({ open, setIsOpenDetail, selectedZone }) => {
       header: 'Status',
       cell: ({ row }) => {
 
-
-
         const additionalCost = row.original?.user_bills?.[0]?.bill?.additional_cost || [];
         const apartmentTypeRaw = row.original?.apartment_type || '';
         const apartmentType = apartmentTypeRaw.replace(/[^\d]/g, '');
