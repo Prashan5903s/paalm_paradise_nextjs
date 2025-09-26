@@ -224,7 +224,7 @@ const UserDashboard = () => {
         },
         {
             title: 'Maintenance dues',
-            stats: billData?.paidBill,
+            stats: billData?.pendingBill,
             trendNumber: 2.5,
             avatarIcon: 'tabler-receipt',
             color: 'info'
