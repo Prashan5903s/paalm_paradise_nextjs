@@ -72,7 +72,7 @@ const ApartmentDialog = ({ open, setOpen, selectedZone, fetchZoneData }) => {
     useEffect(() => {
         if (createData && towerId) {
             const floor = createData.find(item => item._id == towerId);
-            
+
             setFloor(floor?.floors)
         }
     }, [createData, towerId]);
@@ -109,7 +109,7 @@ const ApartmentDialog = ({ open, setOpen, selectedZone, fetchZoneData }) => {
                 })
 
                 const result = await response.json()
-                
+
                 if (response.ok && !ignore) {
                     setCreateData(result?.data || [])
                 }
@@ -130,7 +130,7 @@ const ApartmentDialog = ({ open, setOpen, selectedZone, fetchZoneData }) => {
     // ✅ Submit handler
     const submitData = async (formData) => {
         setLoading(true)
-        
+
         try {
             const url = selectedZone
                 ? `${API_URL}/company/apartment/${selectedZone._id}`
@@ -188,7 +188,7 @@ const ApartmentDialog = ({ open, setOpen, selectedZone, fetchZoneData }) => {
                         <Grid size={{ xs: 12 }}>
                             <Skeleton variant="rectangular" height={26} />
                         </Grid>
-                        <Grid  size={{ xs: 12 }}>
+                        <Grid size={{ xs: 12 }}>
                             <Skeleton variant="rectangular" height={26} />
                         </Grid>
                         <Grid size={{ xs: 12 }}>
@@ -240,19 +240,20 @@ const ApartmentDialog = ({ open, setOpen, selectedZone, fetchZoneData }) => {
                                         helperText={errors?.tower?.message}
                                     >
                                         <MenuItem value="">Select Tower</MenuItem>
-                                        {createData.map((item) => (
-                                            <MenuItem key={item._id} value={item._id}>
-                                                {item.name ?? 'Unnamed Tower'}
-                                            </MenuItem>
-                                        ))}
+                                        {createData
+                                            .slice()
+                                            .sort((a, b) => a.name.localeCompare(b.name))
+                                            .map((item) => (
+                                                <MenuItem key={item._id} value={item._id}>
+                                                    {item.name ?? 'Unnamed Tower'}
+                                                </MenuItem>
+                                            ))}
                                     </CustomTextField>
                                 )}
                             />
                         </Grid>
                         {/* Floor */}
                         {floor && (
-
-
                             <Grid size={{ xs: 12 }}>
                                 <Controller
                                     name="floor"
@@ -268,11 +269,14 @@ const ApartmentDialog = ({ open, setOpen, selectedZone, fetchZoneData }) => {
                                             helperText={errors?.floor?.message}
                                         >
                                             <MenuItem value="">Select Floor</MenuItem>
-                                            {floor.map((item) => (
-                                                <MenuItem key={item._id} value={item._id}>
-                                                    {item.floor_name ?? 'Unnamed Floor'}
-                                                </MenuItem>
-                                            ))}
+                                            {floor
+                                                .slice()
+                                                .sort((a, b) => a.floor_name.localeCompare(b.floor_name))
+                                                .map((item) => (
+                                                    <MenuItem key={item._id} value={item._id}>
+                                                        {item.floor_name ?? 'Unnamed Floor'}
+                                                    </MenuItem>
+                                                ))}
                                         </CustomTextField>
                                     )}
                                 />

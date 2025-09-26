@@ -1334,11 +1334,14 @@ const UserFormLayout = () => {
                                                                     error={!!errors?.apartment_data?.[index]?.tower_id}
                                                                     helperText={errors?.apartment_data?.[index]?.tower_id?.message}
                                                                 >
-                                                                    {createData?.tower?.map((tower) => (
-                                                                        <MenuItem key={tower._id} value={tower._id}>
-                                                                            {tower.name}
-                                                                        </MenuItem>
-                                                                    ))}
+                                                                    {createData?.tower
+                                                                        .slice()
+                                                                        .sort((a, b) => a.name.localeCompare(b.name))
+                                                                        .map((tower) => (
+                                                                            <MenuItem key={tower._id} value={tower._id}>
+                                                                                {tower.name}
+                                                                            </MenuItem>
+                                                                        ))}
                                                                 </CustomTextField>
                                                             )}
                                                         />
@@ -1366,11 +1369,14 @@ const UserFormLayout = () => {
                                                                         error={!!errors?.apartment_data?.[index]?.floor_id}
                                                                         helperText={errors?.apartment_data?.[index]?.floor_id?.message}
                                                                     >
-                                                                        {floors.map((floor) => (
-                                                                            <MenuItem key={floor._id} value={floor._id}>
-                                                                                {floor.floor_name}
-                                                                            </MenuItem>
-                                                                        ))}
+                                                                        {floors
+                                                                            .slice()
+                                                                            .sort((a, b) => a.floor_name.localeCompare(b.floor_name))
+                                                                            .map((floor) => (
+                                                                                <MenuItem key={floor._id} value={floor._id}>
+                                                                                    {floor.floor_name}
+                                                                                </MenuItem>
+                                                                            ))}
                                                                     </CustomTextField>
                                                                 )}
                                                             />
@@ -1396,27 +1402,29 @@ const UserFormLayout = () => {
                                                                             errors?.apartment_data?.[index]?.apartment_id?.message
                                                                         }
                                                                     >
-                                                                        {apartments.map((apt) => {
-                                                                            const isAlreadySelected =
-                                                                                selectedApartmentIds.includes(apt._id) &&
-                                                                                field.value !== apt._id;
+                                                                        {apartments
+                                                                            .slice()
+                                                                            .map((apt) => {
+                                                                                const isAlreadySelected =
+                                                                                    selectedApartmentIds.includes(apt._id) &&
+                                                                                    field.value !== apt._id;
 
-                                                                            // ✅ Only disable if assigned to another user OR status = true (but not current user’s assignment)
-                                                                            const isAssignedToOtherUser =
-                                                                                apt.assigned_to &&
-                                                                                apt.assigned_to.toString() !== user_id.toString();
+                                                                                // ✅ Only disable if assigned to another user OR status = true (but not current user’s assignment)
+                                                                                const isAssignedToOtherUser =
+                                                                                    apt.assigned_to &&
+                                                                                    apt.assigned_to.toString() !== user_id.toString();
 
-                                                                            const isUnavailable =
-                                                                                isAlreadySelected || isAssignedToOtherUser || apt.status === true;
+                                                                                const isUnavailable =
+                                                                                    isAlreadySelected || isAssignedToOtherUser || apt.status === true;
 
-                                                                            const isDisabled = isUnavailable && field.value !== apt._id;
+                                                                                const isDisabled = isUnavailable && field.value !== apt._id;
 
-                                                                            return (
-                                                                                <MenuItem key={apt._id} value={apt._id} disabled={isDisabled}>
-                                                                                    {apt.apartment_no}
-                                                                                </MenuItem>
-                                                                            );
-                                                                        })}
+                                                                                return (
+                                                                                    <MenuItem key={apt._id} value={apt._id} disabled={isDisabled}>
+                                                                                        {apt.apartment_no}
+                                                                                    </MenuItem>
+                                                                                );
+                                                                            })}
                                                                     </CustomTextField>
                                                                 )}
                                                             />

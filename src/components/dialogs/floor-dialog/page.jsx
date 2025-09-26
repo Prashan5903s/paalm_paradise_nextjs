@@ -93,7 +93,7 @@ const FloorDialog = ({
             })
 
             const value = await response.json()
-            
+
             if (response.ok) {
                 setCreateData(value?.data || [])
             }
@@ -151,7 +151,7 @@ const FloorDialog = ({
         }
 
         setLoading(true)
-        
+
         try {
             const url = selectedZone
                 ? `${API_URL}/company/floor/${selectedZone._id}`
@@ -290,7 +290,7 @@ const FloorDialog = ({
                                                 fullWidth
                                                 onKeyDown={(e) => {
                                                     const key = e.key
-                                                    
+
                                                     const allowedKeys = [
                                                         'Backspace',
                                                         'Tab',
@@ -310,7 +310,7 @@ const FloorDialog = ({
                                                 onPaste={(e) => {
                                                     const paste = e.clipboardData.getData('text')
 
-                                                    if (!/^[a-zA-Z ]+$/.test(paste)) {
+                                                    if (!/^[a-zA-Z0-9 ]+$/.test(paste)) {
                                                         e.preventDefault()
                                                     }
                                                 }}
@@ -336,11 +336,15 @@ const FloorDialog = ({
                                                 error={!!errors?.tower_id}
                                                 helperText={errors?.tower_id?.message}
                                             >
-                                                {createData.map((item) => (
-                                                    <MenuItem key={item._id} value={item._id}>
-                                                        {item.name}
-                                                    </MenuItem>
-                                                ))}
+                                                {createData
+                                                    .slice()
+                                                    .sort((a, b) => a.name.localeCompare(b.name))
+                                                    .map((item) => (
+                                                        <MenuItem key={item._id} value={item._id}>
+                                                            {item.name}
+                                                        </MenuItem>
+                                                    ))}
+
                                             </CustomTextField>
                                         )}
                                     />
