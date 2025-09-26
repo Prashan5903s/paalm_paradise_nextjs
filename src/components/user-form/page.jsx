@@ -402,7 +402,6 @@ const UserFormLayout = () => {
             const towerData = await doGet(`company/tower`);
             const floorData = await doGet(`company/floor`);
             const apartmentData = await doGet('company/apartment')
-            const departmentData = await doGet('company/department')
             const participationTypesData = await doGet(`admin/participation_types?status=true`);
             const roleData = await doGet(`company/role`);
 
@@ -410,7 +409,7 @@ const UserFormLayout = () => {
                 ...prevData,
                 country: countryData.country,
                 designations: designationData,
-                department: departmentData,
+                department: [],
                 tower: towerData,
                 floor: floorData,
                 apartment: apartmentData,

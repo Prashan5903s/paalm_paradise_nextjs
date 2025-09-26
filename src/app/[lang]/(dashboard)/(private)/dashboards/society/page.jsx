@@ -584,30 +584,36 @@ const UserDashboard = () => {
                             </Typography>
                             <Divider sx={{ mb: 2 }} />
 
-                            {[
-                                "Parking Policy Update",
-                                "Children's Park Renovation",
-                                "Annual General Meeting Notice",
-                                "Building Maintenance Schedule",
-                            ].map((notice, i) => (
-                                <Box
-                                    key={i}
-                                    display="flex"
-                                    alignItems="center"
-                                    sx={{
-                                        p: 2,
-                                        borderRadius: 2,
-                                        mb: 1,
-                                        transition: '0.3s',
-                                        '&:hover': { backgroundColor: '#fafafa' },
-                                    }}
-                                >
-                                    <Avatar sx={{ mr: 2, width: 42, height: 42 }}>
-                                        <i className='tabler-bell'></i>
-                                    </Avatar>
-                                    <Typography>{notice}</Typography>
-                                </Box>
-                            ))}
+                            {(dashboardData && dashboardData?.['notice'].length > 0)
+                                ?
+                                dashboardData?.['notice'].map((notice, i) => (
+                                    <Box
+                                        key={i}
+                                        display="flex"
+                                        alignItems="center"
+                                        sx={{
+                                            p: 2,
+                                            borderRadius: 2,
+                                            mb: 1,
+                                            transition: '0.3s',
+                                            '&:hover': { backgroundColor: '#fafafa' },
+                                        }}
+                                    >
+                                        <Avatar sx={{ mr: 2, width: 42, height: 42 }}>
+                                            <i className='tabler-bell'></i>
+                                        </Avatar>
+                                        <Typography>{notice.title}</Typography>
+                                    </Box>
+                                ))
+                                :
+                                (
+                                    <Box display="flex" flexDirection="column" alignItems="center" py={6}>
+                                        <Avatar sx={{ width: 56, height: 56, mb: 2 }}>
+                                            <i className='tabler-bell'></i>
+                                        </Avatar>
+                                        <Typography color="text.secondary">No notice found</Typography>
+                                    </Box>
+                                )}
                         </CardContent>
                     </StyledCard>
                 </Grid>
