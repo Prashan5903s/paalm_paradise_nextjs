@@ -98,7 +98,7 @@ const Logo = ({ color }) => {
       {(!token || permissArray?.['isSuperAdmin']) && (
         <img src={`${asset_url}/company_logo/demo39.svg`} alt="DW" width={120} height={80} />
       )}
-      {!permissArray?.['isSuperAdmin'] && (
+      {(token && !permissArray?.['isSuperAdmin']) && (
         <img src={`/images/company_logo.png`} alt="DW" width={120} height={80} />
       )}
       {/* <VuexyLogo className='text-2xl text-primary' /> */}
