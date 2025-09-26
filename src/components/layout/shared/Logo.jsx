@@ -95,7 +95,7 @@ const Logo = ({ color }) => {
 
   return (
     <div className='flex items-center'>
-      {(permissArray?.['isSuperAdmin']) && (
+      {(!token || permissArray?.['isSuperAdmin']) && (
         <img src={`${asset_url}/company_logo/demo39.svg`} alt="DW" width={120} height={80} />
       )}
       {!permissArray?.['isSuperAdmin'] && (
