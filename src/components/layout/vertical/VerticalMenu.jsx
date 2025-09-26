@@ -36,7 +36,7 @@ const RenderExpandIcon = ({ open, transitionDuration }) => (
 )
 
 const VerticalMenu = ({ dictionary, scrollMenu }) => {
-  
+
   const theme = useTheme()
   const verticalNavOptions = useVerticalNav()
   const params = useParams()
@@ -156,6 +156,20 @@ const VerticalMenu = ({ dictionary, scrollMenu }) => {
                 <MenuItem key="camera" href={`/${locale}/apps/camera`}>
                   <i className="tabler-camera" style={{ marginRight: 8, fontSize: '1.2rem' }} />
                   Camera
+                </MenuItem>
+              )}
+
+              {permissArray && permissArray?.['isUser'] && (
+                <MenuItem key="my-notice" href={`/${locale}/apps/user/notice`}>
+                  <i className="tabler-receipt" style={{ marginRight: 8, fontSize: '1.2rem' }} />
+                  Notice
+                </MenuItem>
+              )}
+
+              {permissArray && permissArray?.['isUser'] && (
+                <MenuItem key="my-event" href={`/${locale}/apps/user/event`}>
+                  <i className="tabler-calendar" style={{ marginRight: 8, fontSize: '1.2rem' }} />
+                  Event
                 </MenuItem>
               )}
 
