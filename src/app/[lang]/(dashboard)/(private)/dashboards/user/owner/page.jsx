@@ -134,7 +134,7 @@ const UserDashboard = () => {
 
     useEffect(() => {
         if (dashboardData) {
-            let unpaid = 0;
+            let unpaid = dashboardData?.['unpaidUtilityBill']?.length + dashboardData?.['unpaidCommanAreaBill']?.length
             let paid = dashboardData?.['paidUtilityBill']?.length + dashboardData?.['paidCommanAreaBill']?.length
 
             let processedData = {};
