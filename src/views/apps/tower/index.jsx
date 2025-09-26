@@ -70,9 +70,6 @@ const Towers = () => {
           Tower List
         </Typography>
       </Grid>
-      {/* <Grid size={{ xs: 12 }}>
-        <TowerCards fetchZoneData={fetchTowerData} tableData={towerData} />
-      </Grid> */}
       <Grid size={{ xs: 12 }}>
         {towerData ? (
           <TowerTable tableData={towerData} fetchZoneData={fetchTowerData} />

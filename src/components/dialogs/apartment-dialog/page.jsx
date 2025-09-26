@@ -341,6 +341,7 @@ const ApartmentDialog = ({ open, setOpen, selectedZone, fetchZoneData }) => {
                                         <MenuItem value="1BHK">1 BHK</MenuItem>
                                         <MenuItem value="2BHK">2 BHK</MenuItem>
                                         <MenuItem value="3BHK">3 BHK</MenuItem>
+                                        <MenuItem value="4BHK">4 BHK</MenuItem>
                                     </CustomTextField>
                                 )}
                             />

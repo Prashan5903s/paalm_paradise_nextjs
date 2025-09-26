@@ -79,6 +79,7 @@ const TowerDialog = ({ open, setOpen, title = '', fetchZoneData, selectedZone, t
         if (tableData && tableData.length > 0) {
             let hasError = false;
 
+
             if (selectedZone) {
                 const exist = tableData.find(item =>
                     item.name.trim().toLowerCase() === formData.name.trim().toLowerCase() &&
@@ -100,7 +101,7 @@ const TowerDialog = ({ open, setOpen, title = '', fetchZoneData, selectedZone, t
                 if (!name) return; // Skip empty names (optional)
 
                 const existsInTable = tableData.some(zoneInTable =>
-                    zoneInTable.name.trim().toLowerCase() === name.trim().toLowerCase()
+                    zoneInTable.name.trim().toLowerCase() == name.trim().toLowerCase()
                 );
 
                 if (existsInTable) {
