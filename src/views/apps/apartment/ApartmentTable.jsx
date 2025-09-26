@@ -162,7 +162,7 @@ const ApartmentTable = ({ tableData, fetchZoneData }) => {
       )
     }),
     columnHelper.accessor('Area', {
-      header: 'Apartment Area',
+      header: 'Apartment Area (sqft)',
       cell: ({ row }) => (
         <Typography className='capitalize' color='text.primary'>
           {row.original.apartment_area}
