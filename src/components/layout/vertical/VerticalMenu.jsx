@@ -196,7 +196,7 @@ const VerticalMenu = ({ dictionary, scrollMenu }) => {
             </SubMenu>
           )}
           {permissArray?.isCompany && permissArray?.['hasUserPermission'] && (
-            <SubMenu label={"Users list"} icon={<i className='tabler-user' />}>
+            <SubMenu label={"Users"} icon={<i className='tabler-user' />}>
               <MenuItem href={`/${locale}/apps/user/list`}>{"View Users"}</MenuItem>
             </SubMenu>
           )}
@@ -214,7 +214,7 @@ const VerticalMenu = ({ dictionary, scrollMenu }) => {
               sx={{ display: 'flex', alignItems: 'center' }}
             >
               <i className="tabler-notes" style={{ marginRight: 8, fontSize: '1.2rem' }} />
-              Notices
+              Notice Board
             </MenuItem>
           )}
           {permissArray?.isCompany && (
