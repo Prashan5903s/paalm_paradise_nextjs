@@ -27,7 +27,7 @@ export default function DashboardCRM() {
   const { lang: locale } = useParams();
 
   return (
-    <PermissionGuard locale={locale} element="isa">
+    <PermissionGuard locale={locale} element="isSuperAdmin">
       <Grid container spacing={6}>
         <Grid xs={12} sm={6} md={4} lg={2}>
           <DistributedBarChartOrder />

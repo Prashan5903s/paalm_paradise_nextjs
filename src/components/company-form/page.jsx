@@ -393,7 +393,7 @@ const UserFormLayout = () => {
       const data = await response.json();
 
       if (response.ok) {
-        router.push(`/${locale}/apps/company/list`)
+        router.push(`/${locale}/apps/society/list`)
         toast.success(`Society ${id ? "updated" : "added"} successfully!`, {
           autoClose: 700, // in milliseconds
         });
