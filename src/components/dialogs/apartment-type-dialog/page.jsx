@@ -76,9 +76,6 @@ const ApartmentTypeDialog = ({ open, setOpen, title = '', fetchZoneData, selecte
 
     const submitData = async (formData) => {
 
-        console.log(tableData, formData);
-        // return;
-
         if (tableData && tableData.length > 0) {
             let hasError = false;
 
