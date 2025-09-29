@@ -251,8 +251,9 @@ const VerticalMenu = ({ dictionary, scrollMenu }) => {
           {permissArray?.isCompany && (
             <SubMenu label={"Settings"} icon={<i className='tabler-settings' />}>
               <MenuItem href={`/${locale}/apps/settings/maintenance-setting`}>{"Maintenance setting"}</MenuItem>
-              <MenuItem href={`/${locale}/apps/bill/common-area-bill`}>{"Comman Area Bill"}</MenuItem>
-              <MenuItem href={`/${locale}/apps/bill/maintenance`}>{"Maintenance"}</MenuItem>
+              <MenuItem href={`/${locale}/apps/settings/apartment-type-setting`}>{"Apartment Type Setting"}</MenuItem>
+              <MenuItem href={`/${locale}/apps/settings/ticket-type-setting`}>{"Ticket Type Setting"}</MenuItem>
+              <MenuItem href={`/${locale}/apps/settings/visitor-type-setting`}>{"Visitor Type Setting"}</MenuItem>
             </SubMenu>
           )}
         </MenuSection>
