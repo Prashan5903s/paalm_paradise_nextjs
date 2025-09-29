@@ -82,7 +82,7 @@ const ApartmentTypeDialog = ({ open, setOpen, title = '', fetchZoneData, selecte
 
             if (selectedZone) {
                 const exist = tableData.find(item =>
-                    item.name.trim().toLowerCase() === formData.name.trim().toLowerCase() &&
+                    item.name.trim().toLCase() === formData.name.trim().toLowerCase() &&
                     item._id.toString().trim() !== selectedZone._id.toString().trim()
                 );
 
@@ -138,7 +138,7 @@ const ApartmentTypeDialog = ({ open, setOpen, title = '', fetchZoneData, selecte
 
             if (response.ok) {
                 fetchZoneData?.()
-                toast.success(`Zone(s) ${selectedZone ? 'updated' : 'added'} successfully!`, {
+                toast.success(`Apartment type ${selectedZone ? 'updated' : 'added'} successfully!`, {
                     autoClose: 700
                 })
                 handleClose()

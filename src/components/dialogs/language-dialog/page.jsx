@@ -178,7 +178,7 @@ const LanguageDialog = ({ open, setOpen, title = '', fetchLanguageData, selected
       if (response.ok) {
 
         fetchLanguageData?.()
-        toast.success(`Zone(s) ${selectedLanguage ? 'updated' : 'added'} successfully!`)
+        toast.success(`Language ${selectedLanguage ? 'updated' : 'added'} successfully!`)
         handleClose()
       } else {
         console.error('Server error:', data)

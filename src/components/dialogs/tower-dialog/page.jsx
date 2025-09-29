@@ -138,7 +138,7 @@ const TowerDialog = ({ open, setOpen, title = '', fetchZoneData, selectedZone, t
 
             if (response.ok) {
                 fetchZoneData?.()
-                toast.success(`Zone(s) ${selectedZone ? 'updated' : 'added'} successfully!`, {
+                toast.success(`Tower ${selectedZone ? 'updated' : 'added'} successfully!`, {
                     autoClose: 700
                 })
                 handleClose()

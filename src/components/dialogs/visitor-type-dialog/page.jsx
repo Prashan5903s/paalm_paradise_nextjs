@@ -138,7 +138,7 @@ const VisitorDialog = ({ open, setOpen, title = '', fetchZoneData, selectedZone,
 
             if (response.ok) {
                 fetchZoneData?.()
-                toast.success(`Zone(s) ${selectedZone ? 'updated' : 'added'} successfully!`, {
+                toast.success(`Visitor type ${selectedZone ? 'updated' : 'added'} successfully!`, {
                     autoClose: 700
                 })
                 handleClose()

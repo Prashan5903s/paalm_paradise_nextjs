@@ -147,7 +147,7 @@ const ParkingDialog = ({ open, setOpen, title = '', fetchZoneData, selectedZone,
 
             if (response.ok) {
                 fetchZoneData?.()
-                toast.success(`Zone(s) ${selectedZone ? 'updated' : 'added'} successfully!`, {
+                toast.success(`Parking ${selectedZone ? 'updated' : 'added'} successfully!`, {
                     autoClose: 700
                 })
                 handleClose()

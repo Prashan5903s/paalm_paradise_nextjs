@@ -173,7 +173,7 @@ const FloorDialog = ({
             if (response.ok) {
                 fetchZoneData?.()
                 toast.success(
-                    `Zone(s) ${selectedZone ? 'updated' : 'added'} successfully!`,
+                    `Floor ${selectedZone ? 'updated' : 'added'} successfully!`,
                     { autoClose: 700 }
                 )
                 handleClose()
