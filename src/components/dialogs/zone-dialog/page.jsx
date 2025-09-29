@@ -86,6 +86,8 @@ const ZoneDialog = ({ open, setOpen, title = '', fetchZoneData, selectedZone, ty
 
   const submitData = async (formData) => {
 
+
+
     if (tableData && tableData.length > 0) {
       let hasError = false;
 

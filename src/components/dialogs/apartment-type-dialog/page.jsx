@@ -76,13 +76,16 @@ const ApartmentTypeDialog = ({ open, setOpen, title = '', fetchZoneData, selecte
 
     const submitData = async (formData) => {
 
+        console.log(tableData, formData);
+        // return;
+
         if (tableData && tableData.length > 0) {
             let hasError = false;
 
 
             if (selectedZone) {
                 const exist = tableData.find(item =>
-                    item.name.trim().toLCase() === formData.name.trim().toLowerCase() &&
+                    item.name.trim().toLowerCase() === formData.name.trim().toLowerCase() &&
                     item._id.toString().trim() !== selectedZone._id.toString().trim()
                 );
 
