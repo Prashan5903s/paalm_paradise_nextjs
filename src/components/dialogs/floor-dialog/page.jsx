@@ -113,13 +113,13 @@ const FloorDialog = ({
     const submitData = async (formData) => {
         // Unique validation against tableData
         if (tableData && tableData.length > 0) {
-            const floorName = String(formData.name || '').trim().toLowerCase();
+            const floorName = String(formData.name || '').replace(/\s+/g, ' ').trim().toLowerCase();
             const towerId = String(formData.tower_id || '');
 
             if (selectedZone) {
                 // Edit mode: check for duplicates excluding current selectedZone
                 const duplicate = tableData.find((item) => {
-                    const itemName = String(item.floor_name || '').trim().toLowerCase();
+                    const itemName = String(item.floor_name || '').replace(/\s+/g, ' ').trim().toLowerCase();
                     const itemTowerId = String(item.tower_id?._id || '');
                     const itemId = String(item._id || '');
 
@@ -127,21 +127,21 @@ const FloorDialog = ({
                 });
 
                 if (duplicate) {
-                  
+
                     setError('name', {
                         type: 'manual',
                         message: 'This floor name already exists in this tower.',
                     });
-                    
+
                     return;
                 }
             } else {
-                
+
                 // Add mode: check for any duplicates
                 const duplicate = tableData.some((item) => {
-                    const itemName = String(item.floor_name || '').trim().toLowerCase();
+                    const itemName = String(item.floor_name || '').replace(/\s+/g, ' ').trim().toLowerCase();
                     const itemTowerId = String(item.tower_id?._id || '');
-                    
+
                     return itemName === floorName && itemTowerId === towerId;
                 });
 
@@ -150,7 +150,7 @@ const FloorDialog = ({
                         type: 'manual',
                         message: 'Floor name must be unique in this tower.',
                     });
-                    
+
                     return;
                 }
             }

@@ -132,14 +132,14 @@ const ApartmentDialog = ({ open, setOpen, selectedZone, fetchZoneData, tableData
     const submitData = async (formData) => {
 
         if (tableData && tableData.length > 0) {
-            const apartmentNo = String(formData.apartmentNumber || '').trim().toLowerCase();
+            const apartmentNo = String(formData.apartmentNumber || '').replace(/\s+/g, ' ').trim().toLowerCase();
             const towerId = String(formData.tower || '');
             const floorId = String(formData.floor || '');
 
             if (selectedZone) {
                 // Edit mode: check for duplicates excluding the current selectedZone
                 const duplicate = tableData.find((item) => {
-                    const itemApartment = String(item.apartment_no || '').trim().toLowerCase();
+                    const itemApartment = String(item.apartment_no || '').replace(/\s+/g, ' ').trim().toLowerCase();
                     const itemTower = String(item.tower_id || '');
                     const itemFloor = String(item.floor_id || '');
                     const itemId = String(item._id || '');
@@ -157,16 +157,16 @@ const ApartmentDialog = ({ open, setOpen, selectedZone, fetchZoneData, tableData
                         type: 'manual',
                         message: 'This apartment number already exists on this floor.',
                     });
-                    
+
                     return;
                 }
             } else {
                 // Add mode: check for any duplicates
                 const duplicate = tableData.some((item) => {
-                    const itemApartment = String(item.apartment_no || '').trim().toLowerCase();
+                    const itemApartment = String(item.apartment_no || '').replace(/\s+/g, ' ').trim().toLowerCase();
                     const itemTower = String(item.tower_id || '');
                     const itemFloor = String(item.floor_id || '');
-                    
+
                     return (
                         itemApartment === apartmentNo &&
                         itemTower === towerId &&
@@ -179,7 +179,7 @@ const ApartmentDialog = ({ open, setOpen, selectedZone, fetchZoneData, tableData
                         type: 'manual',
                         message: 'This apartment number already exists on this floor.',
                     });
-                    
+
                     return;
                 }
             }
