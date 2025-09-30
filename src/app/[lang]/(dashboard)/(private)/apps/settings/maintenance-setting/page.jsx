@@ -22,10 +22,9 @@ import {
     Paper,
 } from "@mui/material";
 
-import Grid from '@mui/material/Grid2'; // For Grid2
+import Grid from "@mui/material/Grid2"; // For Grid2
 
 import { toast } from "react-toastify";
-
 
 const MaintenanceSetting = () => {
     const { data: session } = useSession();
@@ -35,39 +34,53 @@ const MaintenanceSetting = () => {
     const [costType, setCostType] = useState("1");
     const [data, setData] = useState(null);
     const [values, setValues] = useState({});
-    
+    const [createData, setCreateData] = useState(null);
+    const [errors, setErrors] = useState({});
+
     const [unitData, setUnitData] = useState({
         unit_name: "",
-        unit_value: ""
+        unit_value: "",
     });
 
-    const handleValueChange = (type, newValue) => {
+    const handleValueChange = (id, val) => {
         setValues((prev) => ({
             ...prev,
-            [type]: newValue,
+            [id]: val,
         }));
+
+        // जैसे ही user कुछ लिखे error हट जाए
+        setErrors((prev) => {
+            const newErrors = { ...prev };
+            
+            delete newErrors[id];
+            
+            return newErrors;
+        });
     };
 
     const reset = () => {
-        setData()
-        fetchMaintenance()
-    }
+        setData(null);
+        fetchMaintenance();
+        setErrors({});
+    };
 
     const fetchMaintenance = async () => {
         try {
-
-            const response = await fetch(`${API_URL}/company/maintenance-setting/${costType}`, {
-                method: "GET",
-                headers: {
-                    Authorization: `Bearer ${token}`
+            const response = await fetch(
+                `${API_URL}/company/maintenance-setting/${costType}`,
+                {
+                    method: "GET",
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
                 }
-            });
+            );
 
             const result = await response.json();
 
             if (response.ok) {
+                const unitType = result?.data?.unit_type;
                 const fixed_data = result?.data?.fixed_data;
-                const unit_type = result?.data?.unit_type;
 
                 const formattedData = fixed_data?.reduce((acc, item) => {
                     acc[item.apartment_type] = item.unit_value;
@@ -76,8 +89,30 @@ const MaintenanceSetting = () => {
                 }, {});
 
                 setValues(formattedData || {});
-                setUnitData(unit_type || { unit_name: "", unit_value: "" });
+                setUnitData(unitType || { unit_name: "", unit_value: "" });
                 setData(result?.data);
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const fetchCreateData = async () => {
+        try {
+            const response = await fetch(
+                `${API_URL}/company/maintenance-setting/data/create`,
+                {
+                    method: "GET",
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+
+            const result = await response.json();
+
+            if (response.ok) {
+                setCreateData(result?.data || []);
             }
         } catch (error) {
             console.error(error);
@@ -87,31 +122,65 @@ const MaintenanceSetting = () => {
     useEffect(() => {
         if (API_URL && token && costType) {
             setData(null);
+            fetchCreateData();
             fetchMaintenance();
         }
     }, [API_URL, token, costType]);
 
     const handleSubmit = async () => {
         try {
+            let newErrors = {};
+            
+            if (costType === "1") {
+                createData.forEach((apt) => {
+                    if (!values?.[apt._id]) {
+                        newErrors[apt._id] = "This field cannot be empty";
+                    }
+                });
+            } else {
+                if (!unitData.unit_name) {
+                    newErrors.unit_name = "Unit Name cannot be empty";
+                }
+                
+                if (!unitData.unit_value) {
+                    newErrors.unit_value = "Unit Value cannot be empty";
+                }
+            }
+
+            setErrors(newErrors);
+
+            if (Object.keys(newErrors).length > 0) {
+                toast.error("Any field cannot be left empty", {
+                    autoClose: 1000,
+                });
+                
+                return;
+            }
+
             const payload = {
                 unit_data: costType === "1" ? values : unitData,
-                cost_type: costType
+                cost_type: costType,
             };
 
-            const response = await fetch(`${API_URL}/company/maintenance-setting/${costType}`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`
-                },
-                body: JSON.stringify(payload)
-            });
+            const response = await fetch(
+                `${API_URL}/company/maintenance-setting/${costType}`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    },
+                    body: JSON.stringify(payload),
+                }
+            );
 
             const result = await response.json();
 
             if (response.ok) {
                 fetchMaintenance();
-                toast.success("Maintenance setting updated successfully", { autoClose: 1000 });
+                toast.success("Maintenance setting updated successfully", {
+                    autoClose: 1000,
+                });
             } else {
                 toast.error(result.message || "Failed to update maintenance setting");
             }
@@ -121,8 +190,7 @@ const MaintenanceSetting = () => {
         }
     };
 
-
-    if (!data) {
+    if (!data || !createData) {
         return (
             <Card sx={{ p: 2 }}>
                 <CardContent>
@@ -134,10 +202,10 @@ const MaintenanceSetting = () => {
                     </Typography>
 
                     <Grid container spacing={2} sx={{ mb: 2 }}>
-                        <Grid size={{ xs: 6 }} >
+                        <Grid size={{ xs: 6 }}>
                             <Skeleton variant="rectangular" height={60} />
                         </Grid>
-                        <Grid size={{ xs: 6 }} >
+                        <Grid size={{ xs: 6 }}>
                             <Skeleton variant="rectangular" height={60} />
                         </Grid>
                     </Grid>
@@ -147,15 +215,23 @@ const MaintenanceSetting = () => {
                             <Table>
                                 <TableHead>
                                     <TableRow sx={{ backgroundColor: "#f5f6f8" }}>
-                                        <TableCell><Skeleton width="80%" /></TableCell>
-                                        <TableCell><Skeleton width="50%" /></TableCell>
+                                        <TableCell>
+                                            <Skeleton width="80%" />
+                                        </TableCell>
+                                        <TableCell>
+                                            <Skeleton width="50%" />
+                                        </TableCell>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
                                     {[1, 2, 3, 4].map((row) => (
                                         <TableRow key={row}>
-                                            <TableCell><Skeleton /></TableCell>
-                                            <TableCell><Skeleton /></TableCell>
+                                            <TableCell>
+                                                <Skeleton />
+                                            </TableCell>
+                                            <TableCell>
+                                                <Skeleton />
+                                            </TableCell>
                                         </TableRow>
                                     ))}
                                 </TableBody>
@@ -185,18 +261,15 @@ const MaintenanceSetting = () => {
     return (
         <Card sx={{ p: 2 }}>
             <CardContent>
-                <Typography variant="h6" gutterBottom>
-                    Maintenance Settings
-                </Typography>
-                <Typography variant="subtitle2" gutterBottom>
-                    Cost Type <span style={{ color: "red" }}>*</span>
+                <Typography variant="h6" sx={{ mb: "2px" }} gutterBottom>
+                    Maintenance Settings <span>*</span>
                 </Typography>
 
                 <RadioGroup
                     row
                     value={costType}
                     onChange={(e) => setCostType(e.target.value)}
-                    sx={{ gap: 2, mb: 2 }}
+                    sx={{ gap: 2, mb: 2, mt: 4 }}
                 >
                     <Card
                         variant="outlined"
@@ -252,20 +325,28 @@ const MaintenanceSetting = () => {
                         <Table>
                             <TableHead>
                                 <TableRow sx={{ backgroundColor: "#f5f6f8" }}>
-                                    <TableCell><b>Apartment Type</b></TableCell>
-                                    <TableCell><b>Unit Value ($)</b></TableCell>
+                                    <TableCell>
+                                        <b>Apartment Type</b>
+                                    </TableCell>
+                                    <TableCell>
+                                        <b>Unit Value ($)</b>
+                                    </TableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {Object.entries(values).map(([apt, val]) => (
-                                    <TableRow key={apt}>
-                                        <TableCell>{apt + "BHK"}</TableCell>
+                                {createData.map((apt) => (
+                                    <TableRow key={apt?._id}>
+                                        <TableCell>{apt?.name}</TableCell>
                                         <TableCell>
                                             <TextField
                                                 type="number"
                                                 size="small"
-                                                value={val}
-                                                onChange={(e) => handleValueChange(apt, e.target.value)}
+                                                value={values?.[apt._id] || ""}
+                                                onChange={(e) =>
+                                                    handleValueChange(apt._id, e.target.value)
+                                                }
+                                                error={!!errors?.[apt._id]}
+                                                helperText={errors?.[apt._id] || ""}
                                             />
                                         </TableCell>
                                     </TableRow>
@@ -283,8 +364,13 @@ const MaintenanceSetting = () => {
                                 label="Unit Name"
                                 value={unitData?.unit_name || ""}
                                 onChange={(e) =>
-                                    setUnitData((prev) => ({ ...prev, unit_name: e.target.value }))
+                                    setUnitData((prev) => ({
+                                        ...prev,
+                                        unit_name: e.target.value,
+                                    }))
                                 }
+                                error={!!errors?.unit_name}
+                                helperText={errors?.unit_name || ""}
                                 required
                             />
                         </Grid>
@@ -293,10 +379,15 @@ const MaintenanceSetting = () => {
                                 fullWidth
                                 type="number"
                                 label="Unit Value ($)"
-                                value={unitData?.unit_value || ''}
+                                value={unitData?.unit_value || ""}
                                 onChange={(e) =>
-                                    setUnitData((prev) => ({ ...prev, unit_value: e.target.value }))
+                                    setUnitData((prev) => ({
+                                        ...prev,
+                                        unit_value: e.target.value,
+                                    }))
                                 }
+                                error={!!errors?.unit_value}
+                                helperText={errors?.unit_value || ""}
                                 required
                             />
                         </Grid>
@@ -304,18 +395,10 @@ const MaintenanceSetting = () => {
                 )}
 
                 <Grid container gap={2} justifyContent="flex-start" sx={{ mt: 3 }}>
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={handleSubmit}
-                    >
+                    <Button variant="contained" color="primary" onClick={handleSubmit}>
                         Save
                     </Button>
-                    <Button
-                        variant="tonal"
-                        color="secondary"
-                        onClick={() => reset()}
-                    >
+                    <Button variant="outlined" color="secondary" onClick={reset}>
                         Reset
                     </Button>
                 </Grid>

@@ -126,7 +126,7 @@ const UserDashboard = () => {
         const map = new Map();
 
         dashboardData?.fixedCost?.forEach(item => {
-            map.set(item.apartment_type, Number(item.unit_value || 0));
+            map.set(item.apartment_type, String(item.unit_value || ""));
         });
 
         return map;
@@ -160,14 +160,14 @@ const UserDashboard = () => {
                 const additionalCost = row?.bill_id?.additional_cost || [];
                 const apartmentTypeRaw = row?.apartment_id?.apartment_type || "";
                 const apartmentType = apartmentTypeRaw.replace(/[^\d]/g, "");
-                const fixedCost = fixedCostMap.get(apartmentType) || 0;
+                const fixedCost = fixedCostMap.get(apartmentTypeRaw) || 0;
 
                 const additionalTotal = additionalCost.reduce(
                     (sum, val) => sum + (val.amount || 0),
                     0
                 );
 
-                grouped[key].total_cost = fixedCost + additionalTotal;
+                grouped[key].total_cost = Number(fixedCost) + Number(additionalTotal);
 
                 // sum paid cost
                 grouped[key].paid_cost += Number(row?.amount) || 0;

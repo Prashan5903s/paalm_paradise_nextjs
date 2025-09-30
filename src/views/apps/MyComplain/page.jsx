@@ -80,6 +80,8 @@ const ComplainModal = ({ open, setIsOpen, fetchComplain }) => {
     const token = session?.user?.token
     const API_URL = process.env.NEXT_PUBLIC_API_URL
 
+    const [createData, setCreateData] = useState()
+
     // Validation schema
     const schema = object({
         nature: pipe(string(), minLength(1, "Nature is required")),
@@ -108,6 +110,33 @@ const ComplainModal = ({ open, setIsOpen, fetchComplain }) => {
         reset();
         setIsOpen(false);
     };
+
+    const fetchCreateData = async () => {
+        try {
+            const response = await fetch(`${API_URL}/user/my-complain/data/create`, {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            })
+
+            const result = await response.json()
+
+            if (response.ok) {
+                const value = result?.data;
+                
+                setCreateData(value)
+            }
+        } catch (error) {
+            throw new Error(error)
+        }
+    }
+
+    useEffect(() => {
+        if (API_URL && token) {
+            fetchCreateData()
+        }
+    }, [API_URL, token])
 
     // Submit handler
     const onSubmit = async (data) => {
@@ -222,12 +251,9 @@ const ComplainModal = ({ open, setIsOpen, fetchComplain }) => {
                                         error={!!errors.category}
                                         helperText={errors.category?.message}
                                     >
-                                        <MenuItem value="1">Plumbing</MenuItem>
-                                        <MenuItem value="2">Electricity</MenuItem>
-                                        <MenuItem value="3">Leakage</MenuItem>
-                                        <MenuItem value="4">Internet</MenuItem>
-                                        <MenuItem value="5">House keeping/Gardening</MenuItem>
-                                        <MenuItem value="6">others</MenuItem>
+                                        {createData && createData.map((item, index) => (
+                                            <MenuItem key={index} value={item._id}>{item.name}</MenuItem>
+                                        ))}
                                     </CustomTextField>
                                 )}
                             />
@@ -500,18 +526,9 @@ const BillTable = ({ value, type }) => {
                 header: "Category",
                 cell: ({ row }) => {
 
-                    const categoryMap = {
-                        1: "Plumbing",
-                        2: "Electricity",
-                        3: "Leakage",
-                        4: "Internet",
-                        5: "House Keeping / Guard",
-                        6: "Others",
-                    };
-
                     return (
                         <Typography className="capitalize" color="text.primary">
-                            {categoryMap[row.original?.category] || "-"}
+                            {row.original?.category?.name || "-"}
                         </Typography>
                     );
                 },

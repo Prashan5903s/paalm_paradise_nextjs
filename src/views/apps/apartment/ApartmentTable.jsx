@@ -173,7 +173,7 @@ const ApartmentTable = ({ tableData, fetchZoneData }) => {
       header: 'Apartment Type',
       cell: ({ row }) => (
         <Typography className='capitalize' color='text.primary'>
-          {row.original.apartment_type}
+          {row.original.apartment_type?.name}
         </Typography>
       )
     }),

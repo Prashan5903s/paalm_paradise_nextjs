@@ -93,7 +93,7 @@ const DebouncedInput = ({ value: initialValue, onChange, debounce = 500, ...prop
 
     return <CustomTextField {...props} value={value} onChange={e => setValue(e.target.value)} />
 
-}   
+}
 
 dayjs.extend(utc);
 
@@ -133,7 +133,7 @@ const VisitorModal = ({
         category: pipe(string(), minLength(1, "Category is required")),
         description: string(),
         apartment_id:
-            createData && createData.length > 1
+            createData && createData?.apartment?.length > 1
                 ? pipe(string(), minLength(1, "Apartment is required"))
                 : optional(string()),
     });
@@ -199,7 +199,7 @@ const VisitorModal = ({
                     ? String(datass.no_person)
                     : "1",
                 vehicle_number: datass.vehicle_no || "",
-                category: datass.category || "",
+                category: datass.category._id || "",
                 description: datass.description || "",
             });
         } else {
@@ -294,7 +294,7 @@ const VisitorModal = ({
                             />
                         </Grid>
 
-                        {createData && createData.length > 1 && (
+                        {createData && createData?.apartment?.length > 1 && (
                             <Grid size={{ xs: 12, md: 6 }}>
                                 <Controller
                                     name="apartment_id"
@@ -308,7 +308,7 @@ const VisitorModal = ({
                                             error={!!errors.apartment_id}
                                             helperText={errors.apartment_id?.message}
                                         >
-                                            {createData.map((item) => (
+                                            {createData?.apartment?.map((item) => (
                                                 <MenuItem key={item._id} value={String(item._id)}>
                                                     {item.apartment_no}
                                                 </MenuItem>
@@ -474,13 +474,9 @@ const VisitorModal = ({
                                         error={!!errors.category}
                                         helperText={errors.category?.message}
                                     >
-                                        <MenuItem value="1">Allow kids</MenuItem>
-                                        <MenuItem value="2">Courier</MenuItem>
-                                        <MenuItem value="3">Driver</MenuItem>
-                                        <MenuItem value="4">Friend/relatives</MenuItem>
-                                        <MenuItem value="5">Helper/maid</MenuItem>
-                                        <MenuItem value="6">Others</MenuItem>
-                                        <MenuItem value="7">Technician</MenuItem>
+                                        {createData && createData?.['visitorType']?.map((item, index) => (
+                                            <MenuItem key={index} value={item._id}>{item.name}</MenuItem>
+                                        ))}
                                     </TextField>
                                 )}
                             />
@@ -730,7 +726,12 @@ const VisitorTable = () => {
 
             const result = await response.json()
 
-            if (response.ok) setCreateData(result?.data || null)
+            if (response.ok) {
+
+                console.log("Result", result?.data);
+
+                setCreateData(result?.data || null)
+            }
         } catch (error) {
             console.error(error)
         }
@@ -789,15 +790,6 @@ const VisitorTable = () => {
     }, [data, globalFilter, nameNo, category])
 
     const columns = useMemo(() => {
-        const dataMap = {
-            '1': 'Allow kids',
-            '2': 'Courier',
-            '3': 'Driver',
-            '4': 'Friend/relatives',
-            '5': 'Helper/maid',
-            '6': 'Others',
-            '7': 'Technician'
-        }
 
         return [
             {
@@ -836,7 +828,7 @@ const VisitorTable = () => {
             columnHelper.accessor('category', {
                 header: 'Category',
                 cell: ({ row }) => (
-                    <Typography>{dataMap[row.original.category] || '-'}</Typography>
+                    <Typography>{row.original.category?.name}</Typography>
                 )
             }),
             columnHelper.accessor('otp', {

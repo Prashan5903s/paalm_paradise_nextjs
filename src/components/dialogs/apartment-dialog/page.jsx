@@ -71,7 +71,7 @@ const ApartmentDialog = ({ open, setOpen, selectedZone, fetchZoneData }) => {
 
     useEffect(() => {
         if (createData && towerId) {
-            const floor = createData.find(item => item._id == towerId);
+            const floor = createData?.towers?.find(item => item._id == towerId);
 
             setFloor(floor?.floors)
         }
@@ -85,7 +85,7 @@ const ApartmentDialog = ({ open, setOpen, selectedZone, fetchZoneData }) => {
                 tower: selectedZone?.tower_id.toString() || '',
                 floor: selectedZone?.floor_id?.toString() || '',
                 apartmentNumber: selectedZone?.apartment_no.toString() || '',
-                apartmentType: selectedZone?.apartment_type || '',
+                apartmentType: selectedZone?.apartment_type?._id || '',
                 area: selectedZone?.apartment_area?.toString() || '',
                 status: selectedZone?.status ? 'active' : 'inactive'
             })
@@ -240,8 +240,7 @@ const ApartmentDialog = ({ open, setOpen, selectedZone, fetchZoneData }) => {
                                         helperText={errors?.tower?.message}
                                     >
                                         <MenuItem value="">Select Tower</MenuItem>
-                                        {createData
-                                            .slice()
+                                        {createData && createData?.towers?.slice()
                                             .sort((a, b) => a.name.localeCompare(b.name))
                                             .map((item) => (
                                                 <MenuItem key={item._id} value={item._id}>
@@ -337,11 +336,10 @@ const ApartmentDialog = ({ open, setOpen, selectedZone, fetchZoneData }) => {
                                         error={!!errors?.apartmentType}
                                         helperText={errors?.apartmentType?.message}
                                     >
-                                        <MenuItem value="">Select Apartment Type</MenuItem>
-                                        <MenuItem value="1BHK">1 BHK</MenuItem>
-                                        <MenuItem value="2BHK">2 BHK</MenuItem>
-                                        <MenuItem value="3BHK">3 BHK</MenuItem>
-                                        <MenuItem value="4BHK">4 BHK</MenuItem>
+                                        <MenuItem value="" disabled>Select Apartment Type</MenuItem>
+                                        {createData && createData?.apartmentType?.map((item, index) => (
+                                            <MenuItem key={index} value={item._id}>{item.name}</MenuItem>
+                                        ))}
                                     </CustomTextField>
                                 )}
                             />

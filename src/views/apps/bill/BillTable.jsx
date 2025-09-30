@@ -914,7 +914,7 @@ const PayMaintenanceModal = ({
   // set form values when modal data changes
   useEffect(() => {
     if (data) {
-      setValue("amount", data?.toString() || "");
+      setValue("amount", data.toString() || "");
       setValue("billId", billId?.toString() || "");
       setValue("apartment_id", apartmentId?.toString() || "");
     }
@@ -1294,7 +1294,7 @@ const ViewMaintenance = ({ open, setIsOpenDetail, selectedZone }) => {
     const map = new Map();
 
     data?.fixed_cost?.forEach(item => {
-      map.set(item.apartment_type, Number(item.unit_value || 0));
+      map.set(item.apartment_type, String(item.unit_value || ""));
     });
 
     return map;
@@ -1345,13 +1345,14 @@ const ViewMaintenance = ({ open, setIsOpenDetail, selectedZone }) => {
       cell: ({ row }) => {
         const additionalCost = row.original?.user_bills?.[0]?.bill?.additional_cost || [];
         const apartmentTypeRaw = row.original?.apartment_type || '';
-        const apartmentType = apartmentTypeRaw.replace(/[^\d]/g, '');
-        const fixedCost = fixedCostMap.get(apartmentType) || 0;
+        
+        // const apartmentType = apartmentTypeRaw.replace(/[^\d]/g, '');
+        const fixedCost = fixedCostMap.get(apartmentTypeRaw) || 0;
         const additionalTotal = additionalCost.reduce((sum, val) => sum + (val.amount || 0), 0);
 
         const leftCost = row.original?.user_bills?.reduce((sum, p) => sum + p.amount, 0);
 
-        const finalCost = (fixedCost + additionalTotal) - leftCost;
+        const finalCost = (Number(fixedCost) + Number(additionalTotal)) - Number(leftCost);
 
         return (
           <Typography className="capitalize" color="text.primary">
@@ -1406,12 +1407,14 @@ const ViewMaintenance = ({ open, setIsOpenDetail, selectedZone }) => {
 
         const additionalCost = row.original?.user_bills?.[0]?.bill?.additional_cost || [];
         const apartmentTypeRaw = row.original?.apartment_type || '';
-        const apartmentType = apartmentTypeRaw.replace(/[^\d]/g, '');
-        const fixedCost = fixedCostMap.get(apartmentType) || 0;
+        
+        // const apartmentType = apartmentTypeRaw.replace(/[^\d]/g, '');
+        
+        const fixedCost = fixedCostMap.get(apartmentTypeRaw) || 0;
         const additionalTotal = additionalCost.reduce((sum, val) => sum + (val.amount || 0), 0);
 
         const leftCost = row.original?.user_bills?.reduce((sum, p) => sum + p.amount, 0);
-        const finalCost = (fixedCost + additionalTotal);
+        const finalCost = (Number(fixedCost) + Number(additionalTotal));
 
         return (
           <Typography className="capitalize" component="span" color="text.primary">
