@@ -89,7 +89,7 @@ const TowerDialog = ({ open, setOpen, title = '', fetchZoneData, selectedZone, t
                 if (exist) {
                     setError('name', {
                         type: 'manual',
-                        message: 'This name already exists.'
+                        message: 'Tower name already exists.'
                     });
 
                     return;
@@ -107,7 +107,7 @@ const TowerDialog = ({ open, setOpen, title = '', fetchZoneData, selectedZone, t
                 if (existsInTable) {
                     setError(`name`, {
                         type: 'manual',
-                        message: 'Zone name must be unique.'
+                        message: 'Tower name must be unique.'
                     });
                     hasError = true;
                 }
