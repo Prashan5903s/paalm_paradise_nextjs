@@ -41,7 +41,7 @@ const schema = object({
     // tower & parkingCode removed from schema since no input fields exist
 })
 
-const ApartmentDialog = ({ open, setOpen, selectedZone, fetchZoneData }) => {
+const ApartmentDialog = ({ open, setOpen, selectedZone, fetchZoneData, tableData }) => {
 
     const { data: session } = useSession()
     const token = session?.user?.token
@@ -56,6 +56,7 @@ const ApartmentDialog = ({ open, setOpen, selectedZone, fetchZoneData }) => {
         control,
         handleSubmit,
         reset,
+        setError,
         formState: { errors }
     } = useForm({
         resolver: valibotResolver(schema),
@@ -129,6 +130,61 @@ const ApartmentDialog = ({ open, setOpen, selectedZone, fetchZoneData }) => {
 
     // ✅ Submit handler
     const submitData = async (formData) => {
+
+        if (tableData && tableData.length > 0) {
+            const apartmentNo = String(formData.apartmentNumber || '').trim().toLowerCase();
+            const towerId = String(formData.tower || '');
+            const floorId = String(formData.floor || '');
+
+            if (selectedZone) {
+                // Edit mode: check for duplicates excluding the current selectedZone
+                const duplicate = tableData.find((item) => {
+                    const itemApartment = String(item.apartment_no || '').trim().toLowerCase();
+                    const itemTower = String(item.tower_id || '');
+                    const itemFloor = String(item.floor_id || '');
+                    const itemId = String(item._id || '');
+
+                    return (
+                        itemApartment === apartmentNo &&
+                        itemTower === towerId &&
+                        itemFloor === floorId &&
+                        itemId !== String(selectedZone._id || '')
+                    );
+                });
+
+                if (duplicate) {
+                    setError('apartmentNumber', {
+                        type: 'manual',
+                        message: 'This apartment number already exists on this floor.',
+                    });
+                    
+                    return;
+                }
+            } else {
+                // Add mode: check for any duplicates
+                const duplicate = tableData.some((item) => {
+                    const itemApartment = String(item.apartment_no || '').trim().toLowerCase();
+                    const itemTower = String(item.tower_id || '');
+                    const itemFloor = String(item.floor_id || '');
+                    
+                    return (
+                        itemApartment === apartmentNo &&
+                        itemTower === towerId &&
+                        itemFloor === floorId
+                    );
+                });
+
+                if (duplicate) {
+                    setError('apartmentNumber', {
+                        type: 'manual',
+                        message: 'This apartment number already exists on this floor.',
+                    });
+                    
+                    return;
+                }
+            }
+        }
+
         setLoading(true)
 
         try {

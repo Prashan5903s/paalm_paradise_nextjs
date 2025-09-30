@@ -334,17 +334,6 @@ const FloorTable = ({ tableData, fetchZoneData }) => {
           tableData={tableData}
         />
       )}
-
-      {openZoneDialog && (
-        <RegionDialog
-          typeForm={true}
-          open={openZoneDialog}
-          setOpen={setOpenZoneDialog}
-          selectZone={selectedZone}
-          selectedRegion={selectedRegion}
-          fetchRegionData={fetchZoneData}
-        />
-      )}
     </Card>
   )
 }

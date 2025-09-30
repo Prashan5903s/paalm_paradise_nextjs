@@ -46,6 +46,7 @@ const FloorDialog = ({
     selectedZone,
     tableData,
 }) => {
+
     const { data: session } = useSession()
     const token = session?.user?.token
     const API_URL = process.env.NEXT_PUBLIC_API_URL
@@ -112,41 +113,46 @@ const FloorDialog = ({
     const submitData = async (formData) => {
         // Unique validation against tableData
         if (tableData && tableData.length > 0) {
-            let hasError = false
+            const floorName = String(formData.name || '').trim().toLowerCase();
+            const towerId = String(formData.tower_id || '');
 
             if (selectedZone) {
-                const exist = tableData.find(
-                    (item) =>
-                        item.floor_name.trim().toLowerCase() ===
-                        formData.name.trim().toLowerCase() &&
-                        item._id.toString().trim() !==
-                        selectedZone._id.toString().trim()
-                )
+                // Edit mode: check for duplicates excluding current selectedZone
+                const duplicate = tableData.find((item) => {
+                    const itemName = String(item.floor_name || '').trim().toLowerCase();
+                    const itemTowerId = String(item.tower_id?._id || '');
+                    const itemId = String(item._id || '');
 
-                if (exist) {
+                    return itemName === floorName && itemTowerId === towerId && itemId !== String(selectedZone._id || '');
+                });
+
+                if (duplicate) {
+                  
                     setError('name', {
                         type: 'manual',
-                        message: 'This name already exists.',
-                    })
-
-                    return
+                        message: 'This floor name already exists in this tower.',
+                    });
+                    
+                    return;
                 }
             } else {
-                const existsInTable = tableData.some(
-                    (zoneInTable) =>
-                        zoneInTable.floor_name.trim().toLowerCase() ===
-                        formData.name.trim().toLowerCase()
-                )
+                
+                // Add mode: check for any duplicates
+                const duplicate = tableData.some((item) => {
+                    const itemName = String(item.floor_name || '').trim().toLowerCase();
+                    const itemTowerId = String(item.tower_id?._id || '');
+                    
+                    return itemName === floorName && itemTowerId === towerId;
+                });
 
-                if (existsInTable) {
+                if (duplicate) {
                     setError('name', {
                         type: 'manual',
-                        message: 'Floor name must be unique.',
-                    })
-                    hasError = true
+                        message: 'Floor name must be unique in this tower.',
+                    });
+                    
+                    return;
                 }
-
-                if (hasError) return
             }
         }
 
