@@ -82,7 +82,7 @@ const TowerDialog = ({ open, setOpen, title = '', fetchZoneData, selectedZone, t
 
             if (selectedZone) {
                 const exist = tableData.find(item =>
-                    item.name.trim().toLowerCase() === formData.name.trim().toLowerCase() &&
+                    item.name.trim().replace(/\s+/g, ' ').toLowerCase() === formData.name.trim().replace(/\s+/g, ' ').toLowerCase() &&
                     item._id.toString().trim() !== selectedZone._id.toString().trim()
                 );
 
@@ -101,7 +101,7 @@ const TowerDialog = ({ open, setOpen, title = '', fetchZoneData, selectedZone, t
                 if (!name) return; // Skip empty names (optional)
 
                 const existsInTable = tableData.some(zoneInTable =>
-                    zoneInTable.name.trim().toLowerCase() == name.trim().toLowerCase()
+                    zoneInTable.name.trim().replace(/\s+/g, ' ').toLowerCase() == name.trim().replace(/\s+/g, ' ').toLowerCase()
                 );
 
                 if (existsInTable) {
