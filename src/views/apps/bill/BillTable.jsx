@@ -704,7 +704,7 @@ const ViewInvoiceModal = ({ open, setIsInvoiceOpen, selectedZone }) => {
                         </div>
                       </div>
                       <div className='flex flex-col gap-6'>
-                        <Typography variant='h5'>{`Invoice #${'123'}`}</Typography>
+                        <Typography variant='h5'>{`Invoice #${selectedZone.invoice_no}`}</Typography>
                         <div className='flex flex-col gap-1'>
                           <Typography color='text.primary'>{`Date Issued: ${formattedDate(selectedZone.bill_date)}`}</Typography>
                           <Typography color='text.primary'>{`Date Due: ${formattedDate(selectedZone?.bill_due_date)}`}</Typography>
