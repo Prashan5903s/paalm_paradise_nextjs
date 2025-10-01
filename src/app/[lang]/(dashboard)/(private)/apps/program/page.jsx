@@ -41,9 +41,6 @@ const MyTrainingPage = () => {
       if (response.ok) {
         const value = result?.data;
 
-        console.log("Value", value);
-
-
         setCardData(value);
         setTotalItems(value?.length || 0);
       }

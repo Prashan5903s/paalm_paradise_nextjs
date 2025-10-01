@@ -264,9 +264,6 @@ const BillDialog = ({ open, setOpen, selectedZone, fetchZoneData, type }) => {
 
                 if (response.ok && !ignore) {
 
-                    console.log("Result", result?.data);
-                    
-
                     setCreateData(result?.data || { apartment: [], billType: [] })
                 }
             } catch (error) {

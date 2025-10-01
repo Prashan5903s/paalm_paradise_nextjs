@@ -48,8 +48,6 @@ const Courses = () => {
             if (response.ok) {
                 const result = value?.data || []
 
-                console.log("Result", result)
-
                 // Tab list data
                 const course_data = result.map(item => ({
                     label: item?.title,

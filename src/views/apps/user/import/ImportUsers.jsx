@@ -345,8 +345,6 @@ const ImportUsers = ({ batch, onBack }) => {
 
         if (!res.ok) {
 
-          console.log("Result error", result?.message);
-
           throw new Error(result.message || 'Import failed');
         }
 

@@ -35,9 +35,7 @@ const ContentFolderForm = () => {
             if (response.ok) {
 
                 const value = result?.data
-
-                console.log("Value", value);
-
+                
                 setEditFormData(value)
 
                 setLoading(true)
@@ -54,8 +52,6 @@ const ContentFolderForm = () => {
             fetchEditData()
         }
     }, [API_URL, token, id, cid])
-
-    console.log(API_URL, token, id, cid);
 
 
     return (

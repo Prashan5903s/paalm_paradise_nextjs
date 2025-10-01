@@ -158,7 +158,6 @@ const UserDashboard = () => {
                 // total_cost calculation
                 const additionalCost = row?.bill_id?.additional_cost || [];
                 const apartmentTypeRaw = row?.apartment_id?.apartment_type || "";
-                const apartmentType = apartmentTypeRaw.replace(/[^\d]/g, "");
                 const fixedCost = fixedCostMap.get(apartmentTypeRaw) || 0;
 
                 const additionalTotal = additionalCost.reduce(
@@ -169,7 +168,10 @@ const UserDashboard = () => {
                 grouped[key].total_cost = Number(fixedCost) + Number(additionalTotal);
 
                 // sum paid cost
-                grouped[key].paid_cost += Number(row?.amount) || 0;
+                grouped[key].paid_cost += row?.payments?.reduce(
+                    (sum, val) => sum + (val.amount || 0),
+                    0
+                ) || 0;
 
                 // status
                 grouped[key].status =

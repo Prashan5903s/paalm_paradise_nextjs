@@ -19,7 +19,7 @@ import Grid from '@mui/material/Grid2'
 // Hook Form + Validation
 import { useForm, Controller } from 'react-hook-form'
 import { valibotResolver } from '@hookform/resolvers/valibot'
-import { object, string, number, minLength, pipe } from 'valibot'
+import { object, string, number, minLength, pipe, optional } from 'valibot'
 
 import { useSession } from 'next-auth/react'
 
@@ -36,7 +36,7 @@ const schema = object({
     apartmentNumber: pipe(string(), minLength(1, 'Apartment number is required')),
     area: pipe(string(), minLength(1, 'Area is required')), // keep as string since input type="number"
     apartmentType: pipe(string(), minLength(1, 'Apartment type is required')),
-    status: pipe(string(), minLength(1, 'Status is required')),
+    status: optional(string()),
 
     // tower & parkingCode removed from schema since no input fields exist
 })
@@ -66,7 +66,7 @@ const ApartmentDialog = ({ open, setOpen, selectedZone, fetchZoneData, tableData
             apartmentNumber: '',
             area: '',
             apartmentType: '',
-            status: ''
+            status: 'inactive'
         }
     })
 
@@ -396,29 +396,6 @@ const ApartmentDialog = ({ open, setOpen, selectedZone, fetchZoneData, tableData
                                         {createData && createData?.apartmentType?.map((item, index) => (
                                             <MenuItem key={index} value={item._id}>{item.name}</MenuItem>
                                         ))}
-                                    </CustomTextField>
-                                )}
-                            />
-                        </Grid>
-
-                        {/* Status */}
-                        <Grid size={{ xs: 12 }}>
-                            <Controller
-                                name="status"
-                                control={control}
-                                render={({ field }) => (
-                                    <CustomTextField
-                                        {...field}
-                                        select
-                                        fullWidth
-                                        label="Status"
-                                        required
-                                        error={!!errors?.status}
-                                        helperText={errors?.status?.message}
-                                    >
-                                        <MenuItem value="">Select Status</MenuItem>
-                                        <MenuItem value="inactive">Unsold</MenuItem>
-                                        <MenuItem value="active">Occupied</MenuItem>
                                     </CustomTextField>
                                 )}
                             />

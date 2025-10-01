@@ -40,8 +40,6 @@ export const authOptions = {
 
           if (!res.ok) {
         
-            console.log('Invalid login:', data?.message);
-        
             return null;
           }
 

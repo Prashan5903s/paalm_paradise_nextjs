@@ -728,8 +728,6 @@ const VisitorTable = () => {
 
             if (response.ok) {
 
-                console.log("Result", result?.data);
-
                 setCreateData(result?.data || null)
             }
         } catch (error) {

@@ -156,7 +156,7 @@ const ProgramCardComponent = ({
         if (API_URL && token && stage) {
             fetchCategory()
         }
-        
+
         if (API_URL && token && parent && currentId) {
             fetchBreadCumbCategory();
         }
@@ -327,7 +327,7 @@ const ProgramCardComponent = ({
                     </MenuItem>
                     <MenuItem
                         onClick={() => {
-                            console.log('Reset action'); // replace with actual reset logic
+
                             handleMenuClose();
                         }}
                     >
@@ -336,7 +336,7 @@ const ProgramCardComponent = ({
                     </MenuItem>
                     <MenuItem
                         onClick={() => {
-                            console.log('Clone action'); // replace with actual clone logic
+
                             handleMenuClose();
                         }}
                     >

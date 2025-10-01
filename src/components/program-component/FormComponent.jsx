@@ -110,22 +110,22 @@ const FormComponent = ({
         onDrop: (acceptedFiles) => {
             if (!acceptedFiles.length) return
             const selectedFile = acceptedFiles[0]
-            
+
             setFile(selectedFile)
             setImageError('') // Clear any previous error
             const reader = new FileReader()
-            
+
             reader.onload = (e) => {
                 setPreview(e.target.result)
             }
-            
+
             reader.readAsDataURL(selectedFile)
         },
         onDropRejected: (rejectedFiles) => {
             rejectedFiles.forEach(file => {
                 file.errors.forEach(error => {
                     let msg = ''
-                    
+
                     switch (error.code) {
                         case 'file-invalid-type':
                             msg = `Invalid file type. Allowed types: JPG, PNG, GIF, WebP, SVG, BMP, TIFF, ICO`
@@ -138,9 +138,9 @@ const FormComponent = ({
                             break
                         default:
                             msg = `There was an issue with the uploaded file.`
-                    
-                        }
-                    
+
+                    }
+
                     toast.error(msg, { hideProgressBar: false })
                     setImageError(msg)
                 })
@@ -169,7 +169,7 @@ const FormComponent = ({
 
         if (!file && !editData?.image_url) {
             setImageError('Image is required');
-            
+
             return;
         } else {
             setImageError(''); // Clear error
@@ -197,12 +197,8 @@ const FormComponent = ({
             if (response.ok) {
                 toast.success(`${stage} ${id ? "edit" : "add"} successfully`, { autoClose: 1000 })
                 router.push(backURL)
-            } else {
-
-                console.log("Error", response, result);
-
-
             }
+
         } catch (error) {
             console.error(error)
             toast.error('Submission failed due to an error')

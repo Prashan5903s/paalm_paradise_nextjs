@@ -832,6 +832,7 @@ const PayMaintenanceModal = ({
   setPayDialog,
   setPayData,
   apartmentId,
+  userBillId,
   billId,
   fetchZoneData,
 }) => {
@@ -851,7 +852,7 @@ const PayMaintenanceModal = ({
         status: pipe(string(), minLength(1, "Status is required")),
         payment_mode: pipe(string(), minLength(1, "Payment mode is required")),
         paid_remark: optional(string()),
-
+        userBillId: optional(string()),
         bank_name:
           ["1", "2", "3"].includes(paymentMode) // only required if mode is 1/2/3
             ? pipe(string(), minLength(1, "Bank name is required"))
@@ -900,6 +901,7 @@ const PayMaintenanceModal = ({
       amount: "",
       status: "",
       payment_mode: "",
+      userBillId: "",
       paid_remark: "",
       bank_name: "",
       cheque_no: "",
@@ -917,8 +919,9 @@ const PayMaintenanceModal = ({
       setValue("amount", data.toString() || "");
       setValue("billId", billId?.toString() || "");
       setValue("apartment_id", apartmentId?.toString() || "");
+      setValue("userBillId", userBillId.toString() || "")
     }
-  }, [data, setValue, apartmentId, billId]);
+  }, [data, setValue, apartmentId, billId, userBillId]);
 
   const submitData = async (formData) => {
     try {
@@ -947,12 +950,6 @@ const PayMaintenanceModal = ({
       console.error("Request failed:", error);
     }
   };
-
-  useEffect(() => {
-    if (errors) {
-      console.log("Error", errors);
-    }
-  }, [errors])
 
   return (
     <Dialog
@@ -1254,13 +1251,15 @@ const ViewMaintenance = ({ open, setIsOpenDetail, selectedZone }) => {
   const token = session?.user?.token;
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-  const [data, setData] = useState([]);
+  const [datas1, setData] = useState([]);
   const [rowSelection, setRowSelection] = useState({});
   const [globalFilter, setGlobalFilter] = useState('');
   const [openDialog, setOpenDialog] = useState(false)
   const [payData, setPayData] = useState();
   const [billId, setBillId] = useState()
   const [apartmentId, setApartmentId] = useState()
+
+  const [userBillId, setUserBillId] = useState()
 
   // Fetch maintenance data
   const fetchMaintenance = async () => {
@@ -1273,7 +1272,6 @@ const ViewMaintenance = ({ open, setIsOpenDetail, selectedZone }) => {
       const result = await response.json();
 
       if (response.ok) {
-        console.log("Data", result?.data);
         setData(result?.data || []);
       } else {
         console.error('Fetch maintenance failed:', result);
@@ -1288,17 +1286,6 @@ const ViewMaintenance = ({ open, setIsOpenDetail, selectedZone }) => {
       fetchMaintenance();
     }
   }, [API_URL, token, selectedZone?._id]);
-
-  // Prepare fixed cost map for faster lookup
-  const fixedCostMap = useMemo(() => {
-    const map = new Map();
-
-    data?.fixed_cost?.forEach(item => {
-      map.set(item.apartment_type, String(item.unit_value || ""));
-    });
-
-    return map;
-  }, [data?.fixed_cost]);
 
   // Table columns
   const columns = useMemo(() => [
@@ -1344,14 +1331,9 @@ const ViewMaintenance = ({ open, setIsOpenDetail, selectedZone }) => {
       header: 'Total cost',
       cell: ({ row }) => {
         const additionalCost = row.original?.user_bills?.[0]?.bill?.additional_cost || [];
-        const apartmentTypeRaw = row.original?.apartment_type || '';
-        
-        // const apartmentType = apartmentTypeRaw.replace(/[^\d]/g, '');
-        const fixedCost = fixedCostMap.get(apartmentTypeRaw) || 0;
+        const fixedCost = row.original?.user_bills?.[0]?.amount || 0;
         const additionalTotal = additionalCost.reduce((sum, val) => sum + (val.amount || 0), 0);
-
-        const leftCost = row.original?.user_bills?.reduce((sum, p) => sum + p.amount, 0);
-
+        const leftCost = row.original?.user_bills?.[0]?.payments?.reduce((sum, p) => sum + p.amount, 0) || 0;
         const finalCost = (Number(fixedCost) + Number(additionalTotal)) - Number(leftCost);
 
         return (
@@ -1366,6 +1348,7 @@ const ViewMaintenance = ({ open, setIsOpenDetail, selectedZone }) => {
                   setBillId(selectedZone.id);
                   setApartmentId(row.original._id)
                   setOpenDialog(true);
+                  setUserBillId(row.original?.user_bills?.[0]?._id)
                   setPayData(finalCost);
                 }}
                 disabled={finalCost <= 0}
@@ -1382,7 +1365,7 @@ const ViewMaintenance = ({ open, setIsOpenDetail, selectedZone }) => {
       header: 'Paid cost',
       cell: ({ row }) => {
 
-        const leftCost = row.original?.user_bills?.reduce((sum, p) => sum + p.amount, 0);
+        const leftCost = row.original?.user_bills?.[0]?.payments?.reduce((sum, p) => sum + p.amount, 0) || 0;
 
         return (
           <Typography className="capitalize" color="text.primary">
@@ -1406,14 +1389,13 @@ const ViewMaintenance = ({ open, setIsOpenDetail, selectedZone }) => {
       cell: ({ row }) => {
 
         const additionalCost = row.original?.user_bills?.[0]?.bill?.additional_cost || [];
-        const apartmentTypeRaw = row.original?.apartment_type || '';
-        
+
         // const apartmentType = apartmentTypeRaw.replace(/[^\d]/g, '');
-        
-        const fixedCost = fixedCostMap.get(apartmentTypeRaw) || 0;
+        const fixedCost = row.original?.user_bills?.[0]?.amount || 0;
         const additionalTotal = additionalCost.reduce((sum, val) => sum + (val.amount || 0), 0);
 
-        const leftCost = row.original?.user_bills?.reduce((sum, p) => sum + p.amount, 0);
+        const leftCost = row.original?.user_bills?.[0]?.payments?.reduce((sum, p) => sum + p.amount, 0) || 0;
+
         const finalCost = (Number(fixedCost) + Number(additionalTotal));
 
         return (
@@ -1428,24 +1410,11 @@ const ViewMaintenance = ({ open, setIsOpenDetail, selectedZone }) => {
         );
       },
     }),
-
-    // Status
-    // columnHelper.accessor('status', {
-    //   header: 'Status',
-    //   cell: ({ row }) => (
-    //     <Chip
-    //       label={row.original.status ? 'Paid' : 'Unpaid'}
-    //       color={row.original.status ? 'success' : 'error'}
-    //       variant="tonal"
-    //       size="small"
-    //     />
-    //   ),
-    // }),
-  ], [fixedCostMap]);
+  ], [datas1]);
 
   // React table instance
   const table = useReactTable({
-    data: data?.userBill || [],
+    data: datas1?.userBill || [],
     columns,
     filterFns: { fuzzy: fuzzyFilter },
     state: { rowSelection, globalFilter },
@@ -1552,6 +1521,7 @@ const ViewMaintenance = ({ open, setIsOpenDetail, selectedZone }) => {
           <PayMaintenanceModal
             open={openDialog}
             data={payData}
+            userBillId={userBillId}
             setPayDialog={setOpenDialog}
             setPayData={setPayData}
             apartmentId={apartmentId}

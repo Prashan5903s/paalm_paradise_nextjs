@@ -513,8 +513,6 @@ const UserFormLayout = () => {
     const submitFormData = async (values) => {
         try {
 
-            console.log("Error", errors);
-
 
             if (values.roles.length === 0) {
                 setError("roles", {

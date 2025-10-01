@@ -49,27 +49,6 @@ const fuzzyFilter = (row, columnId, value, addMeta) => {
     return itemRank.passed
 }
 
-// Debounced Input
-const DebouncedInput = ({ value: initialValue, onChange, debounce = 500, ...props }) => {
-    const [value, setValue] = useState(initialValue)
-
-    useEffect(() => {
-        setValue(initialValue)
-    }, [initialValue])
-
-    useEffect(() => {
-        const timeout = setTimeout(() => {
-            onChange(value)
-        }, debounce)
-
-        return () => clearTimeout(timeout)
-
-    }, [value])
-
-    return <CustomTextField {...props} value={value} onChange={e => setValue(e.target.value)} />
-
-}
-
 const columnHelper = createColumnHelper()
 
 const BillTable = ({ tableData, value, type }) => {
@@ -78,9 +57,6 @@ const BillTable = ({ tableData, value, type }) => {
     const [data, setData] = useState([])
     const [filteredData, setFilteredData] = useState([])
     const [globalFilter, setGlobalFilter] = useState('')
-
-    const [isOpen, setIsOpen] = useState(false)
-    const [paidData, setPaidData] = useState()
 
     const fixedCostMap = useMemo(() => {
         const map = new Map();
@@ -116,7 +92,7 @@ const BillTable = ({ tableData, value, type }) => {
                     // total_cost calculation
                     const additionalCost = row?.bill_id?.additional_cost || [];
                     const apartmentTypeRaw = row?.apartment_id?.apartment_type || "";
-                    
+
                     // const apartmentType = apartmentTypeRaw.replace(/[^\d]/g, "");
                     const fixedCost = fixedCostMap.get(apartmentTypeRaw) || 0;
 
@@ -128,7 +104,10 @@ const BillTable = ({ tableData, value, type }) => {
                     grouped[key].total_cost = Number(fixedCost) + Number(additionalTotal);
 
                     // sum paid cost
-                    grouped[key].paid_cost += Number(row?.amount) || 0;
+                    grouped[key].paid_cost += row?.payments?.reduce(
+                        (sum, val) => sum + (val.amount || 0),
+                        0
+                    ) || 0;
 
                     // status
                     grouped[key].status =
@@ -142,7 +121,7 @@ const BillTable = ({ tableData, value, type }) => {
 
             // 🔹 filter logic based on "value"
             let finalData = processedData;
-            
+
             if (type === "maintenance") {
                 if (value === true) {
                     finalData = processedData.filter(

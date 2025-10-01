@@ -1083,7 +1083,6 @@ const ActivityModal = ({ open, id, setISOpen, editData, API_URL, token, mId, act
 
 const ContentFlowComponent = ({ setOpen, activities, API_URL, token, fetchActivities, mId }) => {
 
-    console.log('Activity', activities);
 
 
     const [editingId, setEditingId] = useState(null);
@@ -2537,7 +2536,7 @@ const ContentFlowModal = ({ open, data, setOpen, setSelected, selected, setNext,
                             name="custom-radios-icons"
                             value={selected || ''}
                             onChange={(e) => {
-                                console.log(e.target.value);
+    
 
                                 const selectedItem = data?.appConfig?.activity_data?.find(
                                     (item) => item.title === e.target.value
