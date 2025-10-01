@@ -2,6 +2,8 @@
 
 import { useState, useMemo, useEffect } from 'react'
 
+import dynamic from 'next/dynamic'
+
 import { useSession } from 'next-auth/react'
 
 import {
@@ -16,6 +18,7 @@ import {
     Box,
     Stack,
     Card,
+    Chip,
     TextField,
     Button,
     CardHeader,
@@ -24,9 +27,9 @@ import {
     Typography,
 } from '@mui/material'
 
-import CustomTextField from '@/@core/components/mui/TextField'
+import dayjs from 'dayjs'
 
-import OptionMenu from '@core/components/option-menu'
+import classnames from 'classnames'
 
 import {
     createColumnHelper,
@@ -49,18 +52,16 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker'
 
+import OptionMenu from '@core/components/option-menu'
+
 import CustomAvatar from '@core/components/mui/Avatar'
 
 import TablePaginationComponent from '@components/TablePaginationComponent'
 
-import classnames from 'classnames'
-
-import dynamic from 'next/dynamic'
+import CustomTextField from '@/@core/components/mui/TextField'
 
 import tableStyles from '@core/styles/table.module.css'
 
-import dayjs from 'dayjs'
-import AppReactDatepicker from '@/libs/styles/AppReactDatepicker'
 
 const AppReactApexCharts = dynamic(() => import('@/libs/styles/AppReactApexCharts'))
 
@@ -185,8 +186,11 @@ const EarningReportsWithTabs = () => {
     }
 
     const renderTabPanels = (currentValue, theme, options, colors) => {
+
         const max = reportData.length > 0 ? Math.max(...reportData) : 0
+
         const seriesIndex = reportData.indexOf(max)
+
         const finalColors = colors.map((color, i) =>
             seriesIndex === i ? 'var(--mui-palette-primary-main)' : color
         )
@@ -370,8 +374,11 @@ const PaymentReport = () => {
             columnHelper.accessor("total_amount", {
                 header: "Total Amount",
                 cell: ({ row }) => {
+
                     const additionalCosts = row.original.additional_cost || []
+
                     const total = additionalCosts.reduce((sum, item) => sum + (Number(item.amount) || 0), 0)
+
                     return <Typography>{total}</Typography>
                 }
             }),
@@ -381,8 +388,11 @@ const PaymentReport = () => {
             columnHelper.accessor("bill_amount", {
                 header: "Bill Amount",
                 cell: ({ row }) => {
+
                     const totalPaid = row.original.payments?.reduce((sum, p) => sum + (p.amount || 0), 0) || 0
+
                     const remaining = (row.original.bill_amount || 0) - totalPaid
+
                     return (
                         <Typography>
                             {row.original.bill_amount || 0}
@@ -398,7 +408,9 @@ const PaymentReport = () => {
             columnHelper.accessor("paid_amount", {
                 header: "Paid Amount",
                 cell: ({ row }) => {
+
                     const totalPaid = row.original.payments?.reduce((sum, p) => sum + (p.amount || 0), 0) || 0
+
                     return (
                         <Typography>
                             {totalPaid > 0 ? (
@@ -543,36 +555,10 @@ const PaymentReport = () => {
 
                         {/* Pagination */}
                         <TablePaginationComponent table={table} />
-
-                        {/* Dialogs */}
-                        {openDialog && (
-                            <BillDialog
-                                open={openDialog}
-                                setOpen={setOpenDialog}
-                                type={''}
-                            />
-                        )}
-                        {payDialog && (
-                            <PayModal
-                                data={payData}
-                                open={payDialog}
-                                setPayDialog={setPayDialog}
-                                setPayData={setPayData}
-                                type={''}
-                                billId={bill_id}
-                            />
-                        )}
-                        {isOpen && (
-                            <PaidAmountModal
-                                setIsOpen={setIsOpen}
-                                open={isOpen}
-                                data={[]}
-                            />
-                        )}
                     </Card>
                 </TabPanel>
             </div>
-        </TabContext> 
+        </TabContext>
     )
 }
 
