@@ -37,16 +37,6 @@ const data = [
     subtitle: '',
     evidence: 'inactive_users',
   },
-  {
-    title: 'Not logged in',
-    stats: '0',
-    avatarIcon: 'tabler-user-search',
-    avatarColor: 'warning',
-    trend: 'positive',
-    trendNumber: '0',
-    subtitle: '',
-    evidence: 'not_logged_in_users',
-  }
 ]
 
 const UserListCards = (statsData) => {
