@@ -19,10 +19,6 @@ import {
     Stack,
     Card,
     Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
-    Chip,
     TextField,
     Button,
     CardHeader,
@@ -515,7 +511,7 @@ const PaymentReport = () => {
             const result = await response.json()
 
             if (response.ok) {
-                console.log("Table report", result.data);
+
                 setFilteredData(result.data || [])
             } else {
                 setError(result?.message || "Something went wrong")
