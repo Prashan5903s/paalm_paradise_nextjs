@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 
 import { useSession } from "next-auth/react";
 
@@ -17,6 +17,8 @@ import {
     Typography,
 } from '@mui/material';
 
+import { Controller, useForm } from "react-hook-form";
+
 import {
     createColumnHelper,
     flexRender,
@@ -27,15 +29,11 @@ import {
     getSortedRowModel,
 } from '@tanstack/react-table';
 
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-
-import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
-
 import classnames from 'classnames';
 
-import dayjs from "dayjs";
+import dayjs from 'dayjs'
+
+import AppReactDatepicker from '@/libs/styles/AppReactDatepicker';
 
 import FormatTime from '@/utils/formatTime';
 
@@ -133,13 +131,17 @@ const FinancialReport = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
-    const initialStart = dayjs().startOf("day");
-    const initialEnd = dayjs().endOf("day");
-    const minDateTime = dayjs("2000-01-01");
-    const maxDateTime = dayjs("2100-01-01");
+    const myDateRef = useRef(null);
 
-    const [start, setStart] = useState(initialStart);
-    const [end, setEnd] = useState(initialEnd);
+    const { control, formState: { errors } } = useForm()
+
+    const [startDateRange, setStartDateRange] = useState(
+        dayjs().startOf("day").toDate()
+    );
+    
+    const [endDateRange, setEndDateRange] = useState(
+        dayjs().endOf("day").toDate()
+    );
 
     // Fetch API
     const fetchTablePaymentData = useCallback(async () => {
@@ -149,7 +151,7 @@ const FinancialReport = () => {
 
         try {
             const response = await fetch(
-                `${URL}/company/table/financial/report/${start.toISOString()}/${end.toISOString()}/${type}`,
+                `${URL}/company/table/financial/report/${startDateRange.toISOString()}/${endDateRange.toISOString()}/${type}`,
                 { method: "GET", headers: { Authorization: `Bearer ${token}` } }
             );
 
@@ -162,11 +164,11 @@ const FinancialReport = () => {
         } finally {
             setLoading(false);
         }
-    }, [URL, start, end, type, token]);
+    }, [URL, startDateRange, endDateRange, type, token]);
 
     useEffect(() => {
         if (URL && token) fetchTablePaymentData();
-    }, [URL, token, start, end, type, fetchTablePaymentData]);
+    }, [URL, token, startDateRange, endDateRange, type, fetchTablePaymentData]);
 
     // Columns
     const columns = useMemo(() => [
@@ -242,38 +244,62 @@ const FinancialReport = () => {
                         </TextField>
                     </div>
 
-                    <div className="flex gap-4 flex-col">
-                        <LocalizationProvider dateAdapter={AdapterDayjs}>
-                            <Box sx={{ flex: 1 }}>
-                                <Stack direction={{ xs: "column", sm: "row" }} spacing={2} alignItems="stretch" sx={{ width: "100%" }}>
-                                    <DateTimePicker
-                                        label="Start"
-                                        value={start || initialStart}
-                                        onChange={(newVal) => setStart(newVal || initialStart)}
-                                        minDateTime={minDateTime}
-                                        maxDateTime={maxDateTime}
-                                        slotProps={{ textField: { fullWidth: true, size: "small" } }}
-                                    />
-                                    <DateTimePicker
-                                        label="End"
-                                        value={end || initialEnd}
-                                        onChange={(newVal) => setEnd(newVal || initialEnd)}
-                                        minDateTime={minDateTime}
-                                        maxDateTime={maxDateTime}
-                                        slotProps={{ textField: { fullWidth: true, size: "small" } }}
-                                    />
-                                    <TextField select fullWidth size="small" required label="Bill Type" value={type} onChange={(e) => setType(e.target.value)}>
-                                        <MenuItem value="" disabled>
-                                            Select Bill Type
-                                        </MenuItem>
-                                        <MenuItem value="all">All</MenuItem>
-                                        <MenuItem value="utilityBills">Utility Bill</MenuItem>
-                                        <MenuItem value="common-area-bill">Common Area Bill</MenuItem>
-                                        <MenuItem value="maintenance">Maintenance</MenuItem>
-                                    </TextField>
-                                </Stack>
-                            </Box>
-                        </LocalizationProvider>
+                    <div className="flex gap-4 flex-row">
+                        <Controller
+                            name="date"
+                            control={control}
+                            render={({ field }) => (
+                                <AppReactDatepicker
+                                    todayButton="Today"
+                                    selectsRange
+                                    fullWidth
+                                    monthsShown={2}
+                                    startDate={field.value?.[0] || startDateRange}
+                                    endDate={field.value?.[1] || endDateRange}
+                                    onChange={(dates) => {
+                                        const [start, end] = dates
+                                        
+                                        setStartDateRange(start)
+                                        setEndDateRange(end)
+                                        field.onChange(dates) // react-hook-form को update करें
+                                    }}
+                                    showYearDropdown
+                                    showMonthDropdown
+                                    dateFormat="yyyy/MM/dd"
+                                    placeholderText="YYYY/MM/DD"
+                                    customInput={
+                                        <TextField
+                                            size="small"
+                                            fullWidth
+                                            style={{ width: "200px" }}
+                                            label="Date"
+                                            error={!!errors?.date}
+                                            helperText={errors?.date?.message}
+                                            inputRef={myDateRef} // ref यहां लगाएं
+                                        />
+                                    }
+                                />
+                            )}
+                        />
+
+                        <TextField
+                            select
+                            style={{ width: "200px" }}
+                            fullWidth
+                            size="small"
+                            required
+                            label="Bill Type"
+                            value={type}
+                            onChange={(e) => setType(e.target.value)}
+                        >
+                            <MenuItem value="" disabled>
+                                Select Bill Type
+                            </MenuItem>
+                            <MenuItem value="all">All</MenuItem>
+                            <MenuItem value="utilityBills">Utility Bill</MenuItem>
+                            <MenuItem value="common-area-bill">Common Area Bill</MenuItem>
+                            <MenuItem value="maintenance">Maintenance</MenuItem>
+                        </TextField>
                     </div>
                 </CardContent>
 

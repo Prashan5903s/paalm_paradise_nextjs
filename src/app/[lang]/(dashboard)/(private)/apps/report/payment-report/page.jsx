@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 
 import dynamic from 'next/dynamic'
 
@@ -11,6 +11,8 @@ import {
     TabList,
     TabPanel
 } from '@mui/lab'
+
+import { Controller, useForm } from 'react-hook-form'
 
 import {
     Tab,
@@ -46,11 +48,7 @@ import {
 
 import { useTheme } from '@mui/material/styles'
 
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
-
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
-
-import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker'
+import AppReactDatepicker from '@/libs/styles/AppReactDatepicker';
 
 import OptionMenu from '@core/components/option-menu'
 
@@ -475,6 +473,8 @@ const PaymentReport = () => {
     const token = session?.user?.token
     const URL = process.env.NEXT_PUBLIC_API_URL
 
+    const myDateRef = useRef(null);
+
     const [type, setType] = useState("all")
     const [value, setValue] = useState("graphical")
     const [isOpen, setIsOpen] = useState(false)
@@ -486,13 +486,15 @@ const PaymentReport = () => {
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState(null)
 
-    const initialStart = dayjs().startOf("day")
-    const initialEnd = dayjs().endOf("day")
-    const minDateTime = dayjs("2000-01-01")
-    const maxDateTime = dayjs("2100-01-01")
+    const { control, formState: { errors } } = useForm()
 
-    const [start, setStart] = useState(initialStart)
-    const [end, setEnd] = useState(initialEnd)
+    const [startDateRange, setStartDateRange] = useState(
+        dayjs().startOf("day").toDate()
+    );
+
+    const [endDateRange, setEndDateRange] = useState(
+        dayjs().endOf("day").toDate()
+    );
 
     const handleTabChange = (e, newValue) => {
         setValue(newValue)
@@ -501,9 +503,9 @@ const PaymentReport = () => {
     const fetchTablePaymentData = async () => {
         setLoading(true)
         setError(null)
-        
+
         try {
-            const response = await fetch(`${URL}/company/table/payment/report/${start}/${end}/${type}`, {
+            const response = await fetch(`${URL}/company/table/payment/report/${startDateRange.toISOString()}/${endDateRange.toISOString()}/${type}`, {
                 method: "GET",
                 headers: { Authorization: `Bearer ${token}` },
             })
@@ -524,10 +526,10 @@ const PaymentReport = () => {
     }
 
     useEffect(() => {
-        if (start && end && type && URL && token) {
+        if (startDateRange && endDateRange && type && URL && token) {
             fetchTablePaymentData()
         }
-    }, [start, end, type, URL, token])
+    }, [startDateRange, endDateRange, type, URL, token])
 
     const columns = useMemo(() => {
         const baseColumns = [
@@ -556,7 +558,7 @@ const PaymentReport = () => {
                 header: "Bill Type",
                 cell: ({ row }) => {
                     const billType = row.original.bill_data_type || []
-                    
+
                     if (billType == "utilityBills") {
                         return <Typography>{"Utlity Bill"}</Typography>
                     } else if (billType == "maintenance") {
@@ -570,7 +572,7 @@ const PaymentReport = () => {
                 header: "Paid Amount",
                 cell: ({ row }) => {
                     const totalPaid = row.original.payments?.reduce((sum, p) => sum + (p.amount || 0), 0) || 0
-                    
+
                     return (
                         <Typography>
                             {totalPaid > 0 ? (
@@ -602,7 +604,7 @@ const PaymentReport = () => {
                 header: "Bill Due Date",
                 cell: ({ row }) => {
                     const billType = row.original.bill_data_type
-                    
+
                     if (billType == "maintenance") {
                         return <Typography>{FormatTime(row.original.payment_due_date)}</Typography>
                     } else {
@@ -673,38 +675,62 @@ const PaymentReport = () => {
                                 </div>
 
                                 {/* Filters Row */}
-                                <div className="flex gap-4 flex-col">
-                                    <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                        <Box sx={{ flex: 1 }}>
-                                            <Stack direction={{ xs: "column", sm: "row" }} spacing={2} alignItems="stretch" sx={{ width: "100%" }}>
-                                                <DateTimePicker
-                                                    label="Start"
-                                                    value={start || initialStart}
-                                                    onChange={(newVal) => setStart(newVal || initialStart)}
-                                                    minDateTime={minDateTime}
-                                                    maxDateTime={maxDateTime}
-                                                    slotProps={{ textField: { fullWidth: true, size: "small" } }}
-                                                />
-                                                <DateTimePicker
-                                                    label="End"
-                                                    value={end || initialEnd}
-                                                    onChange={(newVal) => setEnd(newVal || initialEnd)}
-                                                    minDateTime={minDateTime}
-                                                    maxDateTime={maxDateTime}
-                                                    slotProps={{ textField: { fullWidth: true, size: "small" } }}
-                                                />
-                                                <TextField select fullWidth size="small" required label="Bill Type" value={type} onChange={(e) => setType(e.target.value)}>
-                                                    <MenuItem value="" disabled>
-                                                        Select Bill Type
-                                                    </MenuItem>
-                                                    <MenuItem value="all">All</MenuItem>
-                                                    <MenuItem value="utilityBills">Utility Bill</MenuItem>
-                                                    <MenuItem value="common-area-bill">Common Area Bill</MenuItem>
-                                                    <MenuItem value="maintenance">Maintenance</MenuItem>
-                                                </TextField>
-                                            </Stack>
-                                        </Box>
-                                    </LocalizationProvider>
+                                <div className="flex gap-4 flex-row">
+                                    <Controller
+                                        name="date"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <AppReactDatepicker
+                                                todayButton="Today"
+                                                selectsRange
+                                                fullWidth
+                                                monthsShown={2}
+                                                startDate={field.value?.[0] || startDateRange}
+                                                endDate={field.value?.[1] || endDateRange}
+                                                onChange={(dates) => {
+                                                    const [start, end] = dates
+
+                                                    setStartDateRange(start)
+                                                    setEndDateRange(end)
+                                                    field.onChange(dates) // react-hook-form को update करें
+                                                }}
+                                                showYearDropdown
+                                                showMonthDropdown
+                                                dateFormat="yyyy/MM/dd"
+                                                placeholderText="YYYY/MM/DD"
+                                                customInput={
+                                                    <TextField
+                                                        size="small"
+                                                        fullWidth
+                                                        style={{ width: "200px" }}
+                                                        label="Date"
+                                                        error={!!errors?.date}
+                                                        helperText={errors?.date?.message}
+                                                        inputRef={myDateRef} // ref यहां लगाएं
+                                                    />
+                                                }
+                                            />
+                                        )}
+                                    />
+
+                                    <TextField
+                                        select
+                                        style={{ width: "200px" }}
+                                        fullWidth
+                                        size="small"
+                                        required
+                                        label="Bill Type"
+                                        value={type}
+                                        onChange={(e) => setType(e.target.value)}
+                                    >
+                                        <MenuItem value="" disabled>
+                                            Select Bill Type
+                                        </MenuItem>
+                                        <MenuItem value="all">All</MenuItem>
+                                        <MenuItem value="utilityBills">Utility Bill</MenuItem>
+                                        <MenuItem value="common-area-bill">Common Area Bill</MenuItem>
+                                        <MenuItem value="maintenance">Maintenance</MenuItem>
+                                    </TextField>
                                 </div>
                             </CardContent>
 
