@@ -324,6 +324,9 @@ const PaidAmountModal = ({ open, data, setIsOpen }) => {
     const [globalFilter, setGlobalFilter] = useState('')
     const [rowSelection, setRowSelection] = useState({})
 
+    console.log("Data", data);
+
+
     const columns = useMemo(() => {
 
         const baseColumns = [];
@@ -344,6 +347,30 @@ const PaidAmountModal = ({ open, data, setIsOpen }) => {
         baseColumns.splice(
             2,
             0,
+            columnHelper.accessor("user", {
+                header: "User",
+                cell: ({ row }) => {
+
+                    if (data?.apartment_id?.assigned_to) {
+
+                        return <Typography className="capitalize" color="text.primary">
+                            {data.apartment_id.assigned_to.first_name} {" "} {data.apartment_id.assigned_to.last_name}
+                        </Typography>
+                    } else if (row?.original?.user_bill_id?.user_id) {
+                        return <Typography>
+                            {row?.original?.user_bill_id?.user_id?.first_name} {" "} {row?.original?.user_bill_id?.user_id?.last_name}
+                        </Typography>
+                    } else {
+                        return ("-")
+                    }
+
+                }
+            })
+        );
+
+        baseColumns.splice(
+            3,
+            0,
             columnHelper.accessor("Paid_amount", {
                 header: "Paid amount",
                 cell: ({ row }) => (
@@ -354,8 +381,21 @@ const PaidAmountModal = ({ open, data, setIsOpen }) => {
             })
         );
 
+        baseColumns.splice(
+            4,
+            0,
+            columnHelper.accessor("created_at", {
+                header: "Payment date",
+                cell: ({ row }) => (
+                    <Typography className="capitalize" color="text.primary">
+                        {FormatTime(row.original.created_at)}
+                    </Typography>
+                ),
+            })
+        );
+
         return baseColumns;
-    }, []);
+    }, [data]);
 
     const table = useReactTable({
         data: data?.payments || [],
@@ -590,33 +630,6 @@ const PaymentReport = () => {
                         </Typography>
                     )
                 },
-            }),
-            columnHelper.accessor("bill_date", {
-                header: "Bill Date",
-                cell: ({ row }) => {
-
-                    return <Typography>{FormatTime(row.original.bill_date)}</Typography>
-
-
-                }
-            }),
-            columnHelper.accessor("bill_due_date", {
-                header: "Bill Due Date",
-                cell: ({ row }) => {
-                    const billType = row.original.bill_data_type
-
-                    if (billType == "maintenance") {
-                        return <Typography>{FormatTime(row.original.payment_due_date)}</Typography>
-                    } else {
-                        return <Typography>{FormatTime(row.original.bill_due_date)}</Typography>
-                    }
-                }
-            }),
-            columnHelper.accessor("created_at", {
-                header: "Created At",
-                cell: ({ row }) => {
-                    return <Typography>{FormatTime(row.original.created_at)}</Typography>
-                }
             }),
         )
 

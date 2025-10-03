@@ -49,16 +49,36 @@ const columnHelper = createColumnHelper();
 // Paid Amount Modal
 const PaidAmountModal = ({ open, data, setIsOpen }) => {
 
+    console.log("Data", data);
+
     const columns = useMemo(() => [
         columnHelper.accessor("sn_no", {
             header: "SNo",
             cell: ({ row }) => row.index + 1
         }),
+        columnHelper.accessor("user", {
+            header: "User",
+            cell: ({ row }) => {
+
+
+                if (data?.apartment_id?.assigned_to) {
+                    return `${data?.apartment_id?.assigned_to.first_name} ${data?.apartment_id?.assigned_to.last_name}`;
+                } else if (row?.original?.user_bill_id?.user_id) {
+                    return `${row?.original?.user_bill_id?.user_id?.first_name} ${row?.original?.user_bill_id?.user_id?.last_name}`;
+                } else {
+                    return "-";
+                }
+            }
+        }),
         columnHelper.accessor("amount", {
             header: "Paid Amount",
             cell: ({ row }) => row.original.amount
+        }),
+        columnHelper.accessor("payment_date", {
+            header: "Payment date",
+            cell: ({ row }) => FormatTime(row?.original?.created_at)
         })
-    ], []);
+    ], [data]);
 
     const table = useReactTable({
         data: data?.payments || [],
@@ -118,6 +138,7 @@ const PaidAmountModal = ({ open, data, setIsOpen }) => {
 
 // Financial Report
 const FinancialReport = () => {
+
     const { data: session } = useSession() || {};
     const token = session?.user?.token;
     const URL = process.env.NEXT_PUBLIC_API_URL;
@@ -138,7 +159,7 @@ const FinancialReport = () => {
     const [startDateRange, setStartDateRange] = useState(
         dayjs().startOf("day").toDate()
     );
-    
+
     const [endDateRange, setEndDateRange] = useState(
         dayjs().endOf("day").toDate()
     );
@@ -192,7 +213,32 @@ const FinancialReport = () => {
         },
         columnHelper.accessor("apartment_no", { header: "Apartment No", cell: ({ row }) => row.original.apartment_id?.apartment_no || "-" }),
         columnHelper.accessor("bill_types", { header: "Bill Type", cell: ({ row }) => row.original.bill_id?.bill_data_type || row.original.bill_data_type }),
-        columnHelper.accessor("total_amounts", { header: "Total Amount", cell: ({ row }) => row.original.bill_amount }),
+        columnHelper.accessor("total_amounts", {
+            header: "Total Amount", cell: ({ row }) => {
+
+                const map = new Map();
+
+                const additionalCost = row?.original?.bill_id?.additional_cost
+                    ?.reduce((sum, p) => sum + (p.amount || 0), 0) || 0;
+
+                const apartType = row?.original?.apartment_id?.apartment_type;
+
+                const matchedCost = filteredData?.fixedCost?.find(
+                    item => item.apartment_type === apartType
+                );
+
+                const addCost = matchedCost?.unit_value || 0;
+
+                const finalCost = Number(addCost) + Number(additionalCost);
+
+                if (row?.original?.bill_id?.additional_cost) {
+                    return <Typography>{finalCost}</Typography>
+                } else {
+                    return row.original.bill_amount
+                }
+
+            }
+        }),
         columnHelper.accessor("paid_amountss", {
             header: "Paid Amount",
             cell: ({ row }) => {
@@ -212,9 +258,17 @@ const FinancialReport = () => {
             },
         }),
         columnHelper.accessor("bill_date", { header: "Bill Date", cell: ({ row }) => FormatTime(row.original.bill_date) }),
-        columnHelper.accessor("bill_due_date", { header: "Bill Due Date", cell: ({ row }) => FormatTime(row.original.bill_due_date) }),
+        columnHelper.accessor("bill_due_date", {
+            header: "Bill Due Date", cell: ({ row }) => {
+                if (row?.original?.bill_id?.additional_cost) {
+                    return FormatTime(row.original?.bill_id?.payment_due_date)
+                } else {
+                    return FormatTime(row.original.bill_due_date)
+                }
+            }
+        }),
         columnHelper.accessor("created_at", { header: "Created At", cell: ({ row }) => FormatTime(row.original.created_at) }),
-    ], []);
+    ], [filteredData]);
 
     const tableData = useMemo(() => (type === "all" || type === "maintenance" ? filteredData?.userBill || [] : filteredData || []), [filteredData, type]);
 
@@ -258,7 +312,7 @@ const FinancialReport = () => {
                                     endDate={field.value?.[1] || endDateRange}
                                     onChange={(dates) => {
                                         const [start, end] = dates
-                                        
+
                                         setStartDateRange(start)
                                         setEndDateRange(end)
                                         field.onChange(dates) // react-hook-form को update करें
