@@ -18,6 +18,10 @@ import {
     Box,
     Stack,
     Card,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
     Chip,
     TextField,
     Button,
@@ -62,6 +66,9 @@ import CustomTextField from '@/@core/components/mui/TextField'
 
 import tableStyles from '@core/styles/table.module.css'
 
+import FormatTime from '@/utils/formatTime'
+
+import DialogCloseButton from '@/components/dialogs/DialogCloseButton'
 
 const AppReactApexCharts = dynamic(() => import('@/libs/styles/AppReactApexCharts'))
 
@@ -318,24 +325,175 @@ const EarningReportsWithTabs = () => {
     )
 }
 
-const PaymentReport = () => {
-    const [type, setType] = useState('') // default empty string to avoid uncontrolled warning
-    const [value, setValue] = useState("graphical")
-    const [isOpen, setIsOpen] = useState(false)
-    const [openDialog, setOpenDialog] = useState(false)
-    const [payDialog, setPayDialog] = useState(false)
-    const [filteredData, setFilteredData] = useState([])
+const PaidAmountModal = ({ open, data, setIsOpen }) => {
+
     const [globalFilter, setGlobalFilter] = useState('')
     const [rowSelection, setRowSelection] = useState({})
-    const [permissions, setPermissions] = useState({})
-    const [payData, setPayData] = useState(null)
-    const [bill_id, setBillId] = useState(null)
-    const [paidData, setPaidData] = useState([])
 
-    const initialStart = dayjs().startOf('day')
-    const initialEnd = dayjs().endOf('day')
-    const minDateTime = dayjs('2000-01-01') // set a fallback min date
-    const maxDateTime = dayjs('2100-01-01') // set a fallback max date
+    const columns = useMemo(() => {
+
+        const baseColumns = [];
+
+        baseColumns.splice(
+            1,
+            0,
+            columnHelper.accessor("sn_no", {
+                header: "SNo",
+                cell: ({ row }) => (
+                    <Typography className="capitalize" color="text.primary">
+                        {row.index + 1}
+                    </Typography>
+                ),
+            })
+        );
+
+        baseColumns.splice(
+            2,
+            0,
+            columnHelper.accessor("Paid_amount", {
+                header: "Paid amount",
+                cell: ({ row }) => (
+                    <Typography className="capitalize" color="text.primary">
+                        {row.original.amount}
+                    </Typography>
+                ),
+            })
+        );
+
+        return baseColumns;
+    }, []);
+
+    const table = useReactTable({
+        data: data?.payments || [],
+        columns,
+        filterFns: { fuzzy: fuzzyFilter },
+        state: { globalFilter },
+        initialState: { pagination: { pageSize: 10 } },
+        enableRowSelection: true,
+        globalFilterFn: fuzzyFilter,
+        onRowSelectionChange: setRowSelection,
+        onGlobalFilterChange: setGlobalFilter,
+        getCoreRowModel: getCoreRowModel(),
+        getFilteredRowModel: getFilteredRowModel(),
+        getSortedRowModel: getSortedRowModel(),
+        getPaginationRowModel: getPaginationRowModel(),
+        getFacetedRowModel: getFacetedRowModel(),
+        getFacetedUniqueValues: getFacetedUniqueValues(),
+        getFacetedMinMaxValues: getFacetedMinMaxValues()
+    })
+
+    return (
+        <Dialog
+            fullWidth
+            maxWidth="sm"
+            scroll="body"
+            open={open}
+            sx={{ "& .MuiDialog-paper": { overflow: "visible" } }}
+        >
+            <DialogCloseButton
+                onClick={() => {
+                    setIsOpen(false);
+                }}
+            >
+                <i className="tabler-x" />
+            </DialogCloseButton>
+            {/* <DialogContent> */}
+            <Card>
+                <CardContent className='flex justify-between flex-col gap-4 items-start sm:flex-row sm:items-center'>
+                    <div className='flex items-center gap-2'>
+                        <Typography>Show</Typography>
+                        <CustomTextField
+                            select
+                            value={table.getState().pagination.pageSize}
+                            onChange={e => table.setPageSize(Number(e.target.value))}
+                            className='max-sm:is-full sm:is-[70px]'
+                        >
+                            <MenuItem value={10}>10</MenuItem>
+                            <MenuItem value={25}>25</MenuItem>
+                            <MenuItem value={50}>50</MenuItem>
+                        </CustomTextField>
+                    </div>
+                </CardContent>
+
+                <div className='overflow-x-auto'>
+                    <table className={tableStyles.table}>
+                        <thead>
+                            {table.getHeaderGroups().map(headerGroup => (
+                                <tr key={headerGroup.id}>
+                                    {headerGroup.headers.map(header => (
+                                        <th key={header.id}>
+                                            {header.isPlaceholder ? null : (
+                                                <div
+                                                    className={classnames({
+                                                        'flex items-center': header.column.getIsSorted(),
+                                                        'cursor-pointer select-none': header.column.getCanSort()
+                                                    })}
+                                                    onClick={header.column.getToggleSortingHandler()}
+                                                >
+                                                    {flexRender(header.column.columnDef.header, header.getContext())}
+                                                    {{
+                                                        asc: <i className='tabler-chevron-up text-xl' />,
+                                                        desc: <i className='tabler-chevron-down text-xl' />
+                                                    }[header.column.getIsSorted()] ?? null}
+                                                </div>
+                                            )}
+                                        </th>
+                                    ))}
+                                </tr>
+                            ))}
+                        </thead>
+                        <tbody>
+                            {table.getFilteredRowModel().rows.length === 0 ? (
+                                <tr>
+                                    <td colSpan={table.getVisibleFlatColumns().length} className='text-center'>
+                                        No data available
+                                    </td>
+                                </tr>
+                            ) : (
+                                table.getRowModel().rows.map(row => (
+                                    <tr key={row.id} className={classnames({ selected: row.getIsSelected() })}>
+                                        {row.getVisibleCells().map(cell => (
+                                            <td key={cell.id}>
+                                                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                            </td>
+                                        ))}
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+
+                <TablePaginationComponent table={table} />
+            </Card>
+            {/* </DialogContent> */}
+        </Dialog>
+
+    )
+}
+
+// 🔹 Main Component
+
+const PaymentReport = () => {
+    const { data: session } = useSession() || {}
+    const token = session?.user?.token
+    const URL = process.env.NEXT_PUBLIC_API_URL
+
+    const [type, setType] = useState("all")
+    const [value, setValue] = useState("graphical")
+    const [isOpen, setIsOpen] = useState(false)
+    const [filteredData, setFilteredData] = useState([])
+    const [globalFilter, setGlobalFilter] = useState("")
+    const [rowSelection, setRowSelection] = useState({})
+    const [paidData, setPaidData] = useState(null)
+
+    const [loading, setLoading] = useState(false)
+    const [error, setError] = useState(null)
+
+    const initialStart = dayjs().startOf("day")
+    const initialEnd = dayjs().endOf("day")
+    const minDateTime = dayjs("2000-01-01")
+    const maxDateTime = dayjs("2100-01-01")
 
     const [start, setStart] = useState(initialStart)
     const [end, setEnd] = useState(initialEnd)
@@ -343,6 +501,37 @@ const PaymentReport = () => {
     const handleTabChange = (e, newValue) => {
         setValue(newValue)
     }
+
+    const fetchTablePaymentData = async () => {
+        setLoading(true)
+        setError(null)
+        
+        try {
+            const response = await fetch(`${URL}/company/table/payment/report/${start}/${end}/${type}`, {
+                method: "GET",
+                headers: { Authorization: `Bearer ${token}` },
+            })
+
+            const result = await response.json()
+
+            if (response.ok) {
+                console.log("Table report", result.data);
+                setFilteredData(result.data || [])
+            } else {
+                setError(result?.message || "Something went wrong")
+            }
+        } catch (err) {
+            setError(err.message)
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    useEffect(() => {
+        if (start && end && type && URL && token) {
+            fetchTablePaymentData()
+        }
+    }, [start, end, type, URL, token])
 
     const columns = useMemo(() => {
         const baseColumns = [
@@ -366,68 +555,75 @@ const PaymentReport = () => {
             },
         ]
 
-        // Define all other columns like year, month, total_amount, etc.
         baseColumns.push(
-            columnHelper.accessor("year", { header: "Year", cell: ({ row }) => <Typography>{row.original.year}</Typography> }),
-            columnHelper.accessor("month", { header: "Month", cell: ({ row }) => <Typography>{row.original.month}</Typography> }),
-            columnHelper.accessor("payment_due_date", { header: "Bill Payment Date", cell: ({ row }) => <Typography>{row.original.payment_due_date ? FormatTime(row.original.payment_due_date) : ""}</Typography> }),
-            columnHelper.accessor("total_amount", {
-                header: "Total Amount",
+            columnHelper.accessor("bill_types", {
+                header: "Bill Type",
                 cell: ({ row }) => {
-
-                    const additionalCosts = row.original.additional_cost || []
-
-                    const total = additionalCosts.reduce((sum, item) => sum + (Number(item.amount) || 0), 0)
-
-                    return <Typography>{total}</Typography>
-                }
-            }),
-            columnHelper.accessor("bill_type", { header: "Bill Type", cell: ({ row }) => <Typography className="capitalize">{row.original.bill_type?.name || ''}</Typography> }),
-            columnHelper.accessor("bill_date", { header: "Bill Date", cell: ({ row }) => <Typography>{FormatTime(row.original.bill_date)}</Typography> }),
-            columnHelper.accessor("bill_due_date", { header: "Bill Due Date", cell: ({ row }) => <Typography>{FormatTime(row.original.bill_due_date)}</Typography> }),
-            columnHelper.accessor("bill_amount", {
-                header: "Bill Amount",
-                cell: ({ row }) => {
-
-                    const totalPaid = row.original.payments?.reduce((sum, p) => sum + (p.amount || 0), 0) || 0
-
-                    const remaining = (row.original.bill_amount || 0) - totalPaid
-
-                    return (
-                        <Typography>
-                            {row.original.bill_amount || 0}
-                            {remaining > 0 && (
-                                <Button variant="outlined" sx={{ ml: 1 }} onClick={() => { setBillId(row.original._id); setPayDialog(true); setPayData(remaining) }} disabled={remaining <= 0}>
-                                    Pay
-                                </Button>
-                            )}
-                        </Typography>
-                    )
-                }
+                    const billType = row.original.bill_data_type || []
+                    
+                    if (billType == "utilityBills") {
+                        return <Typography>{"Utlity Bill"}</Typography>
+                    } else if (billType == "maintenance") {
+                        return <Typography>{"Maintenance"}</Typography>
+                    } else {
+                        return <Typography>{"Common Area Bill"}</Typography>
+                    }
+                },
             }),
             columnHelper.accessor("paid_amount", {
                 header: "Paid Amount",
                 cell: ({ row }) => {
-
                     const totalPaid = row.original.payments?.reduce((sum, p) => sum + (p.amount || 0), 0) || 0
-
+                    
                     return (
                         <Typography>
                             {totalPaid > 0 ? (
-                                <Button onClick={() => { setIsOpen(true); setPaidData(row.original) }}>{totalPaid}</Button>
-                            ) : totalPaid}
+                                <Button
+                                    onClick={() => {
+                                        setIsOpen(true)
+                                        setPaidData(row.original)
+                                    }}
+                                >
+                                    {totalPaid}
+                                </Button>
+                            ) : (
+                                totalPaid
+                            )}
                         </Typography>
                     )
+                },
+            }),
+            columnHelper.accessor("bill_date", {
+                header: "Bill Date",
+                cell: ({ row }) => {
+
+                    return <Typography>{FormatTime(row.original.bill_date)}</Typography>
+
+
                 }
             }),
-            columnHelper.accessor("status", {
-                header: "Status",
-                cell: ({ row }) => <Chip label={row.original.status ? "Paid" : "Unpaid"} color={row.original.status ? "success" : "error"} variant="tonal" size="small" />
-            })
+            columnHelper.accessor("bill_due_date", {
+                header: "Bill Due Date",
+                cell: ({ row }) => {
+                    const billType = row.original.bill_data_type
+                    
+                    if (billType == "maintenance") {
+                        return <Typography>{FormatTime(row.original.payment_due_date)}</Typography>
+                    } else {
+                        return <Typography>{FormatTime(row.original.bill_due_date)}</Typography>
+                    }
+                }
+            }),
+            columnHelper.accessor("created_at", {
+                header: "Created At",
+                cell: ({ row }) => {
+                    return <Typography>{FormatTime(row.original.created_at)}</Typography>
+                }
+            }),
         )
 
         return baseColumns
-    }, [permissions])
+    }, [])
 
     const table = useReactTable({
         data: filteredData,
@@ -445,120 +641,149 @@ const PaymentReport = () => {
         getPaginationRowModel: getPaginationRowModel(),
         getFacetedRowModel: getFacetedRowModel(),
         getFacetedUniqueValues: getFacetedUniqueValues(),
-        getFacetedMinMaxValues: getFacetedMinMaxValues()
+        getFacetedMinMaxValues: getFacetedMinMaxValues(),
     })
 
     return (
-        <TabContext value={value}>
-            <TabList
-                variant='scrollable'
-                onChange={handleTabChange}
-                className='border-b px-0 pt-0'
-            >
-                <Tab key={1} label='Graphical' value="graphical" />
-                <Tab key={2} label='Tabular' value="tabular" />
-            </TabList>
+        <>
+            <TabContext value={value}>
+                <TabList variant="scrollable" onChange={handleTabChange} className="border-b px-0 pt-0">
+                    <Tab key={1} label="Graphical" value="graphical" />
+                    <Tab key={2} label="Tabular" value="tabular" />
+                </TabList>
 
-            <div className='pt-0 mt-4'>
-                {/* Graphical */}
-                <TabPanel value="graphical" className='p-0'>
-                    <EarningReportsWithTabs />
-                </TabPanel>
+                <div className="pt-0 mt-4">
+                    {/* Graphical */}
+                    <TabPanel value="graphical" className="p-0">
+                        <EarningReportsWithTabs />
+                    </TabPanel>
 
-                {/* Tabular */}
-                <TabPanel value="tabular" className='p-0'>
-                    <Card>
-                        <CardContent className='flex justify-between flex-col gap-4 items-start sm:flex-row sm:items-center'>
-                            <div className='flex items-center gap-2'>
-                                <Typography>Show</Typography>
-                                <CustomTextField
-                                    select
-                                    value={table.getState().pagination.pageSize}
-                                    onChange={e => table.setPageSize(Number(e.target.value))}
-                                    className='max-sm:is-full sm:is-[70px]'
-                                >
-                                    <MenuItem value={10}>10</MenuItem>
-                                    <MenuItem value={25}>25</MenuItem>
-                                    <MenuItem value={50}>50</MenuItem>
-                                </CustomTextField>
-                            </div>
+                    {/* Tabular */}
+                    <TabPanel value="tabular" className="p-0">
+                        <Card>
+                            <CardContent className="flex justify-between flex-col gap-4 items-start sm:flex-row sm:items-center">
+                                <div className="flex items-center gap-2">
+                                    <Typography>Show</Typography>
+                                    <CustomTextField
+                                        select
+                                        value={table.getState().pagination.pageSize}
+                                        onChange={(e) => table.setPageSize(Number(e.target.value))}
+                                        className="max-sm:is-full sm:is-[70px]"
+                                    >
+                                        <MenuItem value={10}>10</MenuItem>
+                                        <MenuItem value={25}>25</MenuItem>
+                                        <MenuItem value={50}>50</MenuItem>
+                                    </CustomTextField>
+                                </div>
 
-                            {/* 🔥 Filters Row */}
-                            <div className="flex gap-4 flex-col">
-                                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                    <Box sx={{ flex: 1 }}>
-                                        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems="stretch" sx={{ width: '100%' }}>
-                                            <DateTimePicker label="Start" value={start || initialStart} onChange={(newVal) => setStart(newVal || initialStart)} minDateTime={minDateTime} maxDateTime={maxDateTime} slotProps={{ textField: { fullWidth: true, size: 'small' } }} />
-                                            <DateTimePicker label="End" value={end || initialEnd} onChange={(newVal) => setEnd(newVal || initialEnd)} minDateTime={minDateTime} maxDateTime={maxDateTime} slotProps={{ textField: { fullWidth: true, size: 'small' } }} />
-                                            <TextField select fullWidth size="small" required label="Bill Type" value={type} onChange={(e) => setType(e.target.value)}>
-                                                <MenuItem value="" disabled>Select Bill Type</MenuItem>
-                                                <MenuItem value="all">All</MenuItem>
-                                                <MenuItem value="utility_bill">Utility Bill</MenuItem>
-                                                <MenuItem value="common_area_bill">Common Area Bill</MenuItem>
-                                                <MenuItem value="maintenance">Maintenance</MenuItem>
-                                            </TextField>
-                                        </Stack>
-                                    </Box>
-                                </LocalizationProvider>
-                            </div>
-                        </CardContent>
+                                {/* Filters Row */}
+                                <div className="flex gap-4 flex-col">
+                                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                        <Box sx={{ flex: 1 }}>
+                                            <Stack direction={{ xs: "column", sm: "row" }} spacing={2} alignItems="stretch" sx={{ width: "100%" }}>
+                                                <DateTimePicker
+                                                    label="Start"
+                                                    value={start || initialStart}
+                                                    onChange={(newVal) => setStart(newVal || initialStart)}
+                                                    minDateTime={minDateTime}
+                                                    maxDateTime={maxDateTime}
+                                                    slotProps={{ textField: { fullWidth: true, size: "small" } }}
+                                                />
+                                                <DateTimePicker
+                                                    label="End"
+                                                    value={end || initialEnd}
+                                                    onChange={(newVal) => setEnd(newVal || initialEnd)}
+                                                    minDateTime={minDateTime}
+                                                    maxDateTime={maxDateTime}
+                                                    slotProps={{ textField: { fullWidth: true, size: "small" } }}
+                                                />
+                                                <TextField select fullWidth size="small" required label="Bill Type" value={type} onChange={(e) => setType(e.target.value)}>
+                                                    <MenuItem value="" disabled>
+                                                        Select Bill Type
+                                                    </MenuItem>
+                                                    <MenuItem value="all">All</MenuItem>
+                                                    <MenuItem value="utilityBills">Utility Bill</MenuItem>
+                                                    <MenuItem value="common-area-bill">Common Area Bill</MenuItem>
+                                                    <MenuItem value="maintenance">Maintenance</MenuItem>
+                                                </TextField>
+                                            </Stack>
+                                        </Box>
+                                    </LocalizationProvider>
+                                </div>
+                            </CardContent>
 
-                        {/* Table */}
-                        <div className='overflow-x-auto'>
-                            <table className={tableStyles.table}>
-                                <thead>
-                                    {table.getHeaderGroups().map(headerGroup => (
-                                        <tr key={headerGroup.id}>
-                                            {headerGroup.headers.map(header => (
-                                                <th key={header.id}>
-                                                    {header.isPlaceholder ? null : (
-                                                        <div
-                                                            className={classnames({
-                                                                'flex items-center': header.column.getIsSorted(),
-                                                                'cursor-pointer select-none': header.column.getCanSort()
-                                                            })}
-                                                            onClick={header.column.getToggleSortingHandler()}
-                                                        >
-                                                            {flexRender(header.column.columnDef.header, header.getContext())}
-                                                            {{
-                                                                asc: <i className='tabler-chevron-up text-xl' />,
-                                                                desc: <i className='tabler-chevron-down text-xl' />
-                                                            }[header.column.getIsSorted()] ?? null}
-                                                        </div>
-                                                    )}
-                                                </th>
-                                            ))}
-                                        </tr>
-                                    ))}
-                                </thead>
-                                <tbody>
-                                    {table.getFilteredRowModel().rows.length === 0 ? (
-                                        <tr>
-                                            <td colSpan={table.getVisibleFlatColumns().length} className='text-center'>
-                                                No data available
-                                            </td>
-                                        </tr>
-                                    ) : (
-                                        table.getRowModel().rows.map(row => (
-                                            <tr key={row.id} className={classnames({ selected: row.getIsSelected() })}>
-                                                {row.getVisibleCells().map(cell => (
-                                                    <td key={cell.id}>
-                                                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                                    </td>
+                            {/* Table */}
+                            <div className="overflow-x-auto">
+                                <table className={tableStyles.table}>
+                                    <thead>
+                                        {table.getHeaderGroups().map((headerGroup) => (
+                                            <tr key={headerGroup.id}>
+                                                {headerGroup.headers.map((header) => (
+                                                    <th key={header.id}>
+                                                        {header.isPlaceholder ? null : (
+                                                            <div
+                                                                className={classnames({
+                                                                    "flex items-center": header.column.getIsSorted(),
+                                                                    "cursor-pointer select-none": header.column.getCanSort(),
+                                                                })}
+                                                                onClick={header.column.getToggleSortingHandler()}
+                                                            >
+                                                                {flexRender(header.column.columnDef.header, header.getContext())}
+                                                                {{
+                                                                    asc: <i className="tabler-chevron-up text-xl" />,
+                                                                    desc: <i className="tabler-chevron-down text-xl" />,
+                                                                }[header.column.getIsSorted()] ?? null}
+                                                            </div>
+                                                        )}
+                                                    </th>
                                                 ))}
                                             </tr>
-                                        ))
-                                    )}
-                                </tbody>
-                            </table>
-                        </div>
+                                        ))}
+                                    </thead>
+                                    <tbody>
+                                        {loading ? (
+                                            <tr>
+                                                <td colSpan={table.getVisibleFlatColumns().length} className="text-center">
+                                                    Loading...
+                                                </td>
+                                            </tr>
+                                        ) : error ? (
+                                            <tr>
+                                                <td colSpan={table.getVisibleFlatColumns().length} className="text-center">
+                                                    {error}
+                                                </td>
+                                            </tr>
+                                        ) : table.getFilteredRowModel().rows.length === 0 ? (
+                                            <tr>
+                                                <td colSpan={table.getVisibleFlatColumns().length} className="text-center">
+                                                    No data available
+                                                </td>
+                                            </tr>
+                                        ) : (
+                                            table.getRowModel().rows.map((row) => (
+                                                <tr key={row.id} className={classnames({ selected: row.getIsSelected() })}>
+                                                    {row.getVisibleCells().map((cell) => (
+                                                        <td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>
+                                                    ))}
+                                                </tr>
+                                            ))
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
 
-                        {/* Pagination */}
-                        <TablePaginationComponent table={table} />
-                    </Card>
-                </TabPanel>
-            </div>
-        </TabContext>
+                            {/* Pagination */}
+                            <TablePaginationComponent table={table} />
+                        </Card>
+                    </TabPanel>
+                </div>
+            </TabContext>
+
+            {/* 🔹 Payment Modal */}
+            {isOpen && (
+                <PaidAmountModal open={isOpen} setIsOpen={setIsOpen} data={paidData} />
+            )}
+        </>
     )
 }
 
