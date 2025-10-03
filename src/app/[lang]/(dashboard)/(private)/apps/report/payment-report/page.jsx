@@ -726,6 +726,8 @@ const PaymentReport = () => {
                                         )}
                                     />
 
+                                    
+
                                     <TextField
                                         select
                                         style={{ width: "200px" }}
