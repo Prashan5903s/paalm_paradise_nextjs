@@ -263,7 +263,7 @@ const UserListTable = ({ userData, loadData, setIsUserCardShow, getStatsCount })
                   menuItemProps: {
                     className: "flex items-center gap-2 text-textSecondary",
                     onClick: () => {
-                      router.push(`/${locale}/apps/user/form/${row.original._id}`);
+                      router.push(`/${locale}/apps/tenant/form/${row.original._id}`);
                     },
                   },
                 },
