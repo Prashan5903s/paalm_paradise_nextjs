@@ -242,6 +242,16 @@ const VerticalMenu = ({ dictionary, scrollMenu }) => {
               Events
             </MenuItem>
           )}
+          {permissArray?.isCompany && (
+            <MenuItem
+              key="Tenants"
+              href={`/${locale}/apps/tenant/list`}
+              sx={{ display: 'flex', alignItems: 'center' }}
+            >
+              <i className="tabler-users" style={{ marginRight: 8, fontSize: '1.2rem' }} />
+              Tenant
+            </MenuItem>
+          )}
           {permissArray?.isCompany && permissArray?.hasComplainPermission && (
             <MenuItem key="Complain" href={`/${locale}/apps/complain`}>
               <i className="tabler-report" style={{ marginRight: 8, fontSize: '1.2rem' }} />

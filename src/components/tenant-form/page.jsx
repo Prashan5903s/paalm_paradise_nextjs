@@ -531,12 +531,12 @@ const TenantFormLayout = () => {
   if (!createData || isLoading) {
     return (
       <>
-        {/* <PermissionGuard
-          element={id ? 'hasUserEditPermission' : 'hasUserAddPermission'}
+        <PermissionGuard
+          element={'isCompany'}
           locale={locale}
-        > */}
-        <SkeletonFormComponent />
-        {/* </PermissionGuard> */}
+        >
+          <SkeletonFormComponent />
+        </PermissionGuard>
       </>
     )
   }
