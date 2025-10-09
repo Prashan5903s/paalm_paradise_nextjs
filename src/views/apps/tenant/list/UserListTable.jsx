@@ -131,6 +131,21 @@ const UserListTable = ({ userData, loadData, setIsUserCardShow, getStatsCount })
     setOpen(true);
   }
 
+  const handleManageEmpDialog = (row) => {
+    setUser(row);
+    setManageEmpCodeDialog(true);
+  }
+
+  const openDeleteDialogHandle = (row) => {
+    setUser(row);
+    setOpenDeleteDialog(true)
+  }
+
+  const handleImportDialog = (row) => {
+    setOpenImportWindow(true)
+    setIsUserCardShow(false)
+  }
+
   const onBack = () => {
     setOpenImportWindow(false);
     setIsUserCardShow(true)
@@ -248,7 +263,7 @@ const UserListTable = ({ userData, loadData, setIsUserCardShow, getStatsCount })
                   menuItemProps: {
                     className: "flex items-center gap-2 text-textSecondary",
                     onClick: () => {
-                      router.push(`/${locale}/apps/tenant/form/${row.original._id}`);
+                      router.push(`/${locale}/apps/user/form/${row.original._id}`);
                     },
                   },
                 },
@@ -348,6 +363,18 @@ const UserListTable = ({ userData, loadData, setIsUserCardShow, getStatsCount })
                 placeholder='Search Tenant'
                 className='max-sm:is-full'
               />
+
+              {permissions && permissions['isCompany'] && (
+                <Button
+                  variant='contained'
+                  startIcon={<i className='tabler-plus' />}
+                  onClick={() => router.push(`/${locale}/apps/tenant/form`)}
+                  className='max-sm:is-full'
+                >
+                  Add New Tenant
+                </Button>
+              )}
+
             </div>
           </div>
           <div className='overflow-x-auto'>
