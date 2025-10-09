@@ -930,7 +930,7 @@ const TenantFormLayout = () => {
             variant="tonal"
             color="error"
             type="reset"
-            onClick={() => router.push(`/${locale}/apps/user/list`)}
+            onClick={() => router.push(`/${locale}/apps/tenant/list`)}
           >
             Cancel
           </Button>
