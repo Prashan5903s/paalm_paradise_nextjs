@@ -263,7 +263,7 @@ const EarningReportsWithTabs = () => {
         yaxis: {
             labels: {
                 offsetX: -18,
-                formatter: val => `$${val}k`,
+                formatter: val => `₹${val}k`,
                 style: {
                     colors: disabledText,
                     fontFamily: theme.typography.fontFamily,
@@ -726,7 +726,7 @@ const PaymentReport = () => {
                                         )}
                                     />
 
-                                    
+
 
                                     <TextField
                                         select
