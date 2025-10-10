@@ -653,11 +653,13 @@ const PaidAmountModal = ({ open, data, setIsOpen }) => {
 const ViewInvoiceModal = ({ open, setIsInvoiceOpen, selectedZone, finalCost }) => {
 
   const formattedDate = (date) => {
+
     return new Date(date).toLocaleDateString("en-GB", {
       day: "2-digit",
       month: "short",
       year: "numeric",
     });
+
   };
 
   const total = selectedZone.payments.reduce(
@@ -827,6 +829,7 @@ const ViewInvoiceModal = ({ open, setIsInvoiceOpen, selectedZone, finalCost }) =
       </Dialog >
     </>
   )
+
 }
 
 const PayMaintenanceModal = ({
