@@ -18,6 +18,10 @@ import {
   MenuItem
 } from '@mui/material'
 
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
+
+
 import Grid from '@mui/material/Grid2'
 
 import { useForm, Controller } from 'react-hook-form'
@@ -646,28 +650,27 @@ const PaidAmountModal = ({ open, data, setIsOpen }) => {
   )
 }
 
-const ViewInvoiceModal = ({ open, setIsInvoiceOpen, selectedZone }) => {
-
-  const invoiceData = [];
+const ViewInvoiceModal = ({ open, setIsInvoiceOpen, selectedZone, finalCost }) => {
 
   const formattedDate = (date) => {
-
-    return new Date(date)
-      .toLocaleString("en-GB", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-
-    // DD/MM/YYYY
-  }
+    return new Date(date).toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  };
 
   const total = selectedZone.payments.reduce(
     (acc, item) => acc + item.amount,
     0
   );
+
+  const payData = {
+    "1": "Cheque",
+    "2": "Demand draft",
+    "3": "NEFT",
+    "4": "Cash"
+  }
 
   return (
     <>
@@ -698,9 +701,9 @@ const ViewInvoiceModal = ({ open, setIsInvoiceOpen, selectedZone }) => {
                           <Logo />
                         </div>
                         <div>
-                          <Typography color='text.primary'>Office 149, 450 South Brand Brooklyn</Typography>
-                          <Typography color='text.primary'>San Diego County, CA 91905, USA</Typography>
-                          <Typography color='text.primary'>+1 (123) 456 7891, +44 (876) 543 2198</Typography>
+                          <Typography color='text.primary'>Zoo Deoria By Pass,</Typography>
+                          <Typography color='text.primary'>Paalm Paradise, near Gorakhpur,</Typography>
+                          <Typography color='text.primary'>Uttar Pradesh 273016</Typography>
                         </div>
                       </div>
                       <div className='flex flex-col gap-6'>
@@ -721,11 +724,8 @@ const ViewInvoiceModal = ({ open, setIsInvoiceOpen, selectedZone }) => {
                           Invoice To:
                         </Typography>
                         <div>
-                          <Typography>{invoiceData?.name}</Typography>
-                          <Typography>{invoiceData?.company}</Typography>
-                          <Typography>{invoiceData?.address}</Typography>
-                          <Typography>{invoiceData?.contact}</Typography>
-                          <Typography>{invoiceData?.companyEmail}</Typography>
+                          <Typography>{selectedZone?.apartment_id?.assigned_to?.first_name || ""} {selectedZone?.apartment_id?.assigned_to?.last_name || ""}</Typography>
+                          <Typography>{selectedZone?.apartment_id?.assigned_to?.email || ""}</Typography>
                         </div>
                       </div>
                     </Grid>
@@ -737,23 +737,7 @@ const ViewInvoiceModal = ({ open, setIsInvoiceOpen, selectedZone }) => {
                         <div>
                           <div className='flex items-center gap-4'>
                             <Typography className='min-is-[100px]'>Total Due:</Typography>
-                            <Typography>$12,110.55</Typography>
-                          </div>
-                          <div className='flex items-center gap-4'>
-                            <Typography className='min-is-[100px]'>Bank name:</Typography>
-                            <Typography>American Bank</Typography>
-                          </div>
-                          <div className='flex items-center gap-4'>
-                            <Typography className='min-is-[100px]'>Country:</Typography>
-                            <Typography>United States</Typography>
-                          </div>
-                          <div className='flex items-center gap-4'>
-                            <Typography className='min-is-[100px]'>IBAN:</Typography>
-                            <Typography>ETD95476213874685</Typography>
-                          </div>
-                          <div className='flex items-center gap-4'>
-                            <Typography className='min-is-[100px]'>SWIFT code:</Typography>
-                            <Typography>BR91905</Typography>
+                            <Typography>₹{finalCost}</Typography>
                           </div>
                         </div>
                       </div>
@@ -766,7 +750,16 @@ const ViewInvoiceModal = ({ open, setIsInvoiceOpen, selectedZone }) => {
                       <thead className='border-bs-0'>
                         <tr>
                           <th className='!bg-transparent'>Sno</th>
+                          <th className='!bg-transparent'>Receipt No</th>
                           <th className='!bg-transparent'>Amount</th>
+                          <th className='!bg-transparent'>Payment Mode</th>
+                          <th className='!bg-transparent'>Bank name</th>
+                          <th className='!bg-transparent'>Neft No</th>
+                          <th className='!bg-transparent'>Neft Date</th>
+                          <th className='!bg-transparent'>Cheque No</th>
+                          <th className='!bg-transparent'>Cheque Date</th>
+                          <th className='!bg-transparent'>Demand Draft No</th>
+                          <th className='!bg-transparent'>Demand Draft Date</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -778,6 +771,33 @@ const ViewInvoiceModal = ({ open, setIsInvoiceOpen, selectedZone }) => {
                             <td>
                               <Typography color='text.primary'>{item.amount}</Typography>
                             </td>
+                            <td>
+                              <Typography color='text.primary'>{item.receipt_no}</Typography>
+                            </td>
+                            <td>
+                              <Typography color='text.primary'>{payData?.[item.payment_mode]}</Typography>
+                            </td>
+                            <td>
+                              <Typography color='text.primary'>{item.bank_name}</Typography>
+                            </td>
+                            <td>
+                              <Typography color='text.primary'>{item.neft_no}</Typography>
+                            </td>
+                            <td>
+                              <Typography color='text.primary'>{item.neft_date ? formattedDate(item.neft_date) : ""}</Typography>
+                            </td>
+                            <td>
+                              <Typography color='text.primary'>{item.cheque_no}</Typography>
+                            </td>
+                            <td>
+                              <Typography color='text.primary'>{item.cheque_date ? formattedDate(item.cheque_date) : ""}</Typography>
+                            </td>
+                            <td>
+                              <Typography color='text.primary'>{item.demand_draft_no}</Typography>
+                            </td>
+                            <td>
+                              <Typography color='text.primary'>{item.demand_draft_date ? formattedDate(item.demand_draft_date) : ""}</Typography>
+                            </td>
                           </tr>
                         ))}
                       </tbody>
@@ -787,35 +807,18 @@ const ViewInvoiceModal = ({ open, setIsInvoiceOpen, selectedZone }) => {
                 <Grid size={{ xs: 12 }}>
                   <div className='flex justify-between flex-col gap-y-4 sm:flex-row'>
                     <div className='flex flex-col gap-1 order-2 sm:order-[unset]'>
-                      <div className='flex items-center gap-2'>
-                        <Typography className='font-medium' color='text.primary'>
-                          Salesperson:
-                        </Typography>
-                        <Typography>Tommy Shelby</Typography>
-                      </div>
-                      <Typography>Thanks for your business</Typography>
+
                     </div>
                     <div className='min-is-[200px]'>
-                      <div className='flex items-center justify-between'>
+                      <div className="flex items-center justify-center gap-2">
                         <Typography>Total:</Typography>
-                        <Typography className='font-medium' color='text.primary'>
+                        <Typography className="font-medium" color="text.primary">
                           {total}
                         </Typography>
                       </div>
+
                     </div>
                   </div>
-                </Grid>
-                <Grid size={{ xs: 12 }}>
-                  <Divider className='border-dashed' />
-                </Grid>
-                <Grid size={{ xs: 12 }}>
-                  <Typography>
-                    <Typography component='span' className='font-medium' color='text.primary'>
-                      Note:
-                    </Typography>{' '}
-                    It was a pleasure working with you and your team. We hope you will keep us in mind for future freelance
-                    projects. Thank You!
-                  </Typography>
                 </Grid>
               </Grid>
             </CardContent>
@@ -1556,6 +1559,7 @@ const BillTable = ({ tableData, fetchZoneData, type }) => {
   const [isOpen, setIsOpen] = useState(false)
   const [paidData, setPaidData] = useState()
   const [isOpenDetail, setIsOpenDetail] = useState(false)
+  const [finalCost, setFinalCost] = useState()
 
   useEffect(() => {
     const fetchPermissions = async () => {
@@ -1847,71 +1851,83 @@ const BillTable = ({ tableData, fetchZoneData, type }) => {
         0,
         columnHelper.accessor("action", {
           header: "Action",
-          cell: ({ row }) => (
-            <div className="flex items-center">
-              <OptionMenu
-                iconButtonProps={{ size: "medium" }}
-                iconClassName="text-textSecondary"
-                options={[
+          cell: ({ row }) => {
 
-                  ...(permissions?.hasBillingEditPermission
-                    ? [
-                      {
-                        text: "Edit Bill",
-                        icon: "tabler-edit",
-                        menuItemProps: {
-                          className:
-                            "flex items-center gap-2 text-textSecondary",
-                          onClick: () => {
-                            setSelectedZone(row.original);
-                            setOpenDialog(true);
+            const totalPaid =
+              row.original.payments?.reduce(
+                (sum, p) => sum + (p.amount || 0),
+                0
+              ) || 0;
+
+            const remaining = row.original.bill_amount - totalPaid;
+
+            return (
+              <div className="flex items-center">
+                <OptionMenu
+                  iconButtonProps={{ size: "medium" }}
+                  iconClassName="text-textSecondary"
+                  options={[
+
+                    ...(permissions?.hasBillingEditPermission
+                      ? [
+                        {
+                          text: "Edit Bill",
+                          icon: "tabler-edit",
+                          menuItemProps: {
+                            className:
+                              "flex items-center gap-2 text-textSecondary",
+                            onClick: () => {
+                              setSelectedZone(row.original);
+                              setOpenDialog(true);
+                            },
                           },
                         },
-                      },
-                    ]
-                    : []),
+                      ]
+                      : []),
 
-                  ...(type !== "maintenance" &&
-                    permissions?.hasBillingInvoicePermission
-                    ? [
-                      {
-                        text: "Invoice",
-                        icon: "tabler-report",
-                        menuItemProps: {
-                          className:
-                            "flex items-center gap-2 text-textSecondary",
-                          onClick: () => {
-                            setSelectedZone(row.original);
-                            setIsInvoiceOpen(true);
+                    ...(type !== "maintenance" &&
+                      permissions?.hasBillingInvoicePermission
+                      ? [
+                        {
+                          text: "Invoice",
+                          icon: "tabler-report",
+                          menuItemProps: {
+                            className:
+                              "flex items-center gap-2 text-textSecondary",
+                            onClick: () => {
+                              setSelectedZone(row.original);
+                              setIsInvoiceOpen(true);
+                              setFinalCost(remaining)
+                            },
                           },
                         },
-                      },
-                    ]
-                    : []),
+                      ]
+                      : []),
 
-                  ...(type === "maintenance" && permissions?.['hasBillingViewPermission']
-                    ? [
-                      {
-                        text: "View",
-                        icon: "tabler-eye",
-                        menuItemProps: {
-                          className:
-                            "flex items-center gap-2 text-textSecondary",
-                          onClick: () => {
-                            setIsOpenDetail(true);
-                            setSelectedZone(row.original);
+                    ...(type === "maintenance" && permissions?.['hasBillingViewPermission']
+                      ? [
+                        {
+                          text: "View",
+                          icon: "tabler-eye",
+                          menuItemProps: {
+                            className:
+                              "flex items-center gap-2 text-textSecondary",
+                            onClick: () => {
+                              setIsOpenDetail(true);
+                              setSelectedZone(row.original);
+                            },
                           },
                         },
-                      },
-                    ]
-                    : []),
-                ]}
-              />
-            </div>
-          ),
+                      ]
+                      : []),
+                  ]}
+                />
+              </div>
+            )
+          },
           enableSorting: false,
         })
-      );
+      )
 
     }
 
@@ -2060,6 +2076,7 @@ const BillTable = ({ tableData, fetchZoneData, type }) => {
           selectedZone={selectedZone}
           setIsInvoiceOpen={setIsInvoiceOpen}
           open={isInvoiceOpen}
+          finalCost={finalCost}
         />
       )}
       {isOpenDetail && (
