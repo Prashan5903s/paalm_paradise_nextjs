@@ -18,10 +18,6 @@ import {
   MenuItem
 } from '@mui/material'
 
-import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
-
-
 import Grid from '@mui/material/Grid2'
 
 import { useForm, Controller } from 'react-hook-form'
