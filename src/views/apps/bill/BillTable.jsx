@@ -3,6 +3,8 @@
 // React Imports
 import { useState, useMemo, useEffect } from 'react'
 
+import { useParams } from 'next/navigation'
+
 import {
   Button,
   CardContent,
@@ -52,6 +54,8 @@ import { valibotResolver } from '@hookform/resolvers/valibot'
 import { useSession } from 'next-auth/react'
 
 import { toast } from 'react-toastify'
+
+import { toWords } from 'number-to-words'
 
 import OptionMenu from '@core/components/option-menu';
 
@@ -648,6 +652,8 @@ const PaidAmountModal = ({ open, data, setIsOpen }) => {
 
 const ViewInvoiceModal = ({ open, setIsInvoiceOpen, selectedZone, finalCost }) => {
 
+  const param = useParams();
+
   const formattedDate = (date) => {
 
     return new Date(date).toLocaleDateString("en-GB", {
@@ -664,10 +670,8 @@ const ViewInvoiceModal = ({ open, setIsInvoiceOpen, selectedZone, finalCost }) =
   );
 
   const payData = {
-    "1": "Cheque",
-    "2": "Demand draft",
-    "3": "NEFT",
-    "4": "Cash"
+    "utilityBills": "Utility Bill",
+    "common-area-bill": "Common Area Bill",
   }
 
   return (
@@ -719,11 +723,13 @@ const ViewInvoiceModal = ({ open, setIsInvoiceOpen, selectedZone, finalCost }) =
                     <Grid size={{ xs: 12, sm: 6 }}>
                       <div className='flex flex-col gap-4'>
                         <Typography className='font-medium' color='text.primary'>
-                          Invoice To:
+                          Bill From:
                         </Typography>
                         <div>
                           <Typography>{selectedZone?.apartment_id?.assigned_to?.first_name || ""} {selectedZone?.apartment_id?.assigned_to?.last_name || ""}</Typography>
                           <Typography>{selectedZone?.apartment_id?.assigned_to?.email || ""}</Typography>
+                          <Typography>{selectedZone?.apartment_id?.assigned_to?.phone || ""}</Typography>
+                          <Typography>{selectedZone?.apartment_id?.assigned_to?.address || ""} {selectedZone?.apartment_id?.assigned_to?.pincode || ""}</Typography>
                         </div>
                       </div>
                     </Grid>
@@ -737,6 +743,22 @@ const ViewInvoiceModal = ({ open, setIsInvoiceOpen, selectedZone, finalCost }) =
                             <Typography className='min-is-[100px]'>Total Due:</Typography>
                             <Typography>₹{finalCost}</Typography>
                           </div>
+                          <div className='flex items-center gap-4'>
+                            <Typography className='min-is-[100px]'>Bank name:</Typography>
+                            <Typography>XXXX XXXX</Typography>
+                          </div>
+                          <div className='flex items-center gap-4'>
+                            <Typography className='min-is-[100px]'>Country:</Typography>
+                            <Typography>XXXXXXXXX</Typography>
+                          </div>
+                          <div className='flex items-center gap-4'>
+                            <Typography className='min-is-[100px]'>IBAN:</Typography>
+                            <Typography>XXXXXXXXXXX</Typography>
+                          </div>
+                          <div className='flex items-center gap-4'>
+                            <Typography className='min-is-[100px]'>SWIFT code:</Typography>
+                            <Typography>XXXXXX</Typography>
+                          </div>
                         </div>
                       </div>
                     </Grid>
@@ -748,16 +770,9 @@ const ViewInvoiceModal = ({ open, setIsInvoiceOpen, selectedZone, finalCost }) =
                       <thead className='border-bs-0'>
                         <tr>
                           <th className='!bg-transparent'>Sno</th>
-                          <th className='!bg-transparent'>Receipt No</th>
+                          <th className='!bg-transparent'>Quantity</th>
+                          <th className='!bg-transparent'>Product</th>
                           <th className='!bg-transparent'>Amount</th>
-                          <th className='!bg-transparent'>Payment Mode</th>
-                          <th className='!bg-transparent'>Bank name</th>
-                          <th className='!bg-transparent'>Neft No</th>
-                          <th className='!bg-transparent'>Neft Date</th>
-                          <th className='!bg-transparent'>Cheque No</th>
-                          <th className='!bg-transparent'>Cheque Date</th>
-                          <th className='!bg-transparent'>Demand Draft No</th>
-                          <th className='!bg-transparent'>Demand Draft Date</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -767,35 +782,15 @@ const ViewInvoiceModal = ({ open, setIsInvoiceOpen, selectedZone, finalCost }) =
                               <Typography color='text.primary'>{index + 1}</Typography>
                             </td>
                             <td>
+                              <Typography color='text.primary'>1</Typography>
+                            </td>
+                            <td>
+                              <Typography color='text.primary'>{payData?.[param.type]}</Typography>
+                            </td>
+                            <td>
                               <Typography color='text.primary'>{item.amount}</Typography>
                             </td>
-                            <td>
-                              <Typography color='text.primary'>{item.receipt_no}</Typography>
-                            </td>
-                            <td>
-                              <Typography color='text.primary'>{payData?.[item.payment_mode]}</Typography>
-                            </td>
-                            <td>
-                              <Typography color='text.primary'>{item.bank_name}</Typography>
-                            </td>
-                            <td>
-                              <Typography color='text.primary'>{item.neft_no}</Typography>
-                            </td>
-                            <td>
-                              <Typography color='text.primary'>{item.neft_date ? formattedDate(item.neft_date) : ""}</Typography>
-                            </td>
-                            <td>
-                              <Typography color='text.primary'>{item.cheque_no}</Typography>
-                            </td>
-                            <td>
-                              <Typography color='text.primary'>{item.cheque_date ? formattedDate(item.cheque_date) : ""}</Typography>
-                            </td>
-                            <td>
-                              <Typography color='text.primary'>{item.demand_draft_no}</Typography>
-                            </td>
-                            <td>
-                              <Typography color='text.primary'>{item.demand_draft_date ? formattedDate(item.demand_draft_date) : ""}</Typography>
-                            </td>
+
                           </tr>
                         ))}
                       </tbody>
@@ -805,13 +800,18 @@ const ViewInvoiceModal = ({ open, setIsInvoiceOpen, selectedZone, finalCost }) =
                 <Grid size={{ xs: 12 }}>
                   <div className='flex justify-between flex-col gap-y-4 sm:flex-row'>
                     <div className='flex flex-col gap-1 order-2 sm:order-[unset]'>
-
+                      <Typography>
+                        <Typography component='span' className='font-medium' color='text.primary'>
+                          Total Amount In Words:
+                        </Typography>{' '}
+                        INR {toWords(total).toUpperCase()} Rupees Only
+                      </Typography>
                     </div>
                     <div className='min-is-[200px]'>
                       <div className="flex items-center justify-center gap-2">
                         <Typography>Total:</Typography>
                         <Typography className="font-medium" color="text.primary">
-                          {total}
+                          ₹{total}
                         </Typography>
                       </div>
 
