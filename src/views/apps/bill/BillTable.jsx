@@ -24,6 +24,10 @@ import Grid from '@mui/material/Grid2'
 
 import { useForm, Controller } from 'react-hook-form'
 
+import jsPDF from "jspdf";
+
+import html2canvas from "html2canvas";
+
 import classnames from 'classnames'
 
 import { rankItem } from '@tanstack/match-sorter-utils'
@@ -111,6 +115,9 @@ const PayModal = ({ open, data, setPayDialog, setPayData, billId, fetchZoneData 
 
   const { data: session } = useSession()
   const token = session?.user?.token
+
+  console.log("Token", token);
+
   const API_URL = process.env.NEXT_PUBLIC_API_URL
 
   const [paymentMode, setPaymentMode] = useState("");
@@ -726,10 +733,18 @@ const ViewInvoiceModal = ({ open, setIsInvoiceOpen, selectedZone, finalCost }) =
                           Bill From:
                         </Typography>
                         <div>
-                          <Typography>{selectedZone?.apartment_id?.assigned_to?.first_name || ""} {selectedZone?.apartment_id?.assigned_to?.last_name || ""}</Typography>
-                          <Typography>{selectedZone?.apartment_id?.assigned_to?.email || ""}</Typography>
-                          <Typography>{selectedZone?.apartment_id?.assigned_to?.phone || ""}</Typography>
-                          <Typography>{selectedZone?.apartment_id?.assigned_to?.address || ""} {selectedZone?.apartment_id?.assigned_to?.pincode || ""}</Typography>
+                          <div className='flex items-center gap-4'>
+                            <Typography className='min-is-[100px]'>Paalm Paradise</Typography>
+                          </div>
+                          <div className='flex items-center gap-4'>
+                            <Typography className='min-is-[100px]'>Talramgarh, Deoria Bypass Road</Typography>
+                          </div>
+                          <div className='flex items-center gap-4'>
+                            <Typography className='min-is-[100px]'>Gorakhpur, Uttar Pradesh 273016</Typography>
+                          </div>
+                          <div className='flex items-center gap-4'>
+                            <Typography className='min-is-[100px]'>+919513369620</Typography>
+                          </div>
                         </div>
                       </div>
                     </Grid>
@@ -739,26 +754,10 @@ const ViewInvoiceModal = ({ open, setIsInvoiceOpen, selectedZone, finalCost }) =
                           Bill To:
                         </Typography>
                         <div>
-                          <div className='flex items-center gap-4'>
-                            <Typography className='min-is-[100px]'>Total Due:</Typography>
-                            <Typography>₹{finalCost}</Typography>
-                          </div>
-                          <div className='flex items-center gap-4'>
-                            <Typography className='min-is-[100px]'>Bank name:</Typography>
-                            <Typography>XXXX XXXX</Typography>
-                          </div>
-                          <div className='flex items-center gap-4'>
-                            <Typography className='min-is-[100px]'>Country:</Typography>
-                            <Typography>XXXXXXXXX</Typography>
-                          </div>
-                          <div className='flex items-center gap-4'>
-                            <Typography className='min-is-[100px]'>IBAN:</Typography>
-                            <Typography>XXXXXXXXXXX</Typography>
-                          </div>
-                          <div className='flex items-center gap-4'>
-                            <Typography className='min-is-[100px]'>SWIFT code:</Typography>
-                            <Typography>XXXXXX</Typography>
-                          </div>
+                          <Typography>{selectedZone?.apartment_id?.assigned_to?.first_name || ""} {selectedZone?.apartment_id?.assigned_to?.last_name || ""}</Typography>
+                          <Typography>{selectedZone?.apartment_id?.assigned_to?.email || ""}</Typography>
+                          <Typography>{selectedZone?.apartment_id?.assigned_to?.phone || ""}</Typography>
+                          <Typography>{selectedZone?.apartment_id?.assigned_to?.address || ""} {selectedZone?.apartment_id?.assigned_to?.pincode || ""}</Typography>
                         </div>
                       </div>
                     </Grid>
@@ -804,7 +803,7 @@ const ViewInvoiceModal = ({ open, setIsInvoiceOpen, selectedZone, finalCost }) =
                         <Typography component='span' className='font-medium' color='text.primary'>
                           Total Amount In Words:
                         </Typography>{' '}
-                        INR {toWords(total).toUpperCase()} Rupees Only
+                        INR {toWords(total).toUpperCase()} RUPEES ONLY
                       </Typography>
                     </div>
                     <div className='min-is-[200px]'>
