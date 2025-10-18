@@ -300,7 +300,7 @@ const NoticeTable = ({ tableData, fetchZoneData }) => {
               className='max-sm:is-full'
 
             >
-              Add Notice
+              Add Announcement
             </Button>
           )}
         </div>

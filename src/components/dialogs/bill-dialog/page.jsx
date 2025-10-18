@@ -162,11 +162,11 @@ const BillDialog = ({ open, setOpen, selectedZone, fetchZoneData, type }) => {
         onDrop: acceptedFiles => {
             if (!acceptedFiles.length) return
             const selectedFile = acceptedFiles[0]
-            
+
             setFile(selectedFile)
             setImageError('')
             const reader = new FileReader()
-            
+
             reader.onload = e => setPreview(e.target.result)
             reader.readAsDataURL(selectedFile)
         },
@@ -174,7 +174,7 @@ const BillDialog = ({ open, setOpen, selectedZone, fetchZoneData, type }) => {
             rejectedFiles.forEach(file => {
                 file.errors.forEach(error => {
                     let msg = ''
-                    
+
                     switch (error.code) {
                         case 'file-invalid-type':
                             msg = `Invalid file type. Allowed: JPG, PNG, GIF, WebP, SVG, BMP, TIFF, ICO`
@@ -188,7 +188,7 @@ const BillDialog = ({ open, setOpen, selectedZone, fetchZoneData, type }) => {
                         default:
                             msg = `There was an issue with the uploaded file.`
                     }
-                    
+
                     toast.error(msg)
                     setImageError(msg)
                 })
@@ -199,7 +199,7 @@ const BillDialog = ({ open, setOpen, selectedZone, fetchZoneData, type }) => {
     const formatDate = date => {
         if (!date) return "";
         const d = new Date(date);
-        
+
         return d.toISOString().split("T")[0];
     };
 
@@ -444,7 +444,7 @@ const BillDialog = ({ open, setOpen, selectedZone, fetchZoneData, type }) => {
                                             <MenuItem value="">Select Apartment</MenuItem>
                                             {createData.apartment.map(item => (
                                                 <MenuItem key={item._id} value={item._id}>
-                                                    {item.apartment_no ?? 'Unnamed Apartment'}
+                                                    {item.apartment_no ?? 'Unnamed Apartment'}, {item.tower_id?.name}, {item?.floor_id?.floor_name}
                                                 </MenuItem>
                                             ))}
                                         </CustomTextField>

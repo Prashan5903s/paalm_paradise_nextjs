@@ -49,7 +49,6 @@ const columnHelper = createColumnHelper();
 // Paid Amount Modal
 const PaidAmountModal = ({ open, data, setIsOpen }) => {
 
-    console.log("Data", data);
 
     const columns = useMemo(() => [
         columnHelper.accessor("sn_no", {

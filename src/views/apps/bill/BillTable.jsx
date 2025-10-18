@@ -116,8 +116,6 @@ const PayModal = ({ open, data, setPayDialog, setPayData, billId, fetchZoneData 
   const { data: session } = useSession()
   const token = session?.user?.token
 
-  console.log("Token", token);
-
   const API_URL = process.env.NEXT_PUBLIC_API_URL
 
   const [paymentMode, setPaymentMode] = useState("");
@@ -917,7 +915,7 @@ const PayMaintenanceModal = ({
   // set form values when modal data changes
   useEffect(() => {
     if (data) {
-      setValue("amount", data.toString() || "");
+      setValue("amount", data?.toFixed().toString() || "");
       setValue("billId", billId?.toString() || "");
       setValue("apartment_id", apartmentId?.toString() || "");
       setValue("userBillId", userBillId.toString() || "")
@@ -998,7 +996,7 @@ const PayMaintenanceModal = ({
                         if (Number(value) <= (data || 0)) {
                           field.onChange(value);
                         } else {
-                          field.onChange(data?.toString() || "");
+                          field.onChange(data?.toFixed().toString() || "");
                         }
                       }
                     }}
@@ -1288,6 +1286,22 @@ const ViewMaintenance = ({ open, setIsOpenDetail, selectedZone }) => {
     }
   }, [API_URL, token, selectedZone?._id]);
 
+    const fixedCostMap = useMemo(() => {
+    const map = new Map();
+
+    if (Array.isArray(datas1?.fixedCost) && datas1?.fixedCost.length > 0) {
+
+      datas1.fixedCost.forEach((item) => {
+        map.set(item.apartment_type, String(item.unit_value || ""));
+      });
+    } else if (datas1?.fixedCost && typeof datas1.fixedCost === "object") {
+
+      map.set("default", String(datas1.fixedCost.unit_value || ""));
+    }
+
+    return map;
+  }, [datas1?.fixedCost]);
+
   // Table columns
   const columns = useMemo(() => [
     {
@@ -1332,14 +1346,22 @@ const ViewMaintenance = ({ open, setIsOpenDetail, selectedZone }) => {
       header: 'Total cost',
       cell: ({ row }) => {
         const additionalCost = row.original?.user_bills?.[0]?.bill?.additional_cost || [];
-        const fixedCost = row.original?.user_bills?.[0]?.amount || 0;
+        const aprtmentArea = row?.original?.apartment_area
+
+        const fixedCost = Array.isArray(datas1?.fixed_cost)
+          ? Number(fixedCostMap.get(apartmentType) || 0)
+          : Number(fixedCostMap.get("default") || 0) * Number(aprtmentArea);
+
+
         const additionalTotal = additionalCost.reduce((sum, val) => sum + (val.amount || 0), 0);
         const leftCost = row.original?.user_bills?.[0]?.payments?.reduce((sum, p) => sum + p.amount, 0) || 0;
         const finalCost = (Number(fixedCost) + Number(additionalTotal)) - Number(leftCost);
 
+        const totalFinalCost = Number(fixedCost) + Number(additionalTotal);
+
         return (
           <Typography className="capitalize" color="text.primary">
-            {Number(fixedCost) + Number(additionalTotal)} {" "}
+            {totalFinalCost.toFixed(0)} {" "}
             {finalCost > 0 && (
               <Button
                 size='small'
@@ -1393,6 +1415,7 @@ const ViewMaintenance = ({ open, setIsOpenDetail, selectedZone }) => {
 
         // const apartmentType = apartmentTypeRaw.replace(/[^\d]/g, '');
         const fixedCost = row.original?.user_bills?.[0]?.amount || 0;
+
         const additionalTotal = additionalCost.reduce((sum, val) => sum + (val.amount || 0), 0);
 
         const leftCost = row.original?.user_bills?.[0]?.payments?.reduce((sum, p) => sum + p.amount, 0) || 0;
@@ -1620,10 +1643,10 @@ const BillTable = ({ tableData, fetchZoneData, type }) => {
         1,
         0,
         columnHelper.accessor("apartment_no", {
-          header: "Apartment No",
+          header: "Apartment",
           cell: ({ row }) => (
             <Typography className="capitalize" color="text.primary">
-              {row.original.apartment_id.apartment_no}
+              {row.original.apartment_id.apartment_no}, {row?.original?.apartment_id?.tower_id?.name}, {row?.original?.apartment_id?.floor_id?.floor_name}
             </Typography>
           ),
         })

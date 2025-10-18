@@ -224,12 +224,12 @@ const VerticalMenu = ({ dictionary, scrollMenu }) => {
           )}
           {permissArray?.isCompany && (
             <MenuItem
-              key="Notice"
-              href={`/${locale}/apps/notice`}
+              key="announcement"
+              href={`/${locale}/apps/announcement`}
               sx={{ display: 'flex', alignItems: 'center' }}
             >
               <i className="tabler-notes" style={{ marginRight: 8, fontSize: '1.2rem' }} />
-              Notice Board
+              Announcement
             </MenuItem>
           )}
           {permissArray?.isCompany && (

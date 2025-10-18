@@ -44,8 +44,6 @@ const ViewInvoiceModal = () => {
 
         const value = data?.data
 
-        console.log("Value", value);
-
         setSelectedZone(value)
       } else {
 

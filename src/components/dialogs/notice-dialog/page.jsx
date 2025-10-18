@@ -61,7 +61,7 @@ const NoticeDialog = ({ open, setOpen, selectedZone, fetchZoneData, type }) => {
             reset({
                 title: selectedZone?.title?.toString() || '',
                 description: selectedZone?.description?.toString() || '',
-                
+
                 // Extract only the IDs from role objects
                 role_id: selectedZone?.role_id?.map(role => role._id) || []
             });
@@ -76,23 +76,23 @@ const NoticeDialog = ({ open, setOpen, selectedZone, fetchZoneData, type }) => {
     // Fetch roles
     useEffect(() => {
         let ignore = false
-        
+
         const fetchCreateData = async () => {
             try {
                 const response = await fetch(`${API_URL}/company/notice/create`, {
                     headers: { Authorization: `Bearer ${token}` }
                 })
-                
+
                 const result = await response.json()
-                
+
                 if (response.ok && !ignore) setCreateData(result?.data)
             } catch (err) {
                 console.error(err)
             }
         }
-        
+
         if (API_URL && token) fetchCreateData()
-        
+
             return () => { ignore = true }
     }, [API_URL, token])
 
@@ -100,14 +100,14 @@ const NoticeDialog = ({ open, setOpen, selectedZone, fetchZoneData, type }) => {
         // ✅ Manual validation for role_id
         if (!formData.role_id || formData.role_id.length === 0) {
             setError('role_id', { type: 'manual', message: 'At least one role is required' })
-            
+
             return
         } else {
             clearErrors('role_id')
         }
 
         setLoading(true)
-        
+
         try {
             const url = selectedZone
                 ? `${API_URL}/company/notice/update/${selectedZone._id}`
@@ -120,7 +120,7 @@ const NoticeDialog = ({ open, setOpen, selectedZone, fetchZoneData, type }) => {
             })
 
             const data = await response.json()
-            
+
             if (response.ok) {
                 fetchZoneData()
                 toast.success(`Notice ${selectedZone ? 'updated' : 'added'} successfully!`, { autoClose: 700 })
@@ -139,7 +139,7 @@ const NoticeDialog = ({ open, setOpen, selectedZone, fetchZoneData, type }) => {
         return (
             <Dialog fullWidth maxWidth="md" open={open}>
                 <DialogCloseButton onClick={handleClose}><i className="tabler-x" /></DialogCloseButton>
-                <DialogTitle>{selectedZone ? 'Edit Notice' : 'Add Notice'}</DialogTitle>
+                <DialogTitle>{selectedZone ? 'Edit Announcement' : 'Add Announcement'}</DialogTitle>
                 <DialogContent>
                     <Skeleton variant="rectangular" height={26} />
                     <Skeleton variant="rectangular" height={26} />
@@ -210,7 +210,7 @@ const NoticeDialog = ({ open, setOpen, selectedZone, fetchZoneData, type }) => {
                                                                 const newValue = e.target.checked
                                                                     ? [...(field.value || []), role._id]
                                                                     : (field.value || []).filter(r => r !== role._id)
-                                                                
+
                                                                     field.onChange(newValue)
                                                             }}
                                                         />

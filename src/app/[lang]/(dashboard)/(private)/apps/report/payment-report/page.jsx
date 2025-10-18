@@ -324,9 +324,6 @@ const PaidAmountModal = ({ open, data, setIsOpen }) => {
     const [globalFilter, setGlobalFilter] = useState('')
     const [rowSelection, setRowSelection] = useState({})
 
-    console.log("Data", data);
-
-
     const columns = useMemo(() => {
 
         const baseColumns = [];
