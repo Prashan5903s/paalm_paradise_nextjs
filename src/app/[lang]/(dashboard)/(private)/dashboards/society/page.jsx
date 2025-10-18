@@ -133,6 +133,7 @@ const UserDashboard = () => {
       map.set("default", String(dashboardData.fixedCost.unit_value || ""));
     }
 
+    
     return map;
   }, [dashboardData?.fixedCost]);
 
