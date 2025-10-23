@@ -288,16 +288,29 @@ const TenantFormLayout = () => {
 
   const loadData = async () => {
     try {
-      const apartmentData = await doGet('company/apartment')
+      setIsLoading(true); // 🔹 लोडिंग true करते हैं ताकि UX बेहतर रहे
 
-      setCreateData(prevData => ({
-        ...prevData,
-        apartment: apartmentData,
-      }));
+      const apartmentData = await doGet('company/tenant/create/data');
 
-      setIsLoading(false);
+      if (apartmentData && Array.isArray(apartmentData)) {
+        const filteredApartments = apartmentData.filter(apartment => {
+          // tenant_assigned_to null है या current tenant का id match करता है
+          return (
+            apartment.tenant_assigned_to === null ||
+            apartment.tenant_assigned_to?.toString() === id?.toString()
+          );
+        });
+
+        setCreateData(prevData => ({
+          ...prevData,
+          apartment: filteredApartments,
+        }));
+      }
+
     } catch (error) {
-      console.error('Error loading data:', error.message);
+      console.error('Error loading data:', error);
+    } finally {
+      setIsLoading(false); // 🔹 finally block में ताकि हमेशा execute हो
     }
   };
 
@@ -309,9 +322,7 @@ const TenantFormLayout = () => {
         editFormData();
       }
     }
-
-  }, [URL, token, id])
-
+  }, [URL, token, id]);
 
   useEffect(() => {
     if (!id || !editData) return;
@@ -754,7 +765,7 @@ const TenantFormLayout = () => {
                   >
                     {createData?.apartment?.map((item, index) => (
                       <MenuItem key={index} value={item._id} >
-                        {item?.apartment_no}
+                        {item?.apartment_no}, {item?.tower_id?.name}, {item?.floor_id?.floor_name}
                       </MenuItem>
                     ))}
 

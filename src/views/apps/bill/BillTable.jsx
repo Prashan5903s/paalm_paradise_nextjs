@@ -1470,7 +1470,7 @@ const ViewMaintenance = ({ open, setIsOpenDetail, selectedZone }) => {
         <i className="tabler-x" />
       </DialogCloseButton>
 
-      <DialogTitle>Maintenance Detail AA</DialogTitle>
+      <DialogTitle>Maintenance Detail</DialogTitle>
 
       <DialogContent style={{ margin: "4px" }}>
         <Card>
