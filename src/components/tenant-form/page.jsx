@@ -288,13 +288,13 @@ const TenantFormLayout = () => {
 
   const loadData = async () => {
     try {
-      setIsLoading(true); // 🔹 लोडिंग true करते हैं ताकि UX बेहतर रहे
+      setIsLoading(true);
 
       const apartmentData = await doGet('company/tenant/create/data');
 
       if (apartmentData && Array.isArray(apartmentData)) {
         const filteredApartments = apartmentData.filter(apartment => {
-          // tenant_assigned_to null है या current tenant का id match करता है
+
           return (
             apartment.tenant_assigned_to === null ||
             apartment.tenant_assigned_to?.toString() === id?.toString()
@@ -310,7 +310,7 @@ const TenantFormLayout = () => {
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
-      setIsLoading(false); // 🔹 finally block में ताकि हमेशा execute हो
+      setIsLoading(false); 
     }
   };
 
