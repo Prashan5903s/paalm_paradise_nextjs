@@ -269,6 +269,7 @@ const TenantFormLayout = () => {
       const result = await response.json();
 
       if (!response.ok) {
+
         // If server responded with an error status, handle it explicitly
         console.error('Failed to fetch user data:', result.message || result);
 
@@ -310,7 +311,7 @@ const TenantFormLayout = () => {
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
-      setIsLoading(false); 
+      setIsLoading(false);
     }
   };
 

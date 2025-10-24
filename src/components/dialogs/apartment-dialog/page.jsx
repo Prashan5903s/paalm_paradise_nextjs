@@ -81,10 +81,11 @@ const ApartmentDialog = ({ open, setOpen, selectedZone, fetchZoneData, tableData
     // ✅ Reset form when editing
     useEffect(() => {
         if (open && selectedZone) {
-            setTowerId(selectedZone?.tower_id.toString())
+
+            setTowerId(selectedZone?.tower_id?._id.toString())
             reset({
-                tower: selectedZone?.tower_id.toString() || '',
-                floor: selectedZone?.floor_id?.toString() || '',
+                tower: selectedZone?.tower_id?._id.toString() || '',
+                floor: selectedZone?.floor_id?._id.toString() || '',
                 apartmentNumber: selectedZone?.apartment_no.toString() || '',
                 apartmentType: selectedZone?.apartment_type?._id || '',
                 area: selectedZone?.apartment_area?.toString() || '',
@@ -140,8 +141,8 @@ const ApartmentDialog = ({ open, setOpen, selectedZone, fetchZoneData, tableData
                 // Edit mode: check for duplicates excluding the current selectedZone
                 const duplicate = tableData.find((item) => {
                     const itemApartment = String(item.apartment_no || '').replace(/\s+/g, ' ').trim().toLowerCase();
-                    const itemTower = String(item.tower_id || '');
-                    const itemFloor = String(item.floor_id || '');
+                    const itemTower = String(item.tower_id?._id || '');
+                    const itemFloor = String(item.floor_id?._id || '');
                     const itemId = String(item._id || '');
 
                     return (
@@ -164,8 +165,8 @@ const ApartmentDialog = ({ open, setOpen, selectedZone, fetchZoneData, tableData
                 // Add mode: check for any duplicates
                 const duplicate = tableData.some((item) => {
                     const itemApartment = String(item.apartment_no || '').replace(/\s+/g, ' ').trim().toLowerCase();
-                    const itemTower = String(item.tower_id || '');
-                    const itemFloor = String(item.floor_id || '');
+                    const itemTower = String(item.tower_id?._id || '');
+                    const itemFloor = String(item.floor_id?._id || '');
 
                     return (
                         itemApartment === apartmentNo &&

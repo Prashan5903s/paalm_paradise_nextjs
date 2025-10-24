@@ -37,17 +37,17 @@ import { toast } from 'react-toastify'
 import CardActions from '@mui/material/CardActions'
 
 import {
-    object,
-    string,
-    minLength,
-    maxLength,
-    pipe,
-    boolean,
-    check,
-    optional,
-    email,
-    custom,
-    array
+  object,
+  string,
+  minLength,
+  maxLength,
+  pipe,
+  boolean,
+  check,
+  optional,
+  email,
+  custom,
+  array
 } from 'valibot';
 
 import { useApi } from '../../utils/api';
@@ -59,1444 +59,1445 @@ import PermissionGuard from '@/hocs/PermissionClientGuard'
 
 const UserFormLayout = () => {
 
-    const URL = process.env.NEXT_PUBLIC_API_URL
-    const public_url = process.env.NEXT_PUBLIC_ASSETS_URL;
-    const { data: session } = useSession() || {}
+  const URL = process.env.NEXT_PUBLIC_API_URL
+  const public_url = process.env.NEXT_PUBLIC_ASSETS_URL;
+  const { data: session } = useSession() || {}
 
-    const user_id = session?.user?.userId;
+  const user_id = session?.user?.userId;
 
-    const token = session?.user?.token
-    const [createData, setCreateData] = useState({ 'country': [] }, { designations: [] });
-    const [countryId, setCountryId] = useState();
-    const [stateData, setStateData] = useState();
-    const [stateId, setStateId] = useState();
-    const [cityData, setCityData] = useState();
-    const [editData, setEditData] = useState();
-    const [selectTower, setSelectTower] = useState();
-    const [selectFloor, setSelectFloor] = useState();
-    const [selectedFloor, setSelectedFloor] = useState();
-    const [selectedApartment, setSelectedApartment] = useState();
-    const [userRoles, setUserRoles] = useState([]);
-    const [isOfficeBearer, setIsOfficeBearer] = useState(false);
-    const [isFlatOwner, setIsFlatOwner] = useState(false);
-    const [isLoading, setIsLoading] = useState(true);
-    const { doGet, doPost } = useApi();
-    const [loading, setLoading] = useState(false)
+  const token = session?.user?.token
+  const [createData, setCreateData] = useState({ 'country': [] }, { designations: [] });
+  const [countryId, setCountryId] = useState();
+  const [stateData, setStateData] = useState();
+  const [stateId, setStateId] = useState();
+  const [cityData, setCityData] = useState();
+  const [editData, setEditData] = useState();
+  const [selectTower, setSelectTower] = useState();
+  const [selectFloor, setSelectFloor] = useState();
+  const [selectedFloor, setSelectedFloor] = useState();
+  const [selectedApartment, setSelectedApartment] = useState();
+  const [userRoles, setUserRoles] = useState([]);
+  const [isOfficeBearer, setIsOfficeBearer] = useState(false);
+  const [isFlatOwner, setIsFlatOwner] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const { doGet, doPost } = useApi();
+  const [loading, setLoading] = useState(false)
 
-    const router = useRouter();
+  const router = useRouter();
 
-    const { lang: locale, id: id } = useParams()
+  const { lang: locale, id: id } = useParams()
 
-    const schema = object({
-        first_name: pipe(
+  const schema = object({
+    first_name: pipe(
+      string(),
+      minLength(1, 'First Name is required'),
+      maxLength(255, 'First Name can be a maximum of 255 characters')
+    ),
+    last_name: pipe(
+      string(),
+      minLength(1, 'Last Name is required'),
+      maxLength(255, 'Last Name can be a maximum of 255 characters')
+    ),
+    user_type: isOfficeBearer
+      ? pipe(string(), minLength(1, 'User type is required'))
+      : optional(string()),
+
+    email: pipe(
+      string(),
+      minLength(1, 'Email is required'),
+      email('Please enter a valid email address'),
+      maxLength(255, 'Email can be a maximum of 255 characters')
+    ),
+
+    password: id
+      ? optional(string())
+      : pipe(
+        string(),
+        minLength(6, 'Password min length should be 6'),
+        maxLength(255, 'Password can be a maximum of 255 characters')
+      ),
+
+    qnap_username: optional(
+      string(),
+      maxLength(255, 'Qnap Username can be a maximum of 255 characters')
+    ),
+
+    qnap_password: optional(
+      string(),
+      maxLength(255, 'Password can be a maximum of 255 characters')
+    ),
+
+    sip_extension: pipe(
+      string(),
+      maxLength(255, 'SIP extension can be a maximum of 255 characters')
+    ),
+
+    country_id: pipe(string()),
+    state_id: pipe(string()),
+    city_id: pipe(string()),
+    address: pipe(string(), maxLength(1000, 'Address can be a maximum of 1000 characters')),
+    pincode: pipe(string(), maxLength(10, 'Pincode max length is of 10 digit')),
+
+    phone: pipe(
+      string(),
+      minLength(7, 'Phone number must be valid'),
+      maxLength(15, 'Phone number can be a maximum of 15 digits')
+    ),
+
+    photo: optional(string()),
+    status: boolean(),
+
+    dob: optional(
+      pipe(
+        string(),
+        custom(
+          (value) => !value || !isNaN(Date.parse(value)),
+          'Invalid Date of Birth'
+        )
+      )
+    ),
+
+    roles: array(
+      string([minLength(1, 'Each role must be at least 1 character')]),
+      [minLength(1, 'At least one role must be selected')]
+    ),
+
+    // Cameras validation
+    cameras: array(
+      object({
+        title: pipe(
+          string(),
+          minLength(1, 'Camera Title is required'),
+          maxLength(255, 'Camera Title can be a maximum of 255 characters')
+        ),
+        ip: pipe(
+          string(),
+          minLength(1, 'Camera IP is required'),
+          maxLength(255, 'Camera IP can be a maximum of 255 characters')
+        )
+      }),
+      [minLength(1, 'At least one camera is required')]
+    ),
+
+    // ✅ Fixed apartment_data schema (uses floor_id instead of flat_id)
+    apartment_data: isFlatOwner
+      ? array(
+        object({
+          tower_id: pipe(
             string(),
-            minLength(1, 'First Name is required'),
-            maxLength(255, 'First Name can be a maximum of 255 characters')
-        ),
-        last_name: pipe(
+            minLength(1, 'Tower Id is required'),
+            maxLength(255, 'Tower Id can be a maximum of 255 characters')
+          ),
+          floor_id: pipe(
             string(),
-            minLength(1, 'Last Name is required'),
-            maxLength(255, 'Last Name can be a maximum of 255 characters')
-        ),
-        user_type: isOfficeBearer
-            ? pipe(string(), minLength(1, 'User type is required'))
-            : optional(string()),
-
-        email: pipe(
+            minLength(1, 'Floor Id is required'),
+            maxLength(255, 'Floor Id can be a maximum of 255 characters')
+          ),
+          apartment_id: pipe(
             string(),
-            minLength(1, 'Email is required'),
-            email('Please enter a valid email address'),
-            maxLength(255, 'Email can be a maximum of 255 characters')
-        ),
+            minLength(1, 'Apartment Id is required'),
+            maxLength(255, 'Apartment Id can be a maximum of 255 characters')
+          )
+        }),
+        [minLength(1, 'At least one Apartment is required')]
+      )
+      : array(
+        object({
+          tower_id: pipe(string(), maxLength(255, 'Tower Id can be a maximum of 255 characters')),
+          floor_id: pipe(string(), maxLength(255, 'Floor Id can be a maximum of 255 characters')),
+          apartment_id: pipe(string(), maxLength(255, 'Apartment Id can be a maximum of 255 characters'))
+        })
+      )
+  });
 
-        password: id
-            ? optional(string())
-            : pipe(
-                string(),
-                minLength(6, 'Password min length should be 6'),
-                maxLength(255, 'Password can be a maximum of 255 characters')
-            ),
+  // States
+  const [formData, setFormData] = useState({
+    company_name: '',
+    first_name: '',
+    last_name: '',
+    email: '',
+    password: '',
+    country_id: '',
+    state_id: '',
+    city_id: '',
+    region_id: '',
+    branch_id: "",
+    user_type: "",
+    address: '',
+    cameras: [
+      { title: '', ip: '' }
+    ],
+    apartment_data: [
+      { tower_id: "", floor_id: "", apartment_id: "" }
+    ],
+    pincode: '',
+    dob: '',
+    phone: '',
+    photo: '',
+    website: '',
+    status: false,
+    roles: [],
+    user_code: '',
+    qnap_username: "",
+    qnap_password: "",
+    sip_extension: ""
+  })
 
-        qnap_username: optional(
-            string(),
-            maxLength(255, 'Qnap Username can be a maximum of 255 characters')
-        ),
+  const handleClickShowPassword = () => setFormData(show => ({ ...show, isPasswordShown: !show.isPasswordShown }))
 
-        qnap_password: optional(
-            string(),
-            maxLength(255, 'Password can be a maximum of 255 characters')
-        ),
+  // const [formData, setFormData] = useState(initialData)
+  const [imgSrc, setImgSrc] = useState('/images/avatars/11.png');
 
-        sip_extension: pipe(
-            string(),
-            maxLength(255, 'SIP extension can be a maximum of 255 characters')
-        ),
+  // Hooks
+  const {
+    control,
+    reset,
+    watch,
+    handleSubmit,
+    setError,
+    setValue,
+    formState: { errors }
+  } = useForm({
+    resolver: valibotResolver(schema),
+    defaultValues: {
+      first_name: '',
+      last_name: '',
+      email: '',
+      password: '',
+      country_id: '',
+      branch_id: "",
+      state_id: '',
+      city_id: '',
+      address: '',
+      pincode: '',
+      dob: '',
+      phone: '',
+      photo: '',
+      website: '',
+      status: false,
+      urn_no: '',
+      idfa_code: '',
+      application_no: '',
+      licence_no: '',
+      roles: [],
+      apartment_data: [
+        { tower_id: "", floor_id: "", apartment_id: "" }
+      ],
+      cameras: [
+        { title: '', ip: '' }
+      ],
+      user_type: '',
+      employee_type: '',
+      participation_type_id: '',
+      designation_id: '',
+      department_id: '',
+      alternative_email: '',
+      qnap_username: "",
+      qnap_password: "",
+      sip_extension: ""
+    }
+  });
 
-        country_id: pipe(string()),
-        state_id: pipe(string()),
-        city_id: pipe(string()),
-        address: pipe(string(), maxLength(1000, 'Address can be a maximum of 1000 characters')),
-        pincode: pipe(string(), maxLength(10, 'Pincode max length is of 10 digit')),
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: 'cameras'
+  })
 
-        phone: pipe(
-            string(),
-            minLength(7, 'Phone number must be valid'),
-            maxLength(15, 'Phone number can be a maximum of 15 digits')
-        ),
+  const { fields: apartmentFields, append: apartmentAppend, remove: apartmentRemove } = useFieldArray({
+    control,
+    name: "apartment_data",
+  });
 
-        photo: optional(string()),
-        status: boolean(),
+  const watchApartmentData = watch("apartment_data"); // get per-row values
 
-        dob: optional(
-            pipe(
-                string(),
-                custom(
-                    (value) => !value || !isNaN(Date.parse(value)),
-                    'Invalid Date of Birth'
-                )
-            )
-        ),
+  useEffect(() => {
+    if (userRoles && userRoles.length > 0) {
+      const is_office_bearer = userRoles.some(item => item == "68c01730556298d2b76244ac")
+      const is_flat_owner = userRoles.some(item => item == "68bfdb861814836bc3393bdc")
 
-        roles: array(
-            string([minLength(1, 'Each role must be at least 1 character')]),
-            [minLength(1, 'At least one role must be selected')]
-        ),
+      if (!is_office_bearer) {
+        setValue('user_type', '')
+      }
 
-        // Cameras validation
-        cameras: array(
-            object({
-                title: pipe(
-                    string(),
-                    minLength(1, 'Camera Title is required'),
-                    maxLength(255, 'Camera Title can be a maximum of 255 characters')
-                ),
-                ip: pipe(
-                    string(),
-                    minLength(1, 'Camera IP is required'),
-                    maxLength(255, 'Camera IP can be a maximum of 255 characters')
-                )
-            }),
-            [minLength(1, 'At least one camera is required')]
-        ),
+      if (!is_flat_owner) {
+        setValue('apartment_data', [])
+      }
 
-        // ✅ Fixed apartment_data schema (uses floor_id instead of flat_id)
-        apartment_data: isFlatOwner
-            ? array(
-                object({
-                    tower_id: pipe(
-                        string(),
-                        minLength(1, 'Tower Id is required'),
-                        maxLength(255, 'Tower Id can be a maximum of 255 characters')
-                    ),
-                    floor_id: pipe(
-                        string(),
-                        minLength(1, 'Floor Id is required'),
-                        maxLength(255, 'Floor Id can be a maximum of 255 characters')
-                    ),
-                    apartment_id: pipe(
-                        string(),
-                        minLength(1, 'Apartment Id is required'),
-                        maxLength(255, 'Apartment Id can be a maximum of 255 characters')
-                    )
-                }),
-                [minLength(1, 'At least one Apartment is required')]
-            )
-            : array(
-                object({
-                    tower_id: pipe(string(), maxLength(255, 'Tower Id can be a maximum of 255 characters')),
-                    floor_id: pipe(string(), maxLength(255, 'Floor Id can be a maximum of 255 characters')),
-                    apartment_id: pipe(string(), maxLength(255, 'Apartment Id can be a maximum of 255 characters'))
-                })
-            )
+      setIsOfficeBearer(is_office_bearer)
+      setIsFlatOwner(is_flat_owner)
+    } else {
+      setValue('user_type', '')
+      setValue('user_type', '')
+      setIsOfficeBearer(false)
+      setIsFlatOwner(false)
+    }
+  }, [userRoles])
+
+  const checkEmailCompany = async (email, id) => {
+    try {
+      const safeId = id || 'null'; // fallback to 'null' when id is undefined
+
+      const response = await fetch(`${URL}/admin/company/email/check/${email}/${safeId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        return data.exists;
+      } else {
+        console.error('Failed to check email:', data);
+
+        return false;
+      }
+    } catch (error) {
+      console.error('Error occurred while checking email:', error);
+
+      return false;
+    }
+  };
+
+  const editFormData = async () => {
+    try {
+      const response = await fetch(`${URL}/admin/user/${id}/edit`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        // If server responded with an error status, handle it explicitly
+        console.error('Failed to fetch user data:', result.message || result);
+
+        return;
+      }
+
+      if (result?.data) {
+        setEditData(result.data);
+      } else {
+        console.warn('No data found in response:', result);
+      }
+
+    } catch (error) {
+      console.error('Network or parsing error:', error);
+    }
+  };
+
+  const loadData = async () => {
+    try {
+      const countryData = await doGet(`admin/countries`);
+      const designationData = await doGet(`admin/designations?status=true`);
+      const towerData = await doGet(`company/tower`);
+      const floorData = await doGet(`company/floor`);
+      const apartmentData = await doGet('company/apartment')
+      const participationTypesData = await doGet(`admin/participation_types?status=true`);
+      const roleData = await doGet(`company/role`);
+
+      setCreateData(prevData => ({
+        ...prevData,
+        country: countryData.country,
+        designations: designationData,
+        department: [],
+        tower: towerData,
+        floor: floorData,
+        apartment: apartmentData,
+        participation_types: participationTypesData,
+        roles: roleData,
+      }));
+
+      setIsLoading(false);
+    } catch (error) {
+      console.error('Error loading data:', error.message);
+    }
+  };
+
+  useEffect(() => {
+    if (URL && token) {
+      loadData();
+
+      if (id) {
+        editFormData();
+      }
+    }
+
+  }, [URL, token, id])
+
+
+  useEffect(() => {
+    if (!id || !editData) return;
+
+    reset({
+      first_name: editData.first_name ?? '',
+      last_name: editData.last_name ?? '',
+      user_type: editData.user_type ?? '',
+      email: editData.email ?? '',
+      phone: editData.phone ?? '',
+      address: editData.address ?? '',
+      pincode: editData.pincode ?? '',
+      country_id: editData.country_id ?? '',
+      state_id: editData.state_id ?? '',
+      city_id: editData.city_id ?? '',
+      status: editData.status ?? '',
+      website: editData.website ?? '',
+      qnap_password: editData.qnap_password ?? '',
+      qnap_username: editData.qnap_username ?? '',
+      sip_extension: editData.sip_extension ?? '',
+      tower_id: editData.tower_id ?? '',
+      floor_id: editData.floor_id ?? '',
+      apartment_id: editData.apartment_id ?? '',
+      apartment_data: Array.isArray(editData.apartment_data) ? editData.apartment_data : [],
+      cameras: Array.isArray(editData.cameras) ? editData.cameras : [],
+      dob: editData.dob ? new Date(editData.dob).toISOString().split('T')[0] : '',
     });
 
-    // States
-    const [formData, setFormData] = useState({
-        company_name: '',
-        first_name: '',
-        last_name: '',
-        email: '',
-        password: '',
-        country_id: '',
-        state_id: '',
-        city_id: '',
-        region_id: '',
-        branch_id: "",
-        user_type: "",
-        address: '',
-        cameras: [
-            { title: '', ip: '' }
-        ],
-        apartment_data: [
-            { tower_id: "", floor_id: "", apartment_id: "" }
-        ],
-        pincode: '',
-        dob: '',
-        phone: '',
-        photo: '',
-        website: '',
-        status: false,
-        roles: [],
-        user_code: '',
-        qnap_username: "",
-        qnap_password: "",
-        sip_extension: ""
-    })
+    // Safe image assignment
+    if (editData.photo) {
+      setImgSrc(`${public_url}${editData.photo}`);
+    } else {
+      setImgSrc('/images/avatars/11.png')
+    }
 
-    const handleClickShowPassword = () => setFormData(show => ({ ...show, isPasswordShown: !show.isPasswordShown }))
+    // Country & state dependencies
+    if (editData.country_id) setCountryId(editData.country_id);
+    if (editData.state_id) setStateId(editData.state_id);
 
-    // const [formData, setFormData] = useState(initialData)
-    const [imgSrc, setImgSrc] = useState('/images/avatars/11.png');
+    // Roles
+    if (Array.isArray(editData.roles) && editData.roles.length > 0) {
+      const rolesIds = editData.roles.map((role) => role.role_id);
 
-    // Hooks
-    const {
-        control,
-        reset,
-        watch,
-        handleSubmit,
-        setError,
-        setValue,
-        formState: { errors }
-    } = useForm({
-        resolver: valibotResolver(schema),
-        defaultValues: {
-            first_name: '',
-            last_name: '',
-            email: '',
-            password: '',
-            country_id: '',
-            branch_id: "",
-            state_id: '',
-            city_id: '',
-            address: '',
-            pincode: '',
-            dob: '',
-            phone: '',
-            photo: '',
-            website: '',
-            status: false,
-            urn_no: '',
-            idfa_code: '',
-            application_no: '',
-            licence_no: '',
-            roles: [],
-            apartment_data: [
-                { tower_id: "", floor_id: "", apartment_id: "" }
-            ],
-            cameras: [
-                { title: '', ip: '' }
-            ],
-            user_type: '',
-            employee_type: '',
-            participation_type_id: '',
-            designation_id: '',
-            department_id: '',
-            alternative_email: '',
-            qnap_username: "",
-            qnap_password: "",
-            sip_extension: ""
-        }
-    });
+      setUserRoles(rolesIds);
+      setValue('roles', rolesIds);
+    } else {
+      setUserRoles([]);
+      setValue('roles', []);
+    }
 
-    const { fields, append, remove } = useFieldArray({
-        control,
-        name: 'cameras'
-    })
+    // Tower & Floor
+    if (editData.tower_id) setSelectTower(editData.tower_id);
+    if (editData.floor_id) setSelectedFloor(editData.floor_id);
 
-    const { fields: apartmentFields, append: apartmentAppend, remove: apartmentRemove } = useFieldArray({
-        control,
-        name: "apartment_data",
-    });
+    // ✅ Apartments filtering
+    if (editData.floor_id && createData?.apartment) {
+      const branchData =
+        createData.apartment.filter((b) => b.floor_id === editData.floor_id) || [];
 
-    const watchApartmentData = watch("apartment_data"); // get per-row values
+      setSelectedApartment(branchData);
+    } else {
+      setSelectedApartment([]);
+    }
+  }, [id, editData, reset, setValue, createData]);
 
-    useEffect(() => {
-        if (userRoles && userRoles.length > 0) {
-            const is_office_bearer = userRoles.some(item => item == "68c01730556298d2b76244ac")
-            const is_flat_owner = userRoles.some(item => item == "68bfdb861814836bc3393bdc")
+  useEffect(() => {
+    if (countryId && createData?.country.length > 0) {
+      const data = createData && createData['country'].find(item => item.country_id == countryId);
+      const states = data['states'];
 
-            if (!is_office_bearer) {
-                setValue('user_type', '')
-            }
+      setStateData(states);
+    }
+  }, [countryId, createData])
 
-            if (!is_flat_owner) {
-                setValue('apartment_data', [])
-            }
+  useEffect(() => {
+    if (errors) {
+      console.log("Error", errors);
+    }
+  }, [errors])
 
-            setIsOfficeBearer(is_office_bearer)
-            setIsFlatOwner(is_flat_owner)
-        } else {
-            setValue('user_type', '')
-            setValue('user_type', '')
-            setIsOfficeBearer(false)
-            setIsFlatOwner(false)
-        }
-    }, [userRoles])
-
-    const checkEmailCompany = async (email, id) => {
-        try {
-            const safeId = id || 'null'; // fallback to 'null' when id is undefined
-
-            const response = await fetch(`${URL}/admin/company/email/check/${email}/${safeId}`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                return data.exists;
-            } else {
-                console.error('Failed to check email:', data);
-
-                return false;
-            }
-        } catch (error) {
-            console.error('Error occurred while checking email:', error);
-
-            return false;
-        }
-    };
-
-    const editFormData = async () => {
-        try {
-            const response = await fetch(`${URL}/admin/user/${id}/edit`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-
-            const result = await response.json();
-
-            if (!response.ok) {
-                // If server responded with an error status, handle it explicitly
-                console.error('Failed to fetch user data:', result.message || result);
-
-                return;
-            }
-
-            if (result?.data) {
-                setEditData(result.data);
-            } else {
-                console.warn('No data found in response:', result);
-            }
-
-        } catch (error) {
-            console.error('Network or parsing error:', error);
-        }
-    };
-
-    const loadData = async () => {
-        try {
-            const countryData = await doGet(`admin/countries`);
-            const designationData = await doGet(`admin/designations?status=true`);
-            const towerData = await doGet(`company/tower`);
-            const floorData = await doGet(`company/floor`);
-            const apartmentData = await doGet('company/apartment')
-            const participationTypesData = await doGet(`admin/participation_types?status=true`);
-            const roleData = await doGet(`company/role`);
-
-            setCreateData(prevData => ({
-                ...prevData,
-                country: countryData.country,
-                designations: designationData,
-                department: [],
-                tower: towerData,
-                floor: floorData,
-                apartment: apartmentData,
-                participation_types: participationTypesData,
-                roles: roleData,
-            }));
-
-            setIsLoading(false);
-        } catch (error) {
-            console.error('Error loading data:', error.message);
-        }
-    };
-
-    useEffect(() => {
-        if (URL && token) {
-            loadData();
-
-            if (id) {
-                editFormData();
-            }
-        }
-
-    }, [URL, token, id])
+  const submitFormData = async (values) => {
+    try {
 
 
-    useEffect(() => {
-        if (!id || !editData) return;
-
-        reset({
-            first_name: editData.first_name ?? '',
-            last_name: editData.last_name ?? '',
-            user_type: editData.user_type ?? '',
-            email: editData.email ?? '',
-            phone: editData.phone ?? '',
-            address: editData.address ?? '',
-            pincode: editData.pincode ?? '',
-            country_id: editData.country_id ?? '',
-            state_id: editData.state_id ?? '',
-            city_id: editData.city_id ?? '',
-            status: editData.status ?? '',
-            website: editData.website ?? '',
-            qnap_password: editData.qnap_password ?? '',
-            qnap_username: editData.qnap_username ?? '',
-            sip_extension: editData.sip_extension ?? '',
-            tower_id: editData.tower_id ?? '',
-            floor_id: editData.floor_id ?? '',
-            apartment_id: editData.apartment_id ?? '',
-            apartment_data: Array.isArray(editData.apartment_data) ? editData.apartment_data : [],
-            cameras: Array.isArray(editData.cameras) ? editData.cameras : [],
-            dob: editData.dob ? new Date(editData.dob).toISOString().split('T')[0] : '',
+      if (values.roles.length === 0) {
+        setError("roles", {
+          type: "manual",
+          message: "Please select at least one role.",
         });
 
-        // Safe image assignment
-        if (editData.photo) {
-            setImgSrc(`${public_url}${editData.photo}`);
+        return;
+      }
+
+      const formData = new FormData();
+
+      // Photo upload
+      if (values.photo) {
+        formData.append("photo", values.photo);
+      }
+
+      // ✅ Append apartment_data correctly
+      if (Array.isArray(values.apartment_data)) {
+        values.apartment_data.forEach((apart, index) => {
+          if (apart.tower_id)
+            formData.append(`apartment_data[${index}][tower_id]`, apart.tower_id);
+          if (apart.floor_id)
+            formData.append(`apartment_data[${index}][floor_id]`, apart.floor_id);
+          if (apart.apartment_id)
+            formData.append(`apartment_data[${index}][apartment_id]`, apart.apartment_id);
+        });
+      }
+
+      // ✅ Append cameras correctly
+      if (Array.isArray(values.cameras)) {
+        values.cameras.forEach((cam, index) => {
+          if (cam.title) formData.append(`cameras[${index}][title]`, cam.title);
+          if (cam.ip) formData.append(`cameras[${index}][ip]`, cam.ip);
+        });
+      }
+
+      // ✅ Append other fields
+      Object.entries(values).forEach(([key, value]) => {
+        if (["photo", "cameras", "apartment_data"].includes(key)) return;
+
+        if (Array.isArray(value)) {
+          value.forEach((v) => formData.append(`${key}[]`, v));
         } else {
-            setImgSrc('/images/avatars/11.png')
+          formData.append(key, value ?? "");
         }
+      });
 
-        // Country & state dependencies
-        if (editData.country_id) setCountryId(editData.country_id);
-        if (editData.state_id) setStateId(editData.state_id);
+      setLoading(true);
 
-        // Roles
-        if (Array.isArray(editData.roles) && editData.roles.length > 0) {
-            const rolesIds = editData.roles.map((role) => role.role_id);
-
-            setUserRoles(rolesIds);
-            setValue('roles', rolesIds);
-        } else {
-            setUserRoles([]);
-            setValue('roles', []);
+      const response = await fetch(
+        id ? `${URL}/admin/user/${id}` : `${URL}/admin/user`,
+        {
+          method: id ? "PUT" : "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
         }
+      );
 
-        // Tower & Floor
-        if (editData.tower_id) setSelectTower(editData.tower_id);
-        if (editData.floor_id) setSelectedFloor(editData.floor_id);
+      const data1 = await response.json();
 
-        // ✅ Apartments filtering
-        if (editData.floor_id && createData?.apartment) {
-            const branchData =
-                createData.apartment.filter((b) => b.floor_id === editData.floor_id) || [];
+      if (response.ok) {
+        router.push(`/${locale}/apps/user/list`);
+        toast.success(`User ${id ? "updated" : "added"} successfully!`, {
+          autoClose: 700,
+        });
+      } else {
+        toast.error(data1?.message || "Something went wrong", {
+          autoClose: 1200,
+        });
+      }
+    } catch (error) {
+      console.error("Error", error);
+      toast.error("Unexpected error occurred", { autoClose: 1200 });
+    } finally {
+      setLoading(false);
+    }
+  };
 
-            setSelectedApartment(branchData);
-        } else {
-            setSelectedApartment([]);
-        }
-    }, [id, editData, reset, setValue, createData]);
-
-    useEffect(() => {
-        if (countryId && createData?.country.length > 0) {
-            const data = createData && createData['country'].find(item => item.country_id == countryId);
-            const states = data['states'];
-
-            setStateData(states);
-        }
-    }, [countryId, createData])
-
-    useEffect(() => {
-        if (errors) {
-            console.log("Error", errors);
-        }
-    }, [errors])
-
-    const submitFormData = async (values) => {
-        try {
-
-
-            if (values.roles.length === 0) {
-                setError("roles", {
-                    type: "manual",
-                    message: "Please select at least one role.",
-                });
-
-                return;
-            }
-
-            const formData = new FormData();
-
-            // Photo upload
-            if (values.photo) {
-                formData.append("photo", values.photo);
-            }
-
-            // ✅ Append apartment_data correctly
-            if (Array.isArray(values.apartment_data)) {
-                values.apartment_data.forEach((apart, index) => {
-                    if (apart.tower_id)
-                        formData.append(`apartment_data[${index}][tower_id]`, apart.tower_id);
-                    if (apart.floor_id)
-                        formData.append(`apartment_data[${index}][floor_id]`, apart.floor_id);
-                    if (apart.apartment_id)
-                        formData.append(`apartment_data[${index}][apartment_id]`, apart.apartment_id);
-                });
-            }
-
-            // ✅ Append cameras correctly
-            if (Array.isArray(values.cameras)) {
-                values.cameras.forEach((cam, index) => {
-                    if (cam.title) formData.append(`cameras[${index}][title]`, cam.title);
-                    if (cam.ip) formData.append(`cameras[${index}][ip]`, cam.ip);
-                });
-            }
-
-            // ✅ Append other fields
-            Object.entries(values).forEach(([key, value]) => {
-                if (["photo", "cameras", "apartment_data"].includes(key)) return;
-
-                if (Array.isArray(value)) {
-                    value.forEach((v) => formData.append(`${key}[]`, v));
-                } else {
-                    formData.append(key, value ?? "");
-                }
-            });
-
-            setLoading(true);
-
-            const response = await fetch(
-                id ? `${URL}/admin/user/${id}` : `${URL}/admin/user`,
-                {
-                    method: id ? "PUT" : "POST",
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                    body: formData,
-                }
-            );
-
-            const data1 = await response.json();
-
-            if (response.ok) {
-                router.push(`/${locale}/apps/user/list`);
-                toast.success(`User ${id ? "updated" : "added"} successfully!`, {
-                    autoClose: 700,
-                });
-            } else {
-                toast.error(data1?.message || "Something went wrong", {
-                    autoClose: 1200,
-                });
-            }
-        } catch (error) {
-            console.error("Error", error);
-            toast.error("Unexpected error occurred", { autoClose: 1200 });
-        } finally {
-            setLoading(false);
-        }
+  const onSubmit = async (data) => {
+    const newUser = {
+      ...data,
+      photo: file
     };
 
-    const onSubmit = async (data) => {
-        const newUser = {
-            ...data,
-            photo: file
-        };
+    const exist = await checkEmailCompany(data?.email, id);
 
-        const exist = await checkEmailCompany(data?.email, id);
+    if (exist) {
+      setError('email', {
+        type: 'manual',
+        message: 'This email is already in use.'
+      });
 
-        if (exist) {
-            setError('email', {
-                type: 'manual',
-                message: 'This email is already in use.'
-            });
-
-            return;
-        }
-
-        submitFormData(newUser);
-    };
-
-    const [file, setFile] = useState(null);
-
-    const handleFileInputChange = (event) => {
-        const selectedFile = event.target.files[0];
-
-        if (!selectedFile) return;
-
-        const validTypes = ['image/jpeg', 'image/gif', 'image/png'];
-
-        if (!validTypes.includes(selectedFile.type)) {
-            setError('photo', {
-                type: 'manual',
-                message: 'Invalid file type. Only JPG, GIF, or PNG are allowed.'
-            });
-
-            return;
-        }
-
-        if (selectedFile.size > 800 * 1024) {
-            setError('photo', {
-                type: 'manual',
-                message: 'File size exceeds 800KB.'
-            });
-
-            return;
-        }
-
-        setFile(selectedFile); // Save the actual File object
-
-        const reader = new FileReader();
-
-        reader.onload = () => setImgSrc(reader.result);
-        reader.readAsDataURL(selectedFile);
-    };
-
-    const handleFileInputReset = () => {
-        setFile('')
-        setImgSrc('/images/avatars/11.png')
+      return;
     }
 
-    useEffect(() => {
-        if (stateId && stateData) {
-            const data = stateData && stateData.find(item => item.state_id == stateId);
-            const city = data['cities'];
+    submitFormData(newUser);
+  };
 
-            setCityData(city);
-        }
-    }, [stateId, stateData])
+  const [file, setFile] = useState(null);
 
-    useEffect(() => {
-        if (selectTower && createData) {
+  const handleFileInputChange = (event) => {
+    const selectedFile = event.target.files[0];
 
-            const select_floor = createData?.floor?.filter(
-                (item) => item.tower_id._id === selectTower
-            )
+    if (!selectedFile) return;
 
-            setSelectFloor(select_floor || []);
+    const validTypes = ['image/jpeg', 'image/gif', 'image/png'];
 
-        }
-    }, [selectTower, createData, setValue]);
+    if (!validTypes.includes(selectedFile.type)) {
+      setError('photo', {
+        type: 'manual',
+        message: 'Invalid file type. Only JPG, GIF, or PNG are allowed.'
+      });
 
-    useEffect(() => {
-        if (selectedFloor && createData) {
-            const apartmentData =
-                createData?.apartment?.filter(
-                    (item) => item.floor_id === selectedFloor && item.status === false
-                ) || [];
-
-            setSelectedApartment(apartmentData);
-        }
-    }, [selectedFloor, createData, setValue]);
-
-    if (!createData || isLoading) {
-        return (
-            <>
-                <PermissionGuard
-                    element={id ? 'hasUserEditPermission' : 'hasUserAddPermission'}
-                    locale={locale}
-                >
-                    <SkeletonFormComponent />
-                </PermissionGuard>
-            </>
-        )
+      return;
     }
 
+    if (selectedFile.size > 800 * 1024) {
+      setError('photo', {
+        type: 'manual',
+        message: 'File size exceeds 800KB.'
+      });
+
+      return;
+    }
+
+    setFile(selectedFile); // Save the actual File object
+
+    const reader = new FileReader();
+
+    reader.onload = () => setImgSrc(reader.result);
+    reader.readAsDataURL(selectedFile);
+  };
+
+  const handleFileInputReset = () => {
+    setFile('')
+    setImgSrc('/images/avatars/11.png')
+  }
+
+  useEffect(() => {
+    if (stateId && stateData) {
+      const data = stateData && stateData.find(item => item.state_id == stateId);
+      const city = data['cities'];
+
+      setCityData(city);
+    }
+  }, [stateId, stateData])
+
+  useEffect(() => {
+    if (selectTower && createData) {
+
+      const select_floor = createData?.floor?.filter(
+        (item) => item.tower_id._id === selectTower
+      )
+
+      setSelectFloor(select_floor || []);
+
+    }
+  }, [selectTower, createData, setValue]);
+
+  useEffect(() => {
+    if (selectedFloor && createData) {
+      const apartmentData =
+        createData?.apartment?.filter(
+          (item) => item.floor_id === selectedFloor && item.status === false
+        ) || [];
+
+      setSelectedApartment(apartmentData);
+    }
+  }, [selectedFloor, createData, setValue]);
+
+  if (!createData || isLoading) {
     return (
-        <Card>
-            <CardHeader title={id ? `Edit ${editData?.first_name}` : "Add New User"} />
-            <Divider />
-            <form
-                onSubmit={handleSubmit(onSubmit)}
-                noValidate
-                encType="multipart/form-data"
-            >
-                <CardContent>
-                    <Grid container spacing={5}>
-                        {/* Account Details */}
-                        <Grid item size={{ xs: 12 }} >
-                            <Typography variant="body2" className="font-medium">
-                                1. Account Details
-                            </Typography>
-                        </Grid>
+      <>
+        <PermissionGuard
+          element={id ? 'hasUserEditPermission' : 'hasUserAddPermission'}
+          locale={locale}
+        >
+          <SkeletonFormComponent />
+        </PermissionGuard>
+      </>
+    )
+  }
 
-                        <Grid item size={{ xs: 12, sm: 4 }}>
-                            <Controller
-                                name="first_name"
-                                control={control}
-                                render={({ field }) => (
-                                    <CustomTextField
-                                        {...field}
-                                        fullWidth
-                                        label="First Name*"
-                                        placeholder="First Name"
-                                        error={!!errors.first_name}
-                                        helperText={errors.first_name?.message}
-                                    />
-                                )}
-                            />
-                        </Grid>
+  return (
+    <Card>
+      <CardHeader title={id ? `Edit ${editData?.first_name}` : "Add New User"} />
+      <Divider />
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        noValidate
+        encType="multipart/form-data"
+      >
+        <CardContent>
+          <Grid container spacing={5}>
+            {/* Account Details */}
+            <Grid item size={{ xs: 12 }} >
+              <Typography variant="body2" className="font-medium">
+                1. Account Details
+              </Typography>
+            </Grid>
 
-                        <Grid item size={{ xs: 12, sm: 4 }}>
-                            <Controller
-                                name="last_name"
-                                control={control}
-                                render={({ field }) => (
-                                    <CustomTextField
-                                        {...field}
-                                        fullWidth
-                                        type="text"
-                                        label="Last Name*"
-                                        placeholder="Last Name"
-                                        error={!!errors.last_name}
-                                        helperText={errors.last_name?.message}
-                                    />
-                                )}
-                            />
-                        </Grid>
+            <Grid item size={{ xs: 12, sm: 4 }}>
+              <Controller
+                name="first_name"
+                control={control}
+                render={({ field }) => (
+                  <CustomTextField
+                    {...field}
+                    fullWidth
+                    label="First Name*"
+                    placeholder="First Name"
+                    error={!!errors.first_name}
+                    helperText={errors.first_name?.message}
+                  />
+                )}
+              />
+            </Grid>
 
-                        <Grid item size={{ xs: 12, sm: 4 }}>
-                            <Controller
-                                name="email"
-                                control={control}
-                                render={({ field }) => (
-                                    <CustomTextField
-                                        {...field}
-                                        fullWidth
-                                        type="email"
-                                        label="Email*"
-                                        placeholder="Email"
-                                        error={!!errors.email}
-                                        helperText={errors.email?.message}
-                                    />
-                                )}
-                            />
-                        </Grid>
+            <Grid item size={{ xs: 12, sm: 4 }}>
+              <Controller
+                name="last_name"
+                control={control}
+                render={({ field }) => (
+                  <CustomTextField
+                    {...field}
+                    fullWidth
+                    type="text"
+                    label="Last Name*"
+                    placeholder="Last Name"
+                    error={!!errors.last_name}
+                    helperText={errors.last_name?.message}
+                  />
+                )}
+              />
+            </Grid>
 
-                        <Grid item size={{ xs: 12, sm: 4 }}>
-                            <Controller
-                                name="phone"
-                                control={control}
-                                render={({ field }) => (
-                                    <CustomTextField
-                                        {...field}
-                                        fullWidth
-                                        type="tel"
-                                        label="Phone*"
-                                        placeholder="Phone"
-                                        error={!!errors.phone}
-                                        helperText={errors.phone?.message}
-                                    />
-                                )}
-                            />
-                        </Grid>
+            <Grid item size={{ xs: 12, sm: 4 }}>
+              <Controller
+                name="email"
+                control={control}
+                render={({ field }) => (
+                  <CustomTextField
+                    {...field}
+                    fullWidth
+                    type="email"
+                    label="Email*"
+                    placeholder="Email"
+                    error={!!errors.email}
+                    helperText={errors.email?.message}
+                  />
+                )}
+              />
+            </Grid>
 
-                        {!id && (
-                            <Grid item size={{ xs: 12, sm: 4 }}>
-                                <Controller
-                                    name="password"
-                                    control={control}
-                                    render={({ field }) => (
-                                        <CustomTextField
-                                            fullWidth
-                                            label="Password*"
-                                            placeholder="············"
-                                            type={formData.isPasswordShown ? "text" : "password"}
-                                            {...field}
-                                            InputProps={{
-                                                endAdornment: (
-                                                    <InputAdornment position="end">
-                                                        <IconButton
-                                                            edge="end"
-                                                            onClick={handleClickShowPassword}
-                                                            onMouseDown={(e) => e.preventDefault()}
-                                                            aria-label="toggle password visibility"
-                                                        >
-                                                            <i
-                                                                className={
-                                                                    formData.isPasswordShown
-                                                                        ? "tabler-eye-off"
-                                                                        : "tabler-eye"
-                                                                }
-                                                            />
-                                                        </IconButton>
-                                                    </InputAdornment>
-                                                ),
-                                            }}
-                                            error={!!errors.password}
-                                            helperText={errors.password?.message}
-                                        />
-                                    )}
-                                />
-                            </Grid>
-                        )}
+            <Grid item size={{ xs: 12, sm: 4 }}>
+              <Controller
+                name="phone"
+                control={control}
+                render={({ field }) => (
+                  <CustomTextField
+                    {...field}
+                    fullWidth
+                    type="tel"
+                    label="Phone*"
+                    placeholder="Phone"
+                    error={!!errors.phone}
+                    helperText={errors.phone?.message}
+                  />
+                )}
+              />
+            </Grid>
 
-                        {/* Profile Photo */}
-                        <Grid item size={{ xs: 12 }} >
-                            <Divider />
-                        </Grid>
-                        <Grid item size={{ xs: 12, sm: 4 }}>
-                            <Typography variant="h6" className="mb-4">
-                                Profile Photo
-                            </Typography>
-                            <CardContent className="flex flex-col sm:flex-row items-start gap-6 p-0">
-                                <img
-                                    src={imgSrc}
-                                    alt="Profile"
-                                    className="rounded-full object-cover border"
-                                    style={{ width: 100, height: 100 }}
-                                />
-                                <div className="flex flex-col gap-2">
-                                    <div className="flex flex-col gap-2 w-48">
-                                        <Button
-                                            component="label"
-                                            variant="contained"
-                                            fullWidth
-                                            htmlFor="upload-image"
-                                        >
-                                            Upload New Photo
-                                            <input
-                                                hidden
-                                                type="file"
-                                                accept="image/png, image/jpeg"
-                                                id="upload-image"
-                                                onChange={handleFileInputChange}
-                                            />
-                                        </Button>
-                                        <Button
-                                            variant="outlined"
-                                            color="secondary"
-                                            fullWidth
-                                            onClick={handleFileInputReset}
-                                        >
-                                            Reset
-                                        </Button>
-                                    </div>
-                                    {errors?.photo && (
-                                        <Typography
-                                            variant="body2"
-                                            color="error"
-                                            className="mt-2"
-                                            style={{ color: "var(--mui-palette-error-main)" }}
-                                        >
-                                            {errors.photo.message}
-                                        </Typography>
-                                    )}
-                                </div>
-                            </CardContent>
-                        </Grid>
-
-                        {/* Personal Info */}
-                        <Grid item size={{ xs: 12 }} >
-                            <Divider />
-                        </Grid>
-                        <Grid item size={{ xs: 12 }}>
-                            <Typography variant="body2" className="font-medium">
-                                2. Personal Info
-                            </Typography>
-                        </Grid>
-
-                        <Grid item size={{ xs: 12, sm: 4 }} >
-                            <Controller
-                                name="dob"
-                                control={control}
-                                render={({ field }) => (
-                                    <CustomTextField
-                                        {...field}
-                                        fullWidth
-                                        type="date"
-                                        label="Date of birth"
-                                        placeholder="Date of birth"
-                                        error={!!errors.dob}
-                                        helperText={errors.dob?.message}
-                                    />
-                                )}
-                            />
-                        </Grid>
-
-                        <Grid item size={{ xs: 12, sm: 8 }} >
-                            <Controller
-                                name="address"
-                                control={control}
-                                render={({ field }) => (
-                                    <CustomTextField
-                                        {...field}
-                                        fullWidth
-                                        label="Address"
-                                        placeholder="Address"
-                                        multiline
-                                        rows={1}
-                                        error={!!errors.address}
-                                        helperText={errors.address?.message}
-                                    />
-                                )}
-                            />
-                        </Grid>
-
-                        {/* Country, State, City, Pincode */}
-                        <Grid item size={{ xs: 12, sm: 4 }}>
-                            <Controller
-                                name="country_id"
-                                control={control}
-                                render={({ field }) => (
-                                    <CustomTextField
-                                        {...field}
-                                        select
-                                        fullWidth
-                                        label="Country"
-                                        onChange={(e) => {
-                                            const selectedCountryId = e.target.value;
-
-                                            field.onChange(selectedCountryId);
-                                            setCountryId(selectedCountryId);
-                                        }}
-                                        error={!!errors.country_id}
-                                        helperText={errors.country_id?.message}
-                                    >
-                                        {createData?.country?.map((item, index) => (
-                                            <MenuItem key={index} value={`${item.country_id}`}>
-                                                {item.country_name}
-                                            </MenuItem>
-                                        ))}
-                                    </CustomTextField>
-                                )}
-                            />
-                        </Grid>
-
-                        <Grid item size={{ xs: 12, sm: 4 }}>
-                            <Controller
-                                name="state_id"
-                                control={control}
-                                render={({ field }) => (
-                                    <CustomTextField
-                                        {...field}
-                                        select
-                                        fullWidth
-                                        label="State"
-                                        onChange={(e) => {
-                                            const selectStateId = e.target.value;
-
-                                            field.onChange(selectStateId);
-                                            setStateId(selectStateId);
-                                        }}
-                                        error={!!errors.state_id}
-                                        helperText={errors.state_id?.message}
-                                    >
-                                        <MenuItem disabled value="1">
-                                            Select state
-                                        </MenuItem>
-                                        {stateData?.map((item, index) => (
-                                            <MenuItem key={index} value={`${item.state_id}`}>
-                                                {item.state_name}
-                                            </MenuItem>
-                                        ))}
-                                    </CustomTextField>
-                                )}
-                            />
-                        </Grid>
-
-                        <Grid item size={{ xs: 12, sm: 4 }}>
-                            <Controller
-                                name="city_id"
-                                control={control}
-                                render={({ field }) => (
-                                    <CustomTextField
-                                        {...field}
-                                        select
-                                        fullWidth
-                                        label="City"
-                                        error={!!errors.city_id}
-                                        helperText={errors.city_id?.message}
-                                    >
-                                        <MenuItem disabled value="1">
-                                            Select city
-                                        </MenuItem>
-                                        {cityData?.map((item, index) => (
-                                            <MenuItem key={index} value={`${item.city_id}`}>
-                                                {item.city_name}
-                                            </MenuItem>
-                                        ))}
-                                    </CustomTextField>
-                                )}
-                            />
-                        </Grid>
-
-                        <Grid item size={{ xs: 12, sm: 4 }}>
-                            <Controller
-                                name="pincode"
-                                control={control}
-                                render={({ field }) => (
-                                    <CustomTextField
-                                        {...field}
-                                        fullWidth
-                                        type="number"
-                                        label="Pincode"
-                                        placeholder="Pincode"
-                                        error={!!errors.pincode}
-                                        helperText={errors.pincode?.message}
-                                    />
-                                )}
-                            />
-                        </Grid>
-
-                        {/* Roles */}
-                        <Grid item size={{ xs: 12 }} >
-                            <Divider />
-                        </Grid>
-                        <Grid item size={{ xs: 12 }}>
-                            <Typography variant="body2" className="font-medium">
-                                3. Roles
-                            </Typography>
-                        </Grid>
-
-                        <Grid item size={{ xs: 12, sm: 4 }}>
-                            <Controller
-                                name="roles"
-                                control={control}
-                                defaultValue={[]}
-                                render={({ field }) => (
-                                    <CustomTextField
-                                        {...field}
-                                        select
-                                        fullWidth
-                                        label="Assign role*"
-                                        value={field.value}
-                                        error={!!errors.roles}
-                                        helperText={errors.roles?.message}
-                                        SelectProps={{
-                                            multiple: true,
-                                            onChange: (event) => {
-                                                const value = event.target.value;
-
-                                                setUserRoles(value);
-                                                field.onChange(value);
-                                            },
-                                            renderValue: (selectedIds) => {
-                                                const selectedNames = createData.roles
-                                                    .filter((role) => selectedIds.includes(role._id))
-                                                    .map((role) => role.name);
-
-                                                return selectedNames.join(", ");
-                                            },
-                                        }}
-                                    >
-                                        {createData?.roles?.length > 0 ? (
-                                            createData.roles.map((role, index) => (
-                                                <MenuItem key={index} value={role._id}>
-                                                    <Checkbox checked={userRoles.includes(role._id)} />
-                                                    <ListItemText primary={role.name} />
-                                                </MenuItem>
-                                            ))
-                                        ) : (
-                                            <MenuItem disabled>No roles</MenuItem>
-                                        )}
-                                    </CustomTextField>
-                                )}
-                            />
-                        </Grid>
-                        {isOfficeBearer && (
-
-
-                            <Grid item size={{ xs: 12, sm: 4 }}>
-                                <Controller
-                                    name="user_type" // single value
-                                    control={control}
-                                    defaultValue="" // default to empty string
-                                    render={({ field }) => (
-                                        <CustomTextField
-                                            {...field}
-                                            select
-                                            fullWidth
-                                            label="User Type*"
-                                            value={field.value || ""}
-                                            error={!!errors.user_type}
-                                            helperText={errors.user_type?.message}
-                                        >
-
-                                            <MenuItem key={1} value={"1"}>
-                                                Electricity
-                                            </MenuItem>
-                                            <MenuItem key={2} value={'2'}>
-                                                House Keeping/Guard
-                                            </MenuItem>
-                                            <MenuItem key={3} value={"3"}>
-                                                Internet
-                                            </MenuItem>
-                                        </CustomTextField>
-                                    )}
-                                />
-                            </Grid>
-                        )}
-                        {/* Cameras */}
-                        <Grid item size={{ xs: 12 }}>
-                            <Divider />
-                        </Grid>
-                        <Grid item size={{ xs: 12 }}>
-                            <Typography variant="body2" className="font-medium">
-                                4. Cameras
-                            </Typography>
-                        </Grid>
-
-                        <Grid item size={{ xs: 12 }}>
-                            <Grid container spacing={2}>
-                                {fields.map((item, index) => (
-                                    <Grid item size={{ xs: 12 }} key={item.id}>
-                                        <Grid container spacing={2} alignItems="center">
-                                            <Grid item size={{ xs: 12, sm: 5 }}>
-                                                <Controller
-                                                    name={`cameras.${index}.title`}
-                                                    control={control}
-                                                    render={({ field }) => (
-                                                        <CustomTextField
-                                                            {...field}
-                                                            fullWidth
-                                                            label="Camera Title*"
-                                                            error={!!errors?.cameras?.[index]?.title}
-                                                            helperText={
-                                                                errors?.cameras?.[index]?.title?.message
-                                                            }
-                                                        />
-                                                    )}
-                                                />
-                                            </Grid>
-
-                                            <Grid item size={{ xs: 12, sm: 5 }} >
-                                                <Controller
-                                                    name={`cameras.${index}.ip`}
-                                                    control={control}
-                                                    render={({ field }) => (
-                                                        <CustomTextField
-                                                            {...field}
-                                                            fullWidth
-                                                            label="Camera IP Address*"
-                                                            error={!!errors?.cameras?.[index]?.ip}
-                                                            helperText={errors?.cameras?.[index]?.ip?.message}
-                                                        />
-                                                    )}
-                                                />
-                                                <Typography variant="caption">
-                                                    Example:
-                                                    http://admin:admin123@192.168.80.22/cgi-bin/mjpg/video.cgi?channel=1&subtype=1
-                                                </Typography>
-                                            </Grid>
-
-                                            <Grid item size={{ xs: 12, sm: 2 }} textAlign="center">
-                                                <IconButton color="error" onClick={() => remove(index)}>
-                                                    <i className="tabler-x" />
-                                                </IconButton>
-                                            </Grid>
-                                        </Grid>
-                                    </Grid>
-                                ))}
-                            </Grid>
-                        </Grid>
-
-                        <Grid item size={{ xs: 12 }}>
-                            <Button
-                                variant="outlined"
-                                startIcon={<i className="tabler-plus" />}
-                                onClick={() => append({ title: "", icon: "", ip: "" })}
+            {!id && (
+              <Grid item size={{ xs: 12, sm: 4 }}>
+                <Controller
+                  name="password"
+                  control={control}
+                  render={({ field }) => (
+                    <CustomTextField
+                      fullWidth
+                      label="Password*"
+                      placeholder="············"
+                      type={formData.isPasswordShown ? "text" : "password"}
+                      {...field}
+                      InputProps={{
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            <IconButton
+                              edge="end"
+                              onClick={handleClickShowPassword}
+                              onMouseDown={(e) => e.preventDefault()}
+                              aria-label="toggle password visibility"
                             >
-                                Add Camera
-                            </Button>
-                        </Grid>
+                              <i
+                                className={
+                                  formData.isPasswordShown
+                                    ? "tabler-eye-off"
+                                    : "tabler-eye"
+                                }
+                              />
+                            </IconButton>
+                          </InputAdornment>
+                        ),
+                      }}
+                      error={!!errors.password}
+                      helperText={errors.password?.message}
+                    />
+                  )}
+                />
+              </Grid>
+            )}
 
-                        {/* QNAP/SIP */}
-                        <Grid item size={{ xs: 12 }} >
-                            <Divider />
-                        </Grid>
-                        <Grid item size={{ xs: 12 }} >
-                            <Typography variant="body2" className="font-medium">
-                                5. Access Qnap/SIP
-                            </Typography>
-                        </Grid>
+            {/* Profile Photo */}
+            <Grid item size={{ xs: 12 }} >
+              <Divider />
+            </Grid>
+            <Grid item size={{ xs: 12, sm: 4 }}>
+              <Typography variant="h6" className="mb-4">
+                Profile Photo
+              </Typography>
+              <CardContent className="flex flex-col sm:flex-row items-start gap-6 p-0">
+                <img
+                  src={imgSrc}
+                  alt="Profile"
+                  className="rounded-full object-cover border"
+                  style={{ width: 100, height: 100 }}
+                />
+                <div className="flex flex-col gap-2">
+                  <div className="flex flex-col gap-2 w-48">
+                    <Button
+                      component="label"
+                      variant="contained"
+                      fullWidth
+                      htmlFor="upload-image"
+                    >
+                      Upload New Photo
+                      <input
+                        hidden
+                        type="file"
+                        accept="image/png, image/jpeg"
+                        id="upload-image"
+                        onChange={handleFileInputChange}
+                      />
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      color="secondary"
+                      fullWidth
+                      onClick={handleFileInputReset}
+                    >
+                      Reset
+                    </Button>
+                  </div>
+                  {errors?.photo && (
+                    <Typography
+                      variant="body2"
+                      color="error"
+                      className="mt-2"
+                      style={{ color: "var(--mui-palette-error-main)" }}
+                    >
+                      {errors.photo.message}
+                    </Typography>
+                  )}
+                </div>
+              </CardContent>
+            </Grid>
 
-                        <Grid item size={{ xs: 12, sm: 4 }}>
-                            <Controller
-                                name="qnap_username"
-                                control={control}
-                                render={({ field }) => (
-                                    <CustomTextField
-                                        {...field}
-                                        fullWidth
-                                        label="Qnap Username"
-                                        error={!!errors.qnap_username}
-                                        helperText={errors.qnap_username?.message}
-                                    />
-                                )}
+            {/* Personal Info */}
+            <Grid item size={{ xs: 12 }} >
+              <Divider />
+            </Grid>
+            <Grid item size={{ xs: 12 }}>
+              <Typography variant="body2" className="font-medium">
+                2. Personal Info
+              </Typography>
+            </Grid>
+
+            <Grid item size={{ xs: 12, sm: 4 }} >
+              <Controller
+                name="dob"
+                control={control}
+                render={({ field }) => (
+                  <CustomTextField
+                    {...field}
+                    fullWidth
+                    type="date"
+                    label="Date of birth"
+                    placeholder="Date of birth"
+                    error={!!errors.dob}
+                    helperText={errors.dob?.message}
+                  />
+                )}
+              />
+            </Grid>
+
+            <Grid item size={{ xs: 12, sm: 8 }} >
+              <Controller
+                name="address"
+                control={control}
+                render={({ field }) => (
+                  <CustomTextField
+                    {...field}
+                    fullWidth
+                    label="Address"
+                    placeholder="Address"
+                    multiline
+                    rows={1}
+                    error={!!errors.address}
+                    helperText={errors.address?.message}
+                  />
+                )}
+              />
+            </Grid>
+
+            {/* Country, State, City, Pincode */}
+            <Grid item size={{ xs: 12, sm: 4 }}>
+              <Controller
+                name="country_id"
+                control={control}
+                render={({ field }) => (
+                  <CustomTextField
+                    {...field}
+                    select
+                    fullWidth
+                    label="Country"
+                    onChange={(e) => {
+                      const selectedCountryId = e.target.value;
+
+                      field.onChange(selectedCountryId);
+                      setCountryId(selectedCountryId);
+                    }}
+                    error={!!errors.country_id}
+                    helperText={errors.country_id?.message}
+                  >
+                    {createData?.country?.map((item, index) => (
+                      <MenuItem key={index} value={`${item.country_id}`}>
+                        {item.country_name}
+                      </MenuItem>
+                    ))}
+                  </CustomTextField>
+                )}
+              />
+            </Grid>
+
+            <Grid item size={{ xs: 12, sm: 4 }}>
+              <Controller
+                name="state_id"
+                control={control}
+                render={({ field }) => (
+                  <CustomTextField
+                    {...field}
+                    select
+                    fullWidth
+                    label="State"
+                    onChange={(e) => {
+                      const selectStateId = e.target.value;
+
+                      field.onChange(selectStateId);
+                      setStateId(selectStateId);
+                    }}
+                    error={!!errors.state_id}
+                    helperText={errors.state_id?.message}
+                  >
+                    <MenuItem disabled value="1">
+                      Select state
+                    </MenuItem>
+                    {stateData?.map((item, index) => (
+                      <MenuItem key={index} value={`${item.state_id}`}>
+                        {item.state_name}
+                      </MenuItem>
+                    ))}
+                  </CustomTextField>
+                )}
+              />
+            </Grid>
+
+            <Grid item size={{ xs: 12, sm: 4 }}>
+              <Controller
+                name="city_id"
+                control={control}
+                render={({ field }) => (
+                  <CustomTextField
+                    {...field}
+                    select
+                    fullWidth
+                    label="City"
+                    error={!!errors.city_id}
+                    helperText={errors.city_id?.message}
+                  >
+                    <MenuItem disabled value="1">
+                      Select city
+                    </MenuItem>
+                    {cityData?.map((item, index) => (
+                      <MenuItem key={index} value={`${item.city_id}`}>
+                        {item.city_name}
+                      </MenuItem>
+                    ))}
+                  </CustomTextField>
+                )}
+              />
+            </Grid>
+
+            <Grid item size={{ xs: 12, sm: 4 }}>
+              <Controller
+                name="pincode"
+                control={control}
+                render={({ field }) => (
+                  <CustomTextField
+                    {...field}
+                    fullWidth
+                    type="number"
+                    label="Pincode"
+                    placeholder="Pincode"
+                    error={!!errors.pincode}
+                    helperText={errors.pincode?.message}
+                  />
+                )}
+              />
+            </Grid>
+
+            {/* Roles */}
+            <Grid item size={{ xs: 12 }} >
+              <Divider />
+            </Grid>
+            <Grid item size={{ xs: 12 }}>
+              <Typography variant="body2" className="font-medium">
+                3. Roles
+              </Typography>
+            </Grid>
+
+            <Grid item size={{ xs: 12, sm: 4 }}>
+              <Controller
+                name="roles"
+                control={control}
+                defaultValue={[]}
+                render={({ field }) => (
+                  <CustomTextField
+                    {...field}
+                    select
+                    fullWidth
+                    label="Assign role*"
+                    value={field.value}
+                    error={!!errors.roles}
+                    helperText={errors.roles?.message}
+                    SelectProps={{
+                      multiple: true,
+                      onChange: (event) => {
+                        const value = event.target.value;
+
+                        setUserRoles(value);
+                        field.onChange(value);
+                      },
+                      renderValue: (selectedIds) => {
+                        const selectedNames = createData.roles
+                          .filter((role) => selectedIds.includes(role._id))
+                          .map((role) => role.name);
+
+                        return selectedNames.join(", ");
+                      },
+                    }}
+                  >
+                    {createData?.roles?.length > 0 ? (
+                      createData.roles.map((role, index) => (
+                        <MenuItem key={index} value={role._id}>
+                          <Checkbox checked={userRoles.includes(role._id)} />
+                          <ListItemText primary={role.name} />
+                        </MenuItem>
+                      ))
+                    ) : (
+                      <MenuItem disabled>No roles</MenuItem>
+                    )}
+                  </CustomTextField>
+                )}
+              />
+            </Grid>
+            {isOfficeBearer && (
+
+
+              <Grid item size={{ xs: 12, sm: 4 }}>
+                <Controller
+                  name="user_type" // single value
+                  control={control}
+                  defaultValue="" // default to empty string
+                  render={({ field }) => (
+                    <CustomTextField
+                      {...field}
+                      select
+                      fullWidth
+                      label="User Type*"
+                      value={field.value || ""}
+                      error={!!errors.user_type}
+                      helperText={errors.user_type?.message}
+                    >
+
+                      <MenuItem key={1} value={"1"}>
+                        Electricity
+                      </MenuItem>
+                      <MenuItem key={2} value={'2'}>
+                        House Keeping/Guard
+                      </MenuItem>
+                      <MenuItem key={3} value={"3"}>
+                        Internet
+                      </MenuItem>
+                    </CustomTextField>
+                  )}
+                />
+              </Grid>
+            )}
+            {/* Cameras */}
+            <Grid item size={{ xs: 12 }}>
+              <Divider />
+            </Grid>
+            <Grid item size={{ xs: 12 }}>
+              <Typography variant="body2" className="font-medium">
+                4. Cameras
+              </Typography>
+            </Grid>
+
+            <Grid item size={{ xs: 12 }}>
+              <Grid container spacing={2}>
+                {fields.map((item, index) => (
+                  <Grid item size={{ xs: 12 }} key={item.id}>
+                    <Grid container spacing={2} alignItems="center">
+                      <Grid item size={{ xs: 12, sm: 5 }}>
+                        <Controller
+                          name={`cameras.${index}.title`}
+                          control={control}
+                          render={({ field }) => (
+                            <CustomTextField
+                              {...field}
+                              fullWidth
+                              label="Camera Title*"
+                              error={!!errors?.cameras?.[index]?.title}
+                              helperText={
+                                errors?.cameras?.[index]?.title?.message
+                              }
                             />
-                        </Grid>
+                          )}
+                        />
+                      </Grid>
 
-                        {!id && (
-                            <Grid item size={{ xs: 12, sm: 4 }}>
-                                <Controller
-                                    name="qnap_password"
-                                    control={control}
-                                    render={({ field }) => (
-                                        <CustomTextField
-                                            fullWidth
-                                            label="Qnap Password"
-                                            type={formData.isPasswordShown ? "text" : "password"}
-                                            {...field}
-                                            InputProps={{
-                                                endAdornment: (
-                                                    <InputAdornment position="end">
-                                                        <IconButton
-                                                            edge="end"
-                                                            onClick={handleClickShowPassword}
-                                                            onMouseDown={(e) => e.preventDefault()}
-                                                            aria-label="toggle password visibility"
-                                                        >
-                                                            <i
-                                                                className={
-                                                                    formData.isPasswordShown
-                                                                        ? "tabler-eye-off"
-                                                                        : "tabler-eye"
-                                                                }
-                                                            />
-                                                        </IconButton>
-                                                    </InputAdornment>
-                                                ),
-                                            }}
-                                            error={!!errors.qnap_password}
-                                            helperText={errors.qnap_password?.message}
-                                        />
-                                    )}
-                                />
-                            </Grid>
-                        )}
-
-                        <Grid item size={{ xs: 12, sm: 4 }}>
-                            <Controller
-                                name="sip_extension"
-                                control={control}
-                                render={({ field }) => (
-                                    <CustomTextField
-                                        {...field}
-                                        fullWidth
-                                        label="SIP Extension"
-                                        error={!!errors.sip_extension}
-                                        helperText={errors.sip_extension?.message}
-                                    />
-                                )}
+                      <Grid item size={{ xs: 12, sm: 5 }} >
+                        <Controller
+                          name={`cameras.${index}.ip`}
+                          control={control}
+                          render={({ field }) => (
+                            <CustomTextField
+                              {...field}
+                              fullWidth
+                              label="Camera IP Address*"
+                              error={!!errors?.cameras?.[index]?.ip}
+                              helperText={errors?.cameras?.[index]?.ip?.message}
                             />
-                        </Grid>
+                          )}
+                        />
+                        <Typography variant="caption">
+                          Example:
+                          http://admin:admin123@192.168.80.22/cgi-bin/mjpg/video.cgi?channel=1&subtype=1
+                        </Typography>
+                      </Grid>
 
-                        {isFlatOwner && (
-                            <>
-                                <Grid item size={{ xs: 12 }}>
-                                    <Divider />
-                                </Grid>
-
-                                <Grid item size={{ xs: 12 }}>
-                                    <Typography variant="body2" className="font-medium">
-                                        6. Other Details
-                                    </Typography>
-                                </Grid>
-
-                                <Grid item size={{ xs: 12 }}>
-                                    <Grid container size={{ xs: 12 }} spacing={2}>
-                                        {apartmentFields.map((item, index) => {
-                                            const currentTowerId = watchApartmentData?.[index]?.tower_id;
-                                            const currentFloorId = watchApartmentData?.[index]?.floor_id;
-
-                                            const floors =
-                                                createData?.floor?.filter((f) => f.tower_id._id === currentTowerId) || [];
-
-                                            const apartments = Array.isArray(createData?.apartment)
-                                                ? createData.apartment.filter((a) => a.floor_id === currentFloorId)
-                                                : [];
-
-                                            const selectedApartmentIds = (watchApartmentData || [])
-                                                .map((d) => d?.apartment_id)
-                                                .filter(Boolean);
-
-                                            return (
-                                                <Grid container item size={{ xs: 12 }} spacing={2} key={item.id}>
-                                                    {/* Tower Select */}
-                                                    <Grid item size={{ xs: 12, sm: 4 }}>
-                                                        <Controller
-                                                            name={`apartment_data.${index}.tower_id`}
-                                                            control={control}
-                                                            render={({ field }) => (
-                                                                <CustomTextField
-                                                                    {...field}
-                                                                    select
-                                                                    fullWidth
-                                                                    label="Tower*"
-                                                                    value={field.value ?? ""}
-                                                                    onChange={(e) => {
-                                                                        const value = e.target.value || "";
-
-                                                                        field.onChange(value);
-                                                                        setValue(`apartment_data.${index}.floor_id`, "");
-                                                                        setValue(`apartment_data.${index}.apartment_id`, "");
-                                                                    }}
-                                                                    error={!!errors?.apartment_data?.[index]?.tower_id}
-                                                                    helperText={errors?.apartment_data?.[index]?.tower_id?.message}
-                                                                >
-                                                                    {createData?.tower
-                                                                        .slice()
-                                                                        .sort((a, b) => a.name.localeCompare(b.name))
-                                                                        .map((tower) => (
-                                                                            <MenuItem key={tower._id} value={tower._id}>
-                                                                                {tower.name}
-                                                                            </MenuItem>
-                                                                        ))}
-                                                                </CustomTextField>
-                                                            )}
-                                                        />
-                                                    </Grid>
-
-                                                    {/* Floor Select */}
-                                                    {floors.length > 0 && (
-                                                        <Grid item size={{ xs: 12, sm: 3 }}>
-                                                            <Controller
-                                                                name={`apartment_data.${index}.floor_id`}
-                                                                control={control}
-                                                                render={({ field }) => (
-                                                                    <CustomTextField
-                                                                        {...field}
-                                                                        select
-                                                                        fullWidth
-                                                                        label="Floor*"
-                                                                        value={field.value ?? ""}
-                                                                        onChange={(e) => {
-                                                                            const value = e.target.value || "";
-
-                                                                            field.onChange(value);
-                                                                            setValue(`apartment_data.${index}.apartment_id`, "");
-                                                                        }}
-                                                                        error={!!errors?.apartment_data?.[index]?.floor_id}
-                                                                        helperText={errors?.apartment_data?.[index]?.floor_id?.message}
-                                                                    >
-                                                                        {floors
-                                                                            .slice()
-                                                                            .sort((a, b) => a.floor_name.localeCompare(b.floor_name))
-                                                                            .map((floor) => (
-                                                                                <MenuItem key={floor._id} value={floor._id}>
-                                                                                    {floor.floor_name}
-                                                                                </MenuItem>
-                                                                            ))}
-                                                                    </CustomTextField>
-                                                                )}
-                                                            />
-                                                        </Grid>
-                                                    )}
-
-                                                    {/* Apartment Select */}
-                                                    {apartments.length > 0 && (
-                                                        <Grid item size={{ xs: 12, sm: 3 }}>
-                                                            <Controller
-                                                                name={`apartment_data.${index}.apartment_id`}
-                                                                control={control}
-                                                                render={({ field }) => (
-                                                                    <CustomTextField
-                                                                        {...field}
-                                                                        select
-                                                                        fullWidth
-                                                                        label="Apartment*"
-                                                                        value={field.value ?? ""}
-                                                                        onChange={(e) => field.onChange(e.target.value || "")}
-                                                                        error={!!errors?.apartment_data?.[index]?.apartment_id}
-                                                                        helperText={
-                                                                            errors?.apartment_data?.[index]?.apartment_id?.message
-                                                                        }
-                                                                    >
-                                                                        {apartments
-                                                                            .slice()
-                                                                            .map((apt) => {
-                                                                                const isAlreadySelected =
-                                                                                    selectedApartmentIds.includes(apt._id) &&
-                                                                                    field.value !== apt._id;
-
-                                                                                // ✅ Only disable if assigned to another user OR status = true (but not current user’s assignment)
-                                                                                const isAssignedToOtherUser =
-                                                                                    apt.assigned_to &&
-                                                                                    apt.assigned_to.toString() !== user_id.toString();
-
-                                                                                const isUnavailable =
-                                                                                    isAlreadySelected || isAssignedToOtherUser || apt.status === true;
-
-                                                                                const isDisabled = isUnavailable && field.value !== apt._id;
-
-                                                                                return (
-                                                                                    <MenuItem key={apt._id} value={apt._id} disabled={isDisabled}>
-                                                                                        {apt.apartment_no}
-                                                                                    </MenuItem>
-                                                                                );
-                                                                            })}
-                                                                    </CustomTextField>
-                                                                )}
-                                                            />
-                                                        </Grid>
-                                                    )}
-
-                                                    {/* Remove button */}
-                                                    <Grid item size={{ xs: 12, sm: 2 }} textAlign="center">
-                                                        <IconButton color="error" onClick={() => apartmentRemove(index)}>
-                                                            <i className="tabler-x" />
-                                                        </IconButton>
-                                                    </Grid>
-                                                </Grid>
-                                            );
-                                        })}
-
-
-                                    </Grid>
-                                </Grid>
-
-                                {/* Add More */}
-                                <Grid item size={{ xs: 12 }}>
-                                    <Button
-                                        variant="outlined"
-                                        startIcon={<i className="tabler-plus" />}
-                                        onClick={() =>
-                                            apartmentAppend({ tower_id: "", floor_id: "", apartment_id: "" })
-                                        }
-                                    >
-                                        Add more
-                                    </Button>
-                                </Grid>
-                            </>
-                        )}
-
+                      <Grid item size={{ xs: 12, sm: 2 }} textAlign="center">
+                        <IconButton color="error" onClick={() => remove(index)}>
+                          <i className="tabler-x" />
+                        </IconButton>
+                      </Grid>
                     </Grid>
-                </CardContent>
+                  </Grid>
+                ))}
+              </Grid>
+            </Grid>
 
-                <Divider />
-                <CardActions>
-                    <Button
-                        type="submit"
-                        variant="contained"
-                        disabled={loading}
-                        sx={{ height: 40, position: "relative" }}
-                    >
-                        {loading ? (
-                            <CircularProgress
-                                size={24}
-                                sx={{
-                                    color: "white",
-                                    position: "absolute",
-                                    top: "50%",
-                                    left: "50%",
-                                    marginTop: "-12px",
-                                    marginLeft: "-12px",
-                                }}
+            <Grid item size={{ xs: 12 }}>
+              <Button
+                variant="outlined"
+                startIcon={<i className="tabler-plus" />}
+                onClick={() => append({ title: "", icon: "", ip: "" })}
+              >
+                Add Camera
+              </Button>
+            </Grid>
+
+            {/* QNAP/SIP */}
+            <Grid item size={{ xs: 12 }} >
+              <Divider />
+            </Grid>
+            <Grid item size={{ xs: 12 }} >
+              <Typography variant="body2" className="font-medium">
+                5. Access Qnap/SIP
+              </Typography>
+            </Grid>
+
+            <Grid item size={{ xs: 12, sm: 4 }}>
+              <Controller
+                name="qnap_username"
+                control={control}
+                render={({ field }) => (
+                  <CustomTextField
+                    {...field}
+                    fullWidth
+                    label="Qnap Username"
+                    error={!!errors.qnap_username}
+                    helperText={errors.qnap_username?.message}
+                  />
+                )}
+              />
+            </Grid>
+
+            {!id && (
+              <Grid item size={{ xs: 12, sm: 4 }}>
+                <Controller
+                  name="qnap_password"
+                  control={control}
+                  render={({ field }) => (
+                    <CustomTextField
+                      fullWidth
+                      label="Qnap Password"
+                      type={formData.isPasswordShown ? "text" : "password"}
+                      {...field}
+                      InputProps={{
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            <IconButton
+                              edge="end"
+                              onClick={handleClickShowPassword}
+                              onMouseDown={(e) => e.preventDefault()}
+                              aria-label="toggle password visibility"
+                            >
+                              <i
+                                className={
+                                  formData.isPasswordShown
+                                    ? "tabler-eye-off"
+                                    : "tabler-eye"
+                                }
+                              />
+                            </IconButton>
+                          </InputAdornment>
+                        ),
+                      }}
+                      error={!!errors.qnap_password}
+                      helperText={errors.qnap_password?.message}
+                    />
+                  )}
+                />
+              </Grid>
+            )}
+
+            <Grid item size={{ xs: 12, sm: 4 }}>
+              <Controller
+                name="sip_extension"
+                control={control}
+                render={({ field }) => (
+                  <CustomTextField
+                    {...field}
+                    fullWidth
+                    label="SIP Extension"
+                    error={!!errors.sip_extension}
+                    helperText={errors.sip_extension?.message}
+                  />
+                )}
+              />
+            </Grid>
+
+            {isFlatOwner && (
+              <>
+                <Grid item size={{ xs: 12 }}>
+                  <Divider />
+                </Grid>
+
+                <Grid item size={{ xs: 12 }}>
+                  <Typography variant="body2" className="font-medium">
+                    6. Other Details
+                  </Typography>
+                </Grid>
+
+                <Grid item size={{ xs: 12 }}>
+                  <Grid container size={{ xs: 12 }} spacing={2}>
+                    {apartmentFields.map((item, index) => {
+
+                      const currentTowerId = watchApartmentData?.[index]?.tower_id;
+                      const currentFloorId = watchApartmentData?.[index]?.floor_id;
+
+                      const floors =
+                        createData?.floor?.filter((f) => f.tower_id._id === currentTowerId) || [];
+
+                      const apartments = Array.isArray(createData?.apartment)
+                        ? createData.apartment.filter((a) => a.floor_id._id == currentFloorId)
+                        : [];
+
+                      const selectedApartmentIds = (watchApartmentData || [])
+                        .map((d) => d?.apartment_id)
+                        .filter(Boolean);
+
+                      return (
+                        <Grid container item size={{ xs: 12 }} spacing={2} key={item.id}>
+                          {/* Tower Select */}
+                          <Grid item size={{ xs: 12, sm: 4 }}>
+                            <Controller
+                              name={`apartment_data.${index}.tower_id`}
+                              control={control}
+                              render={({ field }) => (
+                                <CustomTextField
+                                  {...field}
+                                  select
+                                  fullWidth
+                                  label="Tower*"
+                                  value={field.value ?? ""}
+                                  onChange={(e) => {
+                                    const value = e.target.value || "";
+
+                                    field.onChange(value);
+                                    setValue(`apartment_data.${index}.floor_id`, "");
+                                    setValue(`apartment_data.${index}.apartment_id`, "");
+                                  }}
+                                  error={!!errors?.apartment_data?.[index]?.tower_id}
+                                  helperText={errors?.apartment_data?.[index]?.tower_id?.message}
+                                >
+                                  {createData?.tower
+                                    .slice()
+                                    .sort((a, b) => a.name.localeCompare(b.name))
+                                    .map((tower) => (
+                                      <MenuItem key={tower._id} value={tower._id}>
+                                        {tower.name}
+                                      </MenuItem>
+                                    ))}
+                                </CustomTextField>
+                              )}
                             />
-                        ) : (
-                            "Submit"
-                        )}
-                    </Button>
-                    <Button
-                        variant="tonal"
-                        color="error"
-                        type="reset"
-                        onClick={() => router.push(`/${locale}/apps/user/list`)}
-                    >
-                        Cancel
-                    </Button>
-                </CardActions>
-            </form>
-        </Card >
-    );
+                          </Grid>
+
+                          {/* Floor Select */}
+                          {floors.length > 0 && (
+                            <Grid item size={{ xs: 12, sm: 3 }}>
+                              <Controller
+                                name={`apartment_data.${index}.floor_id`}
+                                control={control}
+                                render={({ field }) => (
+                                  <CustomTextField
+                                    {...field}
+                                    select
+                                    fullWidth
+                                    label="Floor*"
+                                    value={field.value ?? ""}
+                                    onChange={(e) => {
+                                      const value = e.target.value || "";
+
+                                      field.onChange(value);
+                                      setValue(`apartment_data.${index}.apartment_id`, "");
+                                    }}
+                                    error={!!errors?.apartment_data?.[index]?.floor_id}
+                                    helperText={errors?.apartment_data?.[index]?.floor_id?.message}
+                                  >
+                                    {floors
+                                      .slice()
+                                      .sort((a, b) => a.floor_name.localeCompare(b.floor_name))
+                                      .map((floor) => (
+                                        <MenuItem key={floor._id} value={floor._id}>
+                                          {floor.floor_name}
+                                        </MenuItem>
+                                      ))}
+                                  </CustomTextField>
+                                )}
+                              />
+                            </Grid>
+                          )}
+
+                          {/* Apartment Select */}
+                          {apartments.length > 0 && (
+                            <Grid item size={{ xs: 12, sm: 3 }}>
+                              <Controller
+                                name={`apartment_data.${index}.apartment_id`}
+                                control={control}
+                                render={({ field }) => (
+                                  <CustomTextField
+                                    {...field}
+                                    select
+                                    fullWidth
+                                    label="Apartment*"
+                                    value={field.value ?? ""}
+                                    onChange={(e) => field.onChange(e.target.value || "")}
+                                    error={!!errors?.apartment_data?.[index]?.apartment_id}
+                                    helperText={
+                                      errors?.apartment_data?.[index]?.apartment_id?.message
+                                    }
+                                  >
+                                    {apartments
+                                      .slice()
+                                      .map((apt) => {
+                                        const isAlreadySelected =
+                                          selectedApartmentIds.includes(apt._id) &&
+                                          field.value !== apt._id;
+
+                                        // ✅ Only disable if assigned to another user OR status = true (but not current user’s assignment)
+                                        const isAssignedToOtherUser =
+                                          apt.assigned_to &&
+                                          apt.assigned_to.toString() !== user_id.toString();
+
+                                        const isUnavailable =
+                                          isAlreadySelected || isAssignedToOtherUser || apt.status === true;
+
+                                        const isDisabled = isUnavailable && field.value !== apt._id;
+
+                                        return (
+                                          <MenuItem key={apt._id} value={apt._id} disabled={isDisabled}>
+                                            {apt.apartment_no}
+                                          </MenuItem>
+                                        );
+                                      })}
+                                  </CustomTextField>
+                                )}
+                              />
+                            </Grid>
+                          )}
+
+                          {/* Remove button */}
+                          <Grid item size={{ xs: 12, sm: 2 }} textAlign="center">
+                            <IconButton color="error" onClick={() => apartmentRemove(index)}>
+                              <i className="tabler-x" />
+                            </IconButton>
+                          </Grid>
+                        </Grid>
+                      );
+                    })}
+
+
+                  </Grid>
+                </Grid>
+
+                {/* Add More */}
+                <Grid item size={{ xs: 12 }}>
+                  <Button
+                    variant="outlined"
+                    startIcon={<i className="tabler-plus" />}
+                    onClick={() =>
+                      apartmentAppend({ tower_id: "", floor_id: "", apartment_id: "" })
+                    }
+                  >
+                    Add more
+                  </Button>
+                </Grid>
+              </>
+            )}
+
+          </Grid>
+        </CardContent>
+
+        <Divider />
+        <CardActions>
+          <Button
+            type="submit"
+            variant="contained"
+            disabled={loading}
+            sx={{ height: 40, position: "relative" }}
+          >
+            {loading ? (
+              <CircularProgress
+                size={24}
+                sx={{
+                  color: "white",
+                  position: "absolute",
+                  top: "50%",
+                  left: "50%",
+                  marginTop: "-12px",
+                  marginLeft: "-12px",
+                }}
+              />
+            ) : (
+              "Submit"
+            )}
+          </Button>
+          <Button
+            variant="tonal"
+            color="error"
+            type="reset"
+            onClick={() => router.push(`/${locale}/apps/user/list`)}
+          >
+            Cancel
+          </Button>
+        </CardActions>
+      </form>
+    </Card >
+  );
 
 }
 

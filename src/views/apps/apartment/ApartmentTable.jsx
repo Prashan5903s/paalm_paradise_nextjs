@@ -161,6 +161,22 @@ const ApartmentTable = ({ tableData, fetchZoneData }) => {
         </Typography>
       )
     }),
+    columnHelper.accessor('tower_name', {
+      header: 'Tower name',
+      cell: ({ row }) => (
+        <Typography className='capitalize' color='text.primary'>
+          {row.original.tower_id?.name}
+        </Typography>
+      )
+    }),
+    columnHelper.accessor('floor_name', {
+      header: 'Floor name',
+      cell: ({ row }) => (
+        <Typography className='capitalize' color='text.primary'>
+          {row.original.floor_id?.floor_name}
+        </Typography>
+      )
+    }),
     columnHelper.accessor('Area', {
       header: 'Apartment Area (sqft)',
       cell: ({ row }) => (
