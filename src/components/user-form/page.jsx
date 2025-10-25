@@ -400,6 +400,8 @@ const UserFormLayout = () => {
       const apartmentData = await doGet('company/apartment')
       const participationTypesData = await doGet(`admin/participation_types?status=true`);
       const roleData = await doGet(`company/role`);
+      const filteredRoles = roleData.filter(role => role._id !== '68fcb8aa19932a2fcc0450b9');
+
 
       setCreateData(prevData => ({
         ...prevData,
@@ -410,7 +412,7 @@ const UserFormLayout = () => {
         floor: floorData,
         apartment: apartmentData,
         participation_types: participationTypesData,
-        roles: roleData,
+        roles: filteredRoles,
       }));
 
       setIsLoading(false);
