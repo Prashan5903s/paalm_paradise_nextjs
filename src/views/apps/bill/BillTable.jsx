@@ -1414,21 +1414,26 @@ const ViewMaintenance = ({ open, setIsOpenDetail, selectedZone }) => {
       cell: ({ row }) => {
 
         const additionalCost = row.original?.user_bills?.[0]?.bill?.additional_cost || [];
+        const aprtmentArea = row?.original?.apartment_area
+        const apartmentType = row?.original?.apartment_type
 
-        // const apartmentType = apartmentTypeRaw.replace(/[^\d]/g, '');
-        const fixedCost = row.original?.user_bills?.[0]?.amount || 0;
+        const fixedCost = Array.isArray(datas1?.fixedCost)
+          ? Number(fixedCostMap.get(apartmentType))
+          : Number(fixedCostMap.get("default") || 0) * Number(aprtmentArea);
+
 
         const additionalTotal = additionalCost.reduce((sum, val) => sum + (val.amount || 0), 0);
-
         const leftCost = row.original?.user_bills?.[0]?.payments?.reduce((sum, p) => sum + p.amount, 0) || 0;
+        const finalCost = (Number(fixedCost) + Number(additionalTotal)) - Number(leftCost);
 
-        const finalCost = (Number(fixedCost) + Number(additionalTotal));
+        const totalFinalCost = Number(fixedCost) + Number(additionalTotal);
+
 
         return (
           <Typography className="capitalize" component="span" color="text.primary">
             <Chip
-              label={leftCost == finalCost ? 'Paid' : 'Unpaid'}
-              color={leftCost == finalCost ? 'success' : 'error'}
+              label={leftCost == totalFinalCost.toFixed(0) ? 'Paid' : 'Unpaid'}
+              color={leftCost == totalFinalCost.toFixed(0) ? 'success' : 'error'}
               variant="tonal"
               size="small"
             />
