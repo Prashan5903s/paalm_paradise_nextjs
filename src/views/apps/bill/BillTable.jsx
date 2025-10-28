@@ -915,7 +915,7 @@ const PayMaintenanceModal = ({
   // set form values when modal data changes
   useEffect(() => {
     if (data) {
-      setValue("amount", data?.toFixed().toString() || "");
+      setValue("amount", data?.toFixed(0).toString() || "");
       setValue("billId", billId?.toString() || "");
       setValue("apartment_id", apartmentId?.toString() || "");
       setValue("userBillId", userBillId.toString() || "")
@@ -996,7 +996,7 @@ const PayMaintenanceModal = ({
                         if (Number(value) <= (data || 0)) {
                           field.onChange(value);
                         } else {
-                          field.onChange(data?.toFixed().toString() || "");
+                          field.onChange(data?.toFixed(0).toString() || "");
                         }
                       }
                     }}
@@ -1271,6 +1271,7 @@ const ViewMaintenance = ({ open, setIsOpenDetail, selectedZone }) => {
       const result = await response.json();
 
       if (response.ok) {
+
         setData(result?.data || []);
       } else {
         console.error('Fetch maintenance failed:', result);
@@ -1286,7 +1287,7 @@ const ViewMaintenance = ({ open, setIsOpenDetail, selectedZone }) => {
     }
   }, [API_URL, token, selectedZone?._id]);
 
-    const fixedCostMap = useMemo(() => {
+  const fixedCostMap = useMemo(() => {
     const map = new Map();
 
     if (Array.isArray(datas1?.fixedCost) && datas1?.fixedCost.length > 0) {
@@ -1347,9 +1348,10 @@ const ViewMaintenance = ({ open, setIsOpenDetail, selectedZone }) => {
       cell: ({ row }) => {
         const additionalCost = row.original?.user_bills?.[0]?.bill?.additional_cost || [];
         const aprtmentArea = row?.original?.apartment_area
+        const apartmentType = row?.original?.apartment_type
 
-        const fixedCost = Array.isArray(datas1?.fixed_cost)
-          ? Number(fixedCostMap.get(apartmentType) || 0)
+        const fixedCost = Array.isArray(datas1?.fixedCost)
+          ? Number(fixedCostMap.get(apartmentType))
           : Number(fixedCostMap.get("default") || 0) * Number(aprtmentArea);
 
 

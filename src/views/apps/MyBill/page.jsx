@@ -72,10 +72,11 @@ const BillTable = ({ tableData, value, type }) => {
     }
 
     return map;
-  }, [data?.fixed_cost, data?.unit_type]);
+  }, [data?.fixed_cost]);
 
   useEffect(() => {
     if (tableData) {
+
       setData(tableData)
     }
   }, [tableData])
@@ -109,7 +110,7 @@ const BillTable = ({ tableData, value, type }) => {
 
         const fixedCost = Array.isArray(data?.fixed_cost)
           ? Number(fixedCostMap.get(apartmentType) || 0)
-          : Number(fixedCostMap.get("default") || 0) * Number(apartmentArea).toFixed(0);
+          : Number(fixedCostMap.get("default") || 0) * Number(apartmentArea);
 
         const additionalTotal = additionalCost.reduce(
           (sum, val) => sum + (Number(val.amount) || 0),
@@ -117,7 +118,7 @@ const BillTable = ({ tableData, value, type }) => {
         );
 
         grouped[key].total_cost =
-          fixedCost + additionalTotal;
+          (fixedCost + additionalTotal).toFixed(0);
 
         grouped[key].paid_cost +=
           row?.payments?.reduce((sum, val) => sum + (Number(val.amount) || 0), 0) || 0;

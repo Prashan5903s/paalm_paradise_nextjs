@@ -133,7 +133,7 @@ const UserDashboard = () => {
       map.set("default", String(dashboardData.fixedCost.unit_value || ""));
     }
 
-    
+
     return map;
   }, [dashboardData?.fixedCost]);
 
@@ -165,7 +165,7 @@ const UserDashboard = () => {
         const apartmentTypeRaw = row?.apartment_id?.apartment_type || "";
         const apartmentArea = row?.apartment_id?.apartment_area;
 
-        const fixedCost = Array.isArray(data?.fixed_cost)
+        const fixedCost = Array.isArray(dashboardData?.fixedCost)
           ? Number(fixedCostMap.get(apartmentTypeRaw) || 0)
           : Number(fixedCostMap.get("default") || 0) * Number(apartmentArea).toFixed(0);
 
