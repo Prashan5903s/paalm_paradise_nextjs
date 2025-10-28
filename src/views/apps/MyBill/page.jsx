@@ -124,7 +124,7 @@ const BillTable = ({ tableData, value, type }) => {
           row?.payments?.reduce((sum, val) => sum + (Number(val.amount) || 0), 0) || 0;
 
         grouped[key].status =
-          grouped[key].paid_cost >= grouped[key].total_cost
+          grouped[key].paid_cost.toFixed(0) >= grouped[key].total_cost.toFixed(0)
             ? "Paid"
             : "Unpaid";
 
@@ -139,11 +139,11 @@ const BillTable = ({ tableData, value, type }) => {
     if (type === "maintenance") {
       if (value === true) {
         finalData = processedData.filter(
-          (row) => row.paid_cost === row.total_cost
+          (row) => row.paid_cost.toFixed(0) === row.total_cost.toFixed(0)
         );
       } else if (value === false) {
         finalData = processedData.filter(
-          (row) => row.paid_cost !== row.total_cost
+          (row) => row.paid_cost.toFixed(0) !== row.total_cost.toFixed(0)
         );
       }
     }
@@ -374,8 +374,8 @@ const BillTable = ({ tableData, value, type }) => {
           header: 'Status',
           cell: ({ row }) => {
 
-            const leftCost = row?.original?.paid_cost || 0;
-            const finalCost = row?.original?.total_cost || 0;
+            const leftCost = row?.original?.paid_cost.toFixed(0) || 0;
+            const finalCost = row?.original?.total_cost.toFixed(0) || 0;
 
             return (
               <Typography className="capitalize" component="span" color="text.primary">
