@@ -103,31 +103,31 @@ const BillTable = ({ tableData, value, type }) => {
           };
         }
 
-        // Fixed cost calculation
+        // Calculate costs
         const additionalCost = row?.bill_id?.additional_cost || [];
         const apartmentType = row?.apartment_id?.apartment_type || "";
         const apartmentArea = Number(row?.apartment_id?.apartment_area || 0);
 
         const fixedCost = Array.isArray(data?.fixed_cost)
           ? Number(fixedCostMap.get(apartmentType) || 0)
-          : Number(fixedCostMap.get("default") || 0) * Number(apartmentArea);
+          : Number(fixedCostMap.get("default") || 0) * apartmentArea;
 
         const additionalTotal = additionalCost.reduce(
           (sum, val) => sum + (Number(val.amount) || 0),
           0
         );
 
-        grouped[key].total_cost =
-          (fixedCost + additionalTotal).toFixed(0);
+        const totalCost = fixedCost + additionalTotal;
 
-        grouped[key].paid_cost +=
-          row?.payments?.reduce((sum, val) => sum + (Number(val.amount) || 0), 0) || 0;
+        const paidCost =
+          row?.payments?.reduce((sum, val) => sum + (Number(val.amount) || 0), 0) ||
+          0;
+
+        grouped[key].total_cost = Number(totalCost.toFixed(0));
+        grouped[key].paid_cost += Number(paidCost.toFixed(0));
 
         grouped[key].status =
-          grouped[key].paid_cost.toFixed(0) >= grouped[key].total_cost.toFixed(0)
-            ? "Paid"
-            : "Unpaid";
-
+          grouped[key].paid_cost >= grouped[key].total_cost ? "Paid" : "Unpaid";
       });
 
       processedData = Object.values(grouped);
@@ -139,18 +139,17 @@ const BillTable = ({ tableData, value, type }) => {
     if (type === "maintenance") {
       if (value === true) {
         finalData = processedData.filter(
-          (row) => row.paid_cost.toFixed(0) === row.total_cost.toFixed(0)
+          (row) => row.paid_cost === row.total_cost
         );
       } else if (value === false) {
         finalData = processedData.filter(
-          (row) => row.paid_cost.toFixed(0) !== row.total_cost.toFixed(0)
+          (row) => row.paid_cost !== row.total_cost
         );
       }
     }
 
     setFilteredData(finalData);
   }, [tableData, type, value, data, fixedCostMap]);
-
 
   const columns = useMemo(() => {
     const baseColumns = [
@@ -374,8 +373,8 @@ const BillTable = ({ tableData, value, type }) => {
           header: 'Status',
           cell: ({ row }) => {
 
-            const leftCost = row?.original?.paid_cost.toFixed(0) || 0;
-            const finalCost = row?.original?.total_cost.toFixed(0) || 0;
+            const leftCost = row?.original?.paid_cost || 0;
+            const finalCost = row?.original?.total_cost || 0;
 
             return (
               <Typography className="capitalize" component="span" color="text.primary">
