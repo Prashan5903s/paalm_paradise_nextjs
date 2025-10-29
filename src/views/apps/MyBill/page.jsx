@@ -10,7 +10,7 @@ import {
   Tab,
   Card,
   MenuItem,
-  Button,
+  Box,
   Checkbox,
   CardContent,
   Chip,
@@ -489,6 +489,8 @@ const TypeMyBill = ({ type }) => {
 
   const [value, setValue] = useState(false)
   const [data, setData] = useState()
+  const [pendingBillCount, setPendingBillCount] = useState()
+  const [finalData, setFinalData] = useState()
 
   const handleTabChange = () => {
     setValue(!value)
@@ -528,20 +530,141 @@ const TypeMyBill = ({ type }) => {
     }
   }, [URL, token, type, value])
 
+  const fixedCostMap = useMemo(() => {
+    const map = new Map();
+
+    if (Array.isArray(data?.fixed_cost) && data?.fixed_cost.length > 0) {
+
+      data.fixed_cost.forEach((item) => {
+        map.set(item.apartment_type, String(item.unit_value || ""));
+      });
+    } else if (data?.fixed_cost && typeof data.fixed_cost === "object") {
+
+      map.set("default", String(data.fixed_cost.unit_value || ""));
+    }
+
+    return map;
+  }, [data?.fixed_cost]);
+
+  useEffect(() => {
+    if (!data) return;
+
+    let processedData = data;
+
+    if (type === "maintenance") {
+
+      const grouped = {};
+
+      data?.userBill?.forEach((row) => {
+        const billId = row?.bill_id?._id;
+        const apartmentId = row?.apartment_id?._id;
+        const key = `${billId}-${apartmentId}`;
+
+        if (!grouped[key]) {
+          grouped[key] = {
+            ...row,
+            paid_cost: 0,
+            total_cost: 0,
+            status: "Unpaid",
+          };
+        }
+
+        // Calculate costs
+        const additionalCost = row?.bill_id?.additional_cost || [];
+        const apartmentType = row?.apartment_id?.apartment_type || "";
+        const apartmentArea = Number(row?.apartment_id?.apartment_area || 0);
+
+        const fixedCost = Array.isArray(data?.fixed_cost)
+          ? Number(fixedCostMap.get(apartmentType) || 0)
+          : Number(fixedCostMap.get("default") || 0) * apartmentArea;
+
+        const additionalTotal = additionalCost.reduce(
+          (sum, val) => sum + (Number(val.amount) || 0),
+          0
+        );
+
+        const totalCost = fixedCost + additionalTotal;
+
+        const paidCost =
+          row?.payments?.reduce((sum, val) => sum + (Number(val.amount) || 0), 0) ||
+          0;
+
+        grouped[key].total_cost = Number(totalCost.toFixed(0));
+        grouped[key].paid_cost += Number(paidCost.toFixed(0));
+
+        grouped[key].status =
+          grouped[key].paid_cost >= grouped[key].total_cost ? "Paid" : "Unpaid";
+      });
+
+      processedData = Object.values(grouped);
+    }
+
+    // Filter based on value (true = Paid, false = Unpaid)
+    let finalData = processedData;
+
+    if (type === "maintenance") {
+      if (value === false) {
+        finalData = processedData.filter(
+          (row) => row.paid_cost !== row.total_cost
+        );
+      }
+    }
+
+    setPendingBillCount(finalData?.length);
+  }, [type, value, data, fixedCostMap]);
+
+  useEffect(() => {
+    if (data && type) {
+      if (type == "common-area-bill" || type == "utilityBills") {
+        setFinalData(data?.bills)
+        setPendingBillCount(data?.count)
+      } else {
+        setFinalData(data)
+      }
+
+    }
+  }, [data, type])
+
   return (
     <>
       <TabContext value={value}>
         <TabList variant='scrollable' onChange={handleTabChange} className='border-b px-0 pt-0'>
-          <Tab key={1} label='Pending' value={false} />
+          <Tab
+            key={1}
+            value={false}
+            label={
+              <Box sx={{ display: "flex", alignItems: "center", gap: 0.8 }}>
+                <Typography>Pending</Typography>
+                {pendingBillCount > 0 && (
+                  <Box
+                    sx={{
+                      backgroundColor: "#7961F2", // purple color (you can change)
+                      color: "white",
+                      borderRadius: "50%",
+                      fontSize: "0.75rem",
+                      fontWeight: 600,
+                      width: 18,
+                      height: 18,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    {pendingBillCount}
+                  </Box>
+                )}
+              </Box>
+            }
+          />
           <Tab key={2} label='Paid' value={true} />
         </TabList>
 
         <div className='pt-0 mt-4'>
           <TabPanel value={false} className='p-0'>
-            <BillTable type={type} value={value} tableData={data} />
+            <BillTable type={type} value={value} tableData={finalData} />
           </TabPanel>
           <TabPanel value={true} className='p-0'>
-            <BillTable type={type} value={value} tableData={data} />
+            <BillTable type={type} value={value} tableData={finalData} />
           </TabPanel>
         </div>
       </TabContext>
