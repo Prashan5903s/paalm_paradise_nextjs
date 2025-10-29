@@ -603,14 +603,14 @@ const TypeMyBill = ({ type }) => {
     let finalData = processedData;
 
     if (type === "maintenance") {
-      if (value === false) {
-        finalData = processedData.filter(
-          (row) => row.paid_cost !== row.total_cost
-        );
-      }
+      finalData = processedData.filter(
+        (row) => row.paid_cost !== row.total_cost
+      );
     }
 
-    setPendingBillCount(finalData?.length);
+
+      setPendingBillCount(finalData?.length);
+
   }, [type, value, data, fixedCostMap]);
 
   useEffect(() => {
