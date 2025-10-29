@@ -223,7 +223,7 @@ const NoticeTable = ({ tableData, fetchZoneData }) => {
                 ...(permissions?.hasBillingEditPermission
                   ? [
                     {
-                      text: "Edit Notice",
+                      text: "Edit Announcement",
                       icon: "tabler-edit",
                       menuItemProps: {
                         className:

@@ -160,9 +160,9 @@ const VerticalMenu = ({ dictionary, scrollMenu }) => {
               )}
 
               {permissArray && permissArray?.['isUser'] && (
-                <MenuItem key="my-notice" href={`/${locale}/apps/user/notice`}>
+                <MenuItem key="my-announcement" href={`/${locale}/apps/user/notice`}>
                   <i className="tabler-receipt" style={{ marginRight: 8, fontSize: '1.2rem' }} />
-                  Notice
+                  Announcement
                 </MenuItem>
               )}
 

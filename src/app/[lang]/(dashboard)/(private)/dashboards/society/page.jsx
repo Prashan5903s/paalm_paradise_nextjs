@@ -590,7 +590,7 @@ const UserDashboard = () => {
           <StyledCard>
             <CardContent>
               <Typography variant="h6" gutterBottom>
-                Notices
+                Announcement
               </Typography>
               <Divider sx={{ mb: 2 }} />
 
@@ -621,7 +621,7 @@ const UserDashboard = () => {
                     <Avatar sx={{ width: 56, height: 56, mb: 2 }}>
                       <i className='tabler-bell'></i>
                     </Avatar>
-                    <Typography color="text.secondary">No notice found</Typography>
+                    <Typography color="text.secondary">No announcement found</Typography>
                   </Box>
                 )}
             </CardContent>

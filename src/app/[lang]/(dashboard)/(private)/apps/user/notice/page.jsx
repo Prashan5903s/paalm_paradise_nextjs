@@ -70,7 +70,7 @@ const Notices = () => {
             <Grid container spacing={6}>
                 <Grid size={{ xs: 12 }}>
                     <Typography variant='h4' className='mbe-1'>
-                        Notice List
+                        Announcement List
                     </Typography>
                 </Grid>
                 <Grid size={{ xs: 12 }}>

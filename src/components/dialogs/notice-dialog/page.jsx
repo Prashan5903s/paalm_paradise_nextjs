@@ -123,13 +123,13 @@ const NoticeDialog = ({ open, setOpen, selectedZone, fetchZoneData, type }) => {
 
             if (response.ok) {
                 fetchZoneData()
-                toast.success(`Notice ${selectedZone ? 'updated' : 'added'} successfully!`, { autoClose: 700 })
+                toast.success(`Announcement ${selectedZone ? 'updated' : 'added'} successfully!`, { autoClose: 700 })
                 handleClose()
             } else {
                 toast.error(data?.message || 'Something went wrong')
             }
         } catch (err) {
-            toast.error('Failed to save notice')
+            toast.error('Failed to save announcement')
         } finally {
             setLoading(false)
         }
@@ -161,7 +161,7 @@ const NoticeDialog = ({ open, setOpen, selectedZone, fetchZoneData, type }) => {
                 <i className="tabler-x" />
             </DialogCloseButton>
             <DialogTitle variant="h4" className="text-center sm:pbs-16 sm:pbe-6 sm:pli-16">
-                {selectedZone ? 'Edit Notice' : 'Add Notice'}
+                {selectedZone ? 'Edit Announcement' : 'Add Announcement'}
             </DialogTitle>
 
             <form onSubmit={handleSubmit(submitData)} noValidate>
