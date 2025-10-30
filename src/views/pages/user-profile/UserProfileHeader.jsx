@@ -58,11 +58,12 @@ const UserProfileHeader = ({ data, onImageUpload }) => {
 
       if (res.ok && onImageUpload) {
 
-        onImageUpload(result.photo) // callback to update parent
-
         toast.success("Image uploded successfully", {
           autoClose: 1000
         })
+        
+        onImageUpload(result.photo) // callback to update parent
+
       }
     } catch (error) {
       console.error('Upload failed', error)
