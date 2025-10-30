@@ -1,6 +1,5 @@
 'use client'
 
-// React Imports
 import { useState } from 'react'
 
 // MUI Imports
@@ -14,7 +13,6 @@ import UserProfileHeader from './UserProfileHeader'
 import CustomTabList from '@core/components/mui/TabList'
 
 const UserProfile = ({ tabContentList, data }) => {
-  // States
   const [activeTab, setActiveTab] = useState('profile')
 
   const handleChange = (event, value) => {
@@ -24,9 +22,10 @@ const UserProfile = ({ tabContentList, data }) => {
   return (
     <Grid container spacing={6}>
       <Grid size={{ xs: 12 }}>
-        <UserProfileHeader data={data?.profileHeader} />
+        <UserProfileHeader data={data} />
       </Grid>
-      {activeTab === undefined ? null : (
+
+      {activeTab && (
         <Grid size={{ xs: 12 }} className='flex flex-col gap-6'>
           <TabContext value={activeTab}>
             <CustomTabList onChange={handleChange} variant='scrollable' pill='true'>
@@ -39,20 +38,11 @@ const UserProfile = ({ tabContentList, data }) => {
                 }
                 value='profile'
               />
-              <Tab
-                label={
-                  <div className='flex items-center gap-1.5'>
-                    <i className='tabler-layout-grid text-lg' />
-                    Projects
-                  </div>
-                }
-                value='projects'
-              />
-
             </CustomTabList>
 
+            {/* ✅ Fix: Render only the selected tab */}
             <TabPanel value={activeTab} className='p-0'>
-              {tabContentList[activeTab]}
+              {tabContentList?.[activeTab]}
             </TabPanel>
           </TabContext>
         </Grid>

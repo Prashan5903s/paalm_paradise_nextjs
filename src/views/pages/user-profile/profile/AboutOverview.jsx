@@ -49,24 +49,27 @@ const AboutOverview = ({ data }) => {
               <Typography className='uppercase' variant='body2' color='text.disabled'>
                 About
               </Typography>
-              {data?.about && renderList(data?.about)}
+              {data?.first_name} {data?.last_name}
             </div>
             <div className='flex flex-col gap-4'>
               <Typography className='uppercase' variant='body2' color='text.disabled'>
                 Contacts
               </Typography>
-              {data?.contacts && renderList(data?.contacts)}
+              <div>
+                {data?.phone}
+              </div>
+              {data?.email}
             </div>
             <div className='flex flex-col gap-4'>
               <Typography className='uppercase' variant='body2' color='text.disabled'>
-                Teams
+                Address
               </Typography>
-              {data?.teams && renderTeams(data?.teams)}
+              {data?.address}
             </div>
           </CardContent>
         </Card>
       </Grid>
-      <Grid size={{ xs: 12 }}>
+      {/* <Grid size={{ xs: 12 }}>
         <Card>
           <CardContent className='flex flex-col gap-6'>
             <div className='flex flex-col gap-4'>
@@ -77,7 +80,7 @@ const AboutOverview = ({ data }) => {
             </div>
           </CardContent>
         </Card>
-      </Grid>
+      </Grid> */}
     </Grid>
   )
 }

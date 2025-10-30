@@ -132,7 +132,7 @@ const VerticalMenu = ({ dictionary, scrollMenu }) => {
               {permissArray?.isUser && permissArray?.hasBillingPermission && (
                 <SubMenu label={"Bills"} icon={<i className='tabler-receipt' />}>
                   <MenuItem href={`/${locale}/apps/my-bill/utilityBills`}>{"Utility Bills"}</MenuItem>
-                  <MenuItem href={`/${locale}/apps/my-bill/common-area-bill`}>{"Comman Area Bill"}</MenuItem>
+                  <MenuItem href={`/${locale}/apps/my-bill/common-area-bill`}>{"Common Area Bill"}</MenuItem>
                   <MenuItem href={`/${locale}/apps/my-bill/maintenance`}>{"Maintenance"}</MenuItem>
                 </SubMenu>
               )}
@@ -218,7 +218,7 @@ const VerticalMenu = ({ dictionary, scrollMenu }) => {
           {permissArray?.isCompany && permissArray?.hasBillingPermission && (
             <SubMenu label={"Bills"} icon={<i className='tabler-receipt' />}>
               <MenuItem href={`/${locale}/apps/bill/utilityBills`}>{"Utility Bills"}</MenuItem>
-              <MenuItem href={`/${locale}/apps/bill/common-area-bill`}>{"Comman Area Bill"}</MenuItem>
+              <MenuItem href={`/${locale}/apps/bill/common-area-bill`}>{"Common Area Bill"}</MenuItem>
               <MenuItem href={`/${locale}/apps/bill/maintenance`}>{"Maintenance"}</MenuItem>
             </SubMenu>
           )}
