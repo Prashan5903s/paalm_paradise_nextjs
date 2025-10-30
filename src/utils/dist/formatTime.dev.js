@@ -11,8 +11,10 @@ function formatTime(timestamp) {
   var options = {
     year: "numeric",
     month: "short",
+    
     // Jan, Feb, etc.
     day: "2-digit"
   };
+  
   return date.toLocaleDateString("en-US", options);
 }
