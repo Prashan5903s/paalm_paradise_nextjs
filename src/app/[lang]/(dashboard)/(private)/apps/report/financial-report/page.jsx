@@ -206,6 +206,20 @@ const FinancialReport = () => {
     return map;
   }, [filteredData?.fixedCost]);
 
+  function formatTimes(timestamp) {
+    if (!timestamp) return "-";
+
+    const date = new Date(timestamp);
+
+    const options = {
+      year: "numeric",
+      month: "short", // Jan, Feb, etc.
+      day: "2-digit"
+    };
+
+    return date.toLocaleDateString("en-US", options);
+  }
+
   // Columns
   const columns = useMemo(() => [
     {
@@ -268,17 +282,17 @@ const FinancialReport = () => {
         );
       },
     }),
-    columnHelper.accessor("bill_date", { header: "Bill Date", cell: ({ row }) => FormatTime(row.original.bill_date) }),
+    columnHelper.accessor("bill_date", { header: "Bill Date", cell: ({ row }) => formatTimes(row.original.bill_date) }),
     columnHelper.accessor("bill_due_date", {
       header: "Bill Due Date", cell: ({ row }) => {
         if (row?.original?.bill_id?.additional_cost) {
-          return FormatTime(row.original?.bill_id?.payment_due_date)
+          return formatTimes(row.original?.bill_id?.payment_due_date)
         } else {
-          return FormatTime(row.original.bill_due_date)
+          return formatTimes(row.original.bill_due_date)
         }
       }
     }),
-    columnHelper.accessor("created_at", { header: "Created At", cell: ({ row }) => FormatTime(row.original.created_at) }),
+    columnHelper.accessor("created_at", { header: "Created At", cell: ({ row }) => formatTimes(row.original.created_at) }),
   ], [filteredData]);
 
   const tableData = useMemo(() => (type === "all" || type === "maintenance" ? filteredData?.userBill || [] : filteredData || []), [filteredData, type]);
