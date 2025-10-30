@@ -151,6 +151,20 @@ const BillTable = ({ tableData, value, type }) => {
     setFilteredData(finalData);
   }, [tableData, type, value, data, fixedCostMap]);
 
+  function formatTimes(timestamp) {
+    if (!timestamp) return "-";
+
+    const date = new Date(timestamp);
+
+    const options = {
+      year: "numeric",
+      month: "short", // Jan, Feb, etc.
+      day: "2-digit"
+    };
+
+    return date.toLocaleDateString("en-US", options);
+  }
+
   const columns = useMemo(() => {
     const baseColumns = [
       {
@@ -211,7 +225,7 @@ const BillTable = ({ tableData, value, type }) => {
           header: "Bill Date",
           cell: ({ row }) => (
             <Typography className="capitalize" color="text.primary">
-              {FormatTime(row.original.bill_date)}
+              {formatTimes(row.original.bill_date)}
             </Typography>
           ),
         })
@@ -225,7 +239,7 @@ const BillTable = ({ tableData, value, type }) => {
           header: "Bill Due Date",
           cell: ({ row }) => (
             <Typography className="capitalize" color="text.primary">
-              {FormatTime(row.original.bill_due_date)}
+              {formatTimes(row.original.bill_due_date)}
             </Typography>
           ),
         })
@@ -609,7 +623,7 @@ const TypeMyBill = ({ type }) => {
     }
 
 
-      setPendingBillCount(finalData?.length);
+    setPendingBillCount(finalData?.length);
 
   }, [type, value, data, fixedCostMap]);
 

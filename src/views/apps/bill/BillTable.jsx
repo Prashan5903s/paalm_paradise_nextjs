@@ -1623,6 +1623,20 @@ const BillTable = ({ tableData, fetchZoneData, type }) => {
     setFilteredData(filtered)
   }, [role, data])
 
+  function formatTimes(timestamp) {
+    if (!timestamp) return "-";
+
+    const date = new Date(timestamp);
+
+    const options = {
+      year: "numeric",
+      month: "short", // Jan, Feb, etc.
+      day: "2-digit"
+    };
+
+    return date.toLocaleDateString("en-US", options);
+  }
+
   const columns = useMemo(() => {
     const baseColumns = [
       {
@@ -1683,7 +1697,7 @@ const BillTable = ({ tableData, fetchZoneData, type }) => {
           header: "Bill Date",
           cell: ({ row }) => (
             <Typography className="capitalize" color="text.primary">
-              {FormatTime(row.original.bill_date)}
+              {formatTimes(row.original.bill_date)}
             </Typography>
           ),
         })
@@ -1697,7 +1711,7 @@ const BillTable = ({ tableData, fetchZoneData, type }) => {
           header: "Bill Due Date",
           cell: ({ row }) => (
             <Typography className="capitalize" color="text.primary">
-              {FormatTime(row.original.bill_due_date)}
+              {formatTimes(row.original.bill_due_date)}
             </Typography>
           ),
         })
@@ -1814,7 +1828,7 @@ const BillTable = ({ tableData, fetchZoneData, type }) => {
           header: "Bill Payment Date",
           cell: ({ row }) => (
             <Typography className="capitalize" color="text.primary">
-              {row.original.payment_due_date ? FormatTime(row.original.payment_due_date) : ""}
+              {row.original.payment_due_date ? formatTimes(row.original.payment_due_date) : ""}
             </Typography>
           ),
         })
