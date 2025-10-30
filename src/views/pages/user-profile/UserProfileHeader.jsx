@@ -13,14 +13,14 @@ const UserProfileHeader = ({ data }) => {
       <CardMedia image={"/images/pages/profile-banner.png"} className='bs-[250px]' />
       <CardContent className='flex gap-5 justify-center flex-col items-center md:items-end md:flex-row !pt-0 md:justify-start'>
         <div className='flex rounded-bs-md mbs-[-40px] border-[5px] mis-[-5px] border-be-0  border-backgroundPaper bg-backgroundPaper'>
-          <img height={120} width={120} src={(!data?.photo || data?.photo == "") ? "/images/avatars/11.png" : `${frontURL}/upload/images/${data?.photo}` } className='rounded' alt={(!data?.photo || data?.photo == "") ? "/images/avatars/11.png" : `${frontURL}/upload/images/${data?.photo}`} />
+          <img height={120} width={120} src={"/images/avatars/11.png"} className='rounded' alt={"Profile Background"} />
         </div>
         <div className='flex is-full justify-start self-end flex-col items-center gap-6 sm-gap-0 sm:flex-row sm:justify-between sm:items-end '>
           <div className='flex flex-col items-center sm:items-start gap-2'>
             <Typography variant='h4'>{data?.first_name + " " + data?.last_name}</Typography>
             <div className='flex flex-wrap gap-6 justify-center sm:justify-normal'>
               <div className='flex items-center gap-2'>
-                {data?.first_name && <i className={"tabler-user" } />}
+                {data?.first_name && <i className={"tabler-user"} />}
                 <Typography className='font-medium'>{data?.first_name} {data?.last_name}</Typography>
               </div>
               <div className='flex items-center gap-2'>
