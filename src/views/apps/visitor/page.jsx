@@ -357,7 +357,7 @@ const VisitorModal = ({
 
                         <Grid size={{ xs: 12 }}>
                             <Typography>
-                                <strong>Check In Time*</strong>
+                                <strong>Visit In Time*</strong>
                             </Typography>
                         </Grid>
 
@@ -849,7 +849,7 @@ const VisitorTable = () => {
                 )
             }),
             columnHelper.accessor('check_in_date', {
-                header: 'Check in date & time',
+                header: 'Visit in date & time',
                 cell: ({ row }) => {
                     const times1 = row.original.check_in_from_time
                     const times2 = row.original.check_in_to_time
