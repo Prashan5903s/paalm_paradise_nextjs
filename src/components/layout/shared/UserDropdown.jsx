@@ -52,6 +52,8 @@ const UserDropdown = () => {
   const { settings } = useSettings()
   const { lang: locale } = useParams()
 
+  const assetURL = process.env.NEXT_PUBLIC_ASSETS_URL
+
   // Auto-logout timer
   useEffect(() => {
     if (!session?.user?.expiresAt) return
@@ -105,7 +107,7 @@ const UserDropdown = () => {
       >
         <Avatar
           alt={session?.user?.name || ''}
-          src={session?.user?.image || ''}
+          src={(session?.user?.photo == "" || !session?.user?.photo) ? '' : `${assetURL}/uploads/images/${session?.user?.photo}`}
           onClick={handleDropdownOpen}
           className='cursor-pointer bs-[38px] is-[38px]'
         />
@@ -127,7 +129,7 @@ const UserDropdown = () => {
               <ClickAwayListener onClickAway={e => handleDropdownClose(e)}>
                 <MenuList>
                   <div className='flex items-center plb-2 pli-6 gap-2' tabIndex={-1}>
-                    <Avatar alt={session?.user?.name || ''} src={session?.user?.image || ''} />
+                    <Avatar alt={session?.user?.name || ''} src={(session?.user?.photo == "" || !session?.user?.photo) ? '' : `${assetURL}/uploads/images/${session?.user?.photo}`} />
                     <div className='flex items-start flex-col'>
                       <Typography className='font-medium' color='text.primary'>
                         {session?.user?.name || ''}

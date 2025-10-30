@@ -25,11 +25,11 @@ export const authOptions = {
       credentials: {},
 
       async authorize(credentials) {
-        
+
         const { email, password } = credentials;
 
         try {
-        
+
           const res = await fetch(`${process.env.API_URL}/auth/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -39,7 +39,7 @@ export const authOptions = {
           const data = await res.json();
 
           if (!res.ok) {
-        
+
             return null;
           }
 
@@ -48,16 +48,17 @@ export const authOptions = {
             name: data.name,
             email: data.email,
             token: data.token,
+            photo: data.photo,
             userId: data.userId,
             expiresAt: data.expiresAt
           };
 
         } catch (err) {
-        
+
           console.error('Authorize error:', err);
 
           return null; // prevents redirect
-        
+
         }
       }
 
@@ -110,6 +111,7 @@ export const authOptions = {
          * in token which then will be available in the `session()` callback
          */
         token.name = user.name;
+        token.photo = user.photo;
         token.email = user.email;
         token.token = user.token;
         token.userId = user.userId;
@@ -123,6 +125,7 @@ export const authOptions = {
         // ** Add custom params to user in session which are added in `jwt()` callback via `token` parameter
         session.user.email = token.email;
         session.user.name = token.name;
+        session.user.photo = token.photo;
         session.user.token = token.token;
         session.user.userId = token.userId;
         session.user.expiresAt = token.expiresAt;
