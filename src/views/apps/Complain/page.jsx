@@ -64,22 +64,18 @@ import DialogCloseButton from "@/components/dialogs/DialogCloseButton"
 import { usePermissionList } from '@/utils/getPermission'
 
 function formatTimestamp(timestamp) {
-  if (!timestamp) return "-";
+    if (!timestamp) return "-";
 
-  const date = new Date(timestamp);
+    const date = new Date(timestamp);
 
-  // Options for readable format
-  const options = {
-    year: "numeric",
-    month: "short", // Jan, Feb, ...
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: true,   // 12-hour format with AM/PM
-  };
+    const options = {
+      year: "numeric",
+      month: "short", // Jan, Feb, etc.
+      day: "2-digit"
+    };
 
-  return date.toLocaleString("en-US", options);
-}
+    return date.toLocaleDateString("en-US", options);
+  }
 
 // Filter function
 const fuzzyFilter = (row, columnId, value, addMeta) => {

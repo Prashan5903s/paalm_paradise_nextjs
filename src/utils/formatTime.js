@@ -1,16 +1,13 @@
 export default function formatTime(timestamp) {
-    if (!timestamp) return "-";
+  if (!timestamp) return "-";
 
-    const date = new Date(timestamp);
+  const date = new Date(timestamp);
 
-    const options = {
-        year: "numeric",
-        month: "short", // Jan, Feb, ...
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: true, // 12-hour format with AM/PM
-    };
+  const options = {
+    year: "numeric",
+    month: "short", // Jan, Feb, etc.
+    day: "2-digit"
+  };
 
-    return date.toLocaleString("en-US", options);
+  return date.toLocaleDateString("en-US", options);
 }

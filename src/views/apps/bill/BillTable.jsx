@@ -1344,7 +1344,7 @@ const ViewMaintenance = ({ open, setIsOpenDetail, selectedZone }) => {
 
     // Total Cost
     columnHelper.accessor('total_cost', {
-      header: 'Total cost',
+      header: 'Total amount',
       cell: ({ row }) => {
         const additionalCost = row.original?.user_bills?.[0]?.bill?.additional_cost || [];
         const aprtmentArea = row?.original?.apartment_area

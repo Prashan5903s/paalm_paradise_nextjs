@@ -350,7 +350,7 @@ const BillTable = ({ tableData, value, type }) => {
         // Total Cost
         // Total Cost
         columnHelper.accessor('total_cost', {
-          header: 'Total cost',
+          header: 'Total amount',
           cell: ({ row }) => {
 
             const leftCost = row?.original?.total_cost || 0;

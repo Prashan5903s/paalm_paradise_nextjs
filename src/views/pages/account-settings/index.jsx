@@ -14,7 +14,7 @@ import CustomTabList from '@core/components/mui/TabList'
 
 const AccountSettings = ({ tabContentList }) => {
   // States
-  const [activeTab, setActiveTab] = useState('account')
+  const [activeTab, setActiveTab] = useState('security')
 
   const handleChange = (event, value) => {
     setActiveTab(value)
@@ -25,7 +25,7 @@ const AccountSettings = ({ tabContentList }) => {
       <Grid container spacing={6}>
         <Grid size={{ xs: 12 }}>
           <CustomTabList onChange={handleChange} variant='scrollable' pill='true'>
-            <Tab label='Account' icon={<i className='tabler-users' />} iconPosition='start' value='account' />
+            {/* <Tab label='Account' icon={<i className='tabler-users' />} iconPosition='start' value='account' /> */}
             <Tab label='Security' icon={<i className='tabler-lock' />} iconPosition='start' value='security' />
             {/* <Tab
               label='Billing & Plans'
@@ -33,12 +33,12 @@ const AccountSettings = ({ tabContentList }) => {
               iconPosition='start'
               value='billing-plans'
             /> */}
-            <Tab
+            {/* <Tab
               label='Notifications'
               icon={<i className='tabler-bell' />}
               iconPosition='start'
               value='notifications'
-            />
+            /> */}
             {/* <Tab label='Connections' icon={<i className='tabler-link' />} iconPosition='start' value='connections' /> */}
           </CustomTabList>
         </Grid>

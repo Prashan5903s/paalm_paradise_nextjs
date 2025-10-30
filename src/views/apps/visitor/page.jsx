@@ -345,7 +345,7 @@ const VisitorModal = ({
                                     <TextField
                                         {...field}
                                         type="date"
-                                        label="Check-in Date *"
+                                        label="Visit in date *"
                                         fullWidth
                                         InputLabelProps={{ shrink: true }}
                                         error={!!errors.checkin_date}

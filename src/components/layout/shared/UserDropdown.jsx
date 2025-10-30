@@ -142,10 +142,10 @@ const UserDropdown = () => {
                     <i className='tabler-user' />
                     <Typography color='text.primary'>My Profile</Typography>
                   </MenuItem>
-                  {/* <MenuItem onClick={e => handleDropdownClose(e, '/pages/account-settings')}>
-                    <i className='tabler-settings' />
-                    <Typography color='text.primary'>Settings</Typography>
-                  </MenuItem> */}
+                  <MenuItem onClick={e => handleDropdownClose(e, '/pages/account-settings')}>
+                    <i className='tabler-password' />
+                    <Typography color='text.primary'>Change Password</Typography>
+                  </MenuItem>
                   {/* <MenuItem onClick={e => handleDropdownClose(e, '/pages/pricing')}>
                     <i className='tabler-currency-dollar' />
                     <Typography color='text.primary'>Pricing</Typography>

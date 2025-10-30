@@ -6,8 +6,7 @@ import { useEffect, useState } from 'react'
 // Next Imports
 import { useParams, useRouter, usePathname } from 'next/navigation'
 
-// MUI Imports
-import IconButton from '@mui/material/IconButton'
+import { useSession } from 'next-auth/react'
 
 // Third-party Imports
 import classnames from 'classnames'
@@ -54,7 +53,7 @@ const transformedData = data.reduce((acc, item) => {
 }, [])
 
 // SearchItem Component for introduce the shortcut keys
-const SearchItem = ({ children, shortcut, value, currentPath, url, onSelect = () => {} }) => {
+const SearchItem = ({ children, shortcut, value, currentPath, url, onSelect = () => { } }) => {
   return (
     <CommandItem
       onSelect={onSelect}
@@ -116,6 +115,8 @@ const NavSearch = () => {
   // States
   const [open, setOpen] = useState(false)
   const [searchValue, setSearchValue] = useState('')
+
+  const { data: session } = useSession()
 
   // Hooks
   const router = useRouter()
@@ -185,7 +186,8 @@ const NavSearch = () => {
 
   return (
     <>
-      {isBreakpointReached || settings.layout === 'horizontal' ? (
+      <div>Welcome <strong>{session?.user?.name}</strong></div>
+      {/* {isBreakpointReached || settings.layout === 'horizontal' ? (
         <IconButton className='text-textPrimary' onClick={() => setOpen(true)}>
           <i className='tabler-search text-2xl' />
         </IconButton>
@@ -196,7 +198,7 @@ const NavSearch = () => {
           </IconButton>
           <div className='whitespace-nowrap select-none text-textDisabled'>Search ⌘K</div>
         </div>
-      )}
+      )} */}
       <CommandDialog open={open} onOpenChange={setOpen}>
         <div className='flex items-center justify-between border-be pli-4 plb-3 gap-2'>
           <Title hidden />
