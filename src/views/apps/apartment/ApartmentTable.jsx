@@ -153,45 +153,28 @@ const ApartmentTable = ({ tableData, fetchZoneData }) => {
         />
       )
     },
-    columnHelper.accessor('name', {
+    columnHelper.accessor('apartment_no', {
       header: 'Apartment No',
-      cell: ({ row }) => (
-        <Typography className='capitalize' color='text.primary'>
-          {row.original.apartment_no}
-        </Typography>
-      )
+      cell: info => <Typography>{info.getValue()}</Typography>
     }),
-    columnHelper.accessor('tower_name', {
-      header: 'Tower name',
-      cell: ({ row }) => (
-        <Typography className='capitalize' color='text.primary'>
-          {row.original.tower_id?.name}
-        </Typography>
-      )
+    columnHelper.accessor(row => row.tower_id?.name ?? '-', {
+      id: 'tower_name',
+      header: 'Tower Name',
+      cell: info => <Typography>{info.getValue()}</Typography>
     }),
-    columnHelper.accessor('floor_name', {
-      header: 'Floor name',
-      cell: ({ row }) => (
-        <Typography className='capitalize' color='text.primary'>
-          {row.original.floor_id?.floor_name}
-        </Typography>
-      )
+    columnHelper.accessor(row => row.floor_id?.floor_name ?? '-', {
+      id: 'floor_name',
+      header: 'Floor Name',
+      cell: info => <Typography>{info.getValue()}</Typography>
     }),
-    columnHelper.accessor('Area', {
+    columnHelper.accessor('apartment_area', {
       header: 'Apartment Area (sqft)',
-      cell: ({ row }) => (
-        <Typography className='capitalize' color='text.primary'>
-          {row.original.apartment_area}
-        </Typography>
-      )
+      cell: info => <Typography>{info.getValue()}</Typography>
     }),
-    columnHelper.accessor('Type', {
+    columnHelper.accessor(row => row.apartment_type?.name ?? '-', {
+      id: 'apartment_type',
       header: 'Apartment Type',
-      cell: ({ row }) => (
-        <Typography className='capitalize' color='text.primary'>
-          {row.original.apartment_type?.name}
-        </Typography>
-      )
+      cell: info => <Typography>{info.getValue()}</Typography>
     }),
     columnHelper.accessor('status', {
       header: 'Apartment Status',
@@ -204,48 +187,35 @@ const ApartmentTable = ({ tableData, fetchZoneData }) => {
         />
       )
     }),
-    columnHelper.accessor('action', {
+    columnHelper.display({
+      id: 'actions',
       header: 'Actions',
-      cell: ({ row }) => {
-        return (
-          permissions && permissions?.['hasApartmentEditPermission'] && (
-
-            <>
-              <div className='flex items-center'>
-                <IconButton
-                  onClick={() => {
-                    setSelectedZone(row.original)
-                    setOpenDialog(true)
-                  }}
-                >
-                  <i className='tabler-edit text-textSecondary' />
-                </IconButton>
-              </div>
-            </>
-          )
+      cell: ({ row }) =>
+        permissions?.['hasApartmentEditPermission'] && (
+          <IconButton
+            onClick={() => {
+              setSelectedZone(row.original)
+              setOpenDialog(true)
+            }}
+          >
+            <i className='tabler-edit text-textSecondary' />
+          </IconButton>
         )
-      },
-      enableSorting: false
     })
   ], [permissions])
+
 
   const table = useReactTable({
     data: filteredData,
     columns,
     filterFns: { fuzzy: fuzzyFilter },
-    state: { rowSelection, globalFilter },
-    initialState: { pagination: { pageSize: 10 } },
-    enableRowSelection: true,
     globalFilterFn: fuzzyFilter,
-    onRowSelectionChange: setRowSelection,
+    state: { globalFilter, rowSelection },
     onGlobalFilterChange: setGlobalFilter,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    getFacetedRowModel: getFacetedRowModel(),
-    getFacetedUniqueValues: getFacetedUniqueValues(),
-    getFacetedMinMaxValues: getFacetedMinMaxValues()
+    getSortedRowModel: getSortedRowModel(),
   })
 
   return (
