@@ -23,11 +23,13 @@ import { QRCodeCanvas } from "qrcode.react";
 
 import utc from "dayjs/plugin/utc";
 
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
-import { TimePicker } from "@mui/x-date-pickers/TimePicker";
+import {
+  LocalizationProvider,
+  TimePicker,
+  DatePicker,
+} from "@mui/x-date-pickers";
 
 import { valibotResolver } from '@hookform/resolvers/valibot'
 
@@ -121,7 +123,10 @@ const VisitorModal = ({
   const token = session?.user?.token;
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-  //  Validation schema
+  const [fromTimeValue, setFromTimeValue] = useState(null);
+  const [visitDateValue, setVisitDateValue] = useState("");
+
+  // Validation schema (field presence only)
   const schema = object({
     visitor_name: pipe(string(), minLength(1, "Visitor name is required")),
     visitor_contact: pipe(string(), minLength(10, "Contact no. is required")),
@@ -138,7 +143,6 @@ const VisitorModal = ({
         : optional(string()),
   });
 
-  //  useForm setup
   const {
     control,
     handleSubmit,
@@ -164,65 +168,72 @@ const VisitorModal = ({
   const onClose = () => {
     setVisitorData();
     setIsOpen(false);
-    reset(
-      {
-        user: "",
-        visitor_name: "",
-        visitor_contact: "",
-        apartment_id: "",
-        checkin_date: "",
-        checkin_from_time: "",
-        checkin_to_time: "",
-        no_of_persons: "",
-        vehicle_number: "",
-        category: "",
-        description: "",
-      }
-    );
+    reset();
+    setFromTimeValue(null);
+    setVisitDateValue("");
   };
 
-  //  Reset when datass changes
   useEffect(() => {
     if (datass) {
       reset({
         visitor_name: datass.visitor_name || "",
-        apartment_id: datass.apartment_id?._id
-          ? String(datass.apartment_id._id)
-          : "",
+        apartment_id: datass.apartment_id?._id ? String(datass.apartment_id._id) : "",
         visitor_contact: datass.visitor_contact_no
           ? String(datass.visitor_contact_no)
           : "",
         checkin_date: datass.check_in_date || "",
         checkin_from_time: datass.check_in_from_time || "",
         checkin_to_time: datass.check_in_to_time || "",
-        no_of_persons: datass.no_person
-          ? String(datass.no_person)
-          : "1",
+        no_of_persons: datass.no_person ? String(datass.no_person) : "1",
         vehicle_number: datass.vehicle_no || "",
         category: datass.category._id || "",
         description: datass.description || "",
       });
+      setVisitDateValue(datass.check_in_date || "");
+      setFromTimeValue(datass.check_in_from_time ? dayjs(datass.check_in_from_time, "HH:mm") : null);
     } else {
-      reset(
-        {
-          user: "",
-          visitor_name: "",
-          visitor_contact: "",
-          apartment_id: "",
-          checkin_date: "",
-          checkin_from_time: "",
-          checkin_to_time: "",
-          no_of_persons: "",
-          vehicle_number: "",
-          category: "",
-          description: "",
-        }
-      );
+      reset();
+      setFromTimeValue(null);
+      setVisitDateValue("");
     }
   }, [datass, reset]);
 
-  //  Submit handler
+  // 🧠 Validation Logic (runs on submit)
+  const validateTimes = (data) => {
+    const now = dayjs();
+    const selectedDate = dayjs(data.checkin_date);
+    const isToday = selectedDate.isSame(now, "day");
+
+    // 1️⃣ Date cannot be before today
+    if (selectedDate.isBefore(now, "day")) {
+      toast.error("Visit date cannot be before today.");
+
+      return false;
+    }
+
+    const fromTime = dayjs(data.checkin_from_time, "HH:mm");
+    const toTime = dayjs(data.checkin_to_time, "HH:mm");
+
+    // 2️⃣ If today → From time must be after current time
+    if (isToday && fromTime.isBefore(now)) {
+      toast.error("From time cannot be earlier than the current time.");
+
+      return false;
+    }
+
+    // 3️⃣ To time must be strictly after From time
+    if (!toTime.isAfter(fromTime)) {
+      toast.error("End time must be later than start time.");
+
+      return false;
+    }
+
+    return true;
+  };
+
   const onSubmit = async (data) => {
+    if (!validateTimes(data)) return; // 🚫 stop on invalid inputs
+
     try {
       const response = await fetch(
         datass
@@ -239,10 +250,9 @@ const VisitorModal = ({
       );
 
       if (response.ok) {
-        toast.success(
-          `Visitor ${datass ? "updated" : "added"} successfully`,
-          { autoClose: 1000 }
-        );
+        toast.success(`Visitor ${datass ? "updated" : "added"} successfully`, {
+          autoClose: 1000,
+        });
         fetchVisitors();
         onClose();
       } else {
@@ -264,16 +274,11 @@ const VisitorModal = ({
       open={open}
       sx={{ "& .MuiDialog-paper": { overflow: "visible" } }}
     >
-      <DialogCloseButton
-        onClick={() => {
-          onClose();
-        }}
-      >
+      <DialogCloseButton onClick={onClose}>
         <i className="tabler-x" />
       </DialogCloseButton>
       <DialogTitle>{!datass ? "Add New Visitor" : "Edit Visitor"}</DialogTitle>
 
-      {/*  form wrapper */}
       <form onSubmit={handleSubmit(onSubmit)}>
         <DialogContent>
           <Grid container spacing={3}>
@@ -294,8 +299,9 @@ const VisitorModal = ({
               />
             </Grid>
 
+            {/* Apartment */}
             {createData && createData?.apartment?.length > 1 && (
-              <Grid size={{ xs: 12, md: 6 }}>
+              <Grid item size={{ xs: 12, md: 6 }}>
                 <Controller
                   name="apartment_id"
                   control={control}
@@ -319,8 +325,8 @@ const VisitorModal = ({
               </Grid>
             )}
 
-            {/* Visitor Contact */}
-            <Grid size={{ xs: 12, md: 6 }}>
+            {/* Contact */}
+            <Grid item size={{ xs: 12, md: 6 }}>
               <Controller
                 name="visitor_contact"
                 control={control}
@@ -336,8 +342,8 @@ const VisitorModal = ({
               />
             </Grid>
 
-            {/* Check-in Date */}
-            <Grid size={{ xs: 12, md: 6 }}>
+            {/* Date */}
+            <Grid item size={{ xs: 12, md: 6 }}>
               <Controller
                 name="checkin_date"
                 control={control}
@@ -345,39 +351,41 @@ const VisitorModal = ({
                   <TextField
                     {...field}
                     type="date"
-                    label="Visit in date *"
+                    label="Visit Date *"
                     fullWidth
                     InputLabelProps={{ shrink: true }}
                     error={!!errors.checkin_date}
                     helperText={errors.checkin_date?.message}
+                    onChange={(e) => {
+                      field.onChange(e.target.value);
+                      setVisitDateValue(e.target.value);
+                    }}
                   />
                 )}
               />
             </Grid>
 
-            <Grid size={{ xs: 12 }}>
+            {/* Visit In Time */}
+            <Grid item size={{ xs: 12 }}>
               <Typography>
-                <strong>Visit In Time*</strong>
+                <strong>Visit In Time *</strong>
               </Typography>
             </Grid>
 
-            {/* Check-in Time */}
             <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <Grid size={{ xs: 12, md: 6 }}>
+              {/* From Time */}
+              <Grid item size={{ xs: 12, md: 6 }}>
                 <Controller
                   name="checkin_from_time"
                   control={control}
                   render={({ field }) => (
                     <TimePicker
-                      label="From*"
-                      value={
-                        field.value ? dayjs(field.value, "HH:mm") : null
-                      }
-                      onChange={(newValue) =>
-                        field.onChange(
-                          newValue ? newValue.format("HH:mm") : ""
-                        )
-                      }
+                      label="From *"
+                      value={field.value ? dayjs(field.value, "HH:mm") : null}
+                      onChange={(newValue) => {
+                        field.onChange(newValue ? newValue.format("HH:mm") : "");
+                        setFromTimeValue(newValue);
+                      }}
                       slotProps={{
                         textField: {
                           fullWidth: true,
@@ -389,25 +397,19 @@ const VisitorModal = ({
                   )}
                 />
               </Grid>
-            </LocalizationProvider>
 
-            {/* Check-out Time */}
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <Grid size={{ xs: 12, md: 6 }}>
+              {/* To Time */}
+              <Grid item size={{ xs: 12, md: 6 }}>
                 <Controller
                   name="checkin_to_time"
                   control={control}
                   render={({ field }) => (
                     <TimePicker
-                      label="To*"
-                      value={
-                        field.value ? dayjs(field.value, "HH:mm") : null
-                      }
-                      onChange={(newValue) =>
-                        field.onChange(
-                          newValue ? newValue.format("HH:mm") : ""
-                        )
-                      }
+                      label="To *"
+                      value={field.value ? dayjs(field.value, "HH:mm") : null}
+                      onChange={(newValue) => {
+                        field.onChange(newValue ? newValue.format("HH:mm") : "");
+                      }}
                       slotProps={{
                         textField: {
                           fullWidth: true,
@@ -422,17 +424,10 @@ const VisitorModal = ({
             </LocalizationProvider>
 
             {/* No of Persons */}
-            <Grid size={{ xs: 12, md: 6 }}>
+            <Grid item size={{ xs: 12, md: 6 }}>
               <Controller
                 name="no_of_persons"
                 control={control}
-                rules={{
-                  required: "No of Persons is required",
-                  min: {
-                    value: 1,
-                    message: "Only positive numbers are allowed"
-                  }
-                }}
                 render={({ field }) => (
                   <TextField
                     {...field}
@@ -441,16 +436,14 @@ const VisitorModal = ({
                     fullWidth
                     error={!!errors.no_of_persons}
                     helperText={errors.no_of_persons?.message}
-                    inputProps={{
-                      min: 1  // Prevent user from entering numbers < 1
-                    }}
+                    inputProps={{ min: 1 }}
                   />
                 )}
               />
             </Grid>
 
             {/* Vehicle Number */}
-            <Grid size={{ xs: 12, md: 6 }}>
+            <Grid item size={{ xs: 12, md: 6 }}>
               <Controller
                 name="vehicle_number"
                 control={control}
@@ -461,7 +454,7 @@ const VisitorModal = ({
             </Grid>
 
             {/* Category */}
-            <Grid size={{ xs: 12, md: 6 }}>
+            <Grid item size={{ xs: 12, md: 6 }}>
               <Controller
                 name="category"
                 control={control}
@@ -474,8 +467,10 @@ const VisitorModal = ({
                     error={!!errors.category}
                     helperText={errors.category?.message}
                   >
-                    {createData && createData?.['visitorType']?.map((item, index) => (
-                      <MenuItem key={index} value={item._id}>{item.name}</MenuItem>
+                    {createData?.visitorType?.map((item, index) => (
+                      <MenuItem key={index} value={item._id}>
+                        {item.name}
+                      </MenuItem>
                     ))}
                   </TextField>
                 )}
@@ -483,7 +478,7 @@ const VisitorModal = ({
             </Grid>
 
             {/* Description */}
-            <Grid size={{ xs: 12 }}>
+            <Grid item size={{ xs: 12 }}>
               <Controller
                 name="description"
                 control={control}
@@ -501,7 +496,6 @@ const VisitorModal = ({
           </Grid>
         </DialogContent>
 
-        {/* Buttons */}
         <DialogActions sx={{ justifyContent: "center", gap: 2 }}>
           <Button variant="contained" type="submit">
             Submit
