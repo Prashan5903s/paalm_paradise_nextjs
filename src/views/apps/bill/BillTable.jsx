@@ -1287,6 +1287,11 @@ const ViewMaintenance = ({ open, setIsOpenDetail, selectedZone }) => {
     }
   }, [API_URL, token, selectedZone?._id]);
 
+  useEffect(() => {
+    console.log("data", datas1);
+
+  }, [datas1]);
+
   const fixedCostMap = useMemo(() => {
     const map = new Map();
 
@@ -1330,6 +1335,22 @@ const ViewMaintenance = ({ open, setIsOpenDetail, selectedZone }) => {
       cell: ({ row }) => (
         <Typography className="capitalize" color="text.primary">
           {row.original?.apartment_no || '-'}
+        </Typography>
+      ),
+    }),
+    columnHelper.accessor('tower_name', {
+      header: 'Tower Name',
+      cell: ({ row }) => (
+        <Typography className="capitalize" color="text.primary">
+          {row.original?.tower?.name || '-'}
+        </Typography>
+      ),
+    }),
+    columnHelper.accessor('floor_name', {
+      header: 'Floor Name',
+      cell: ({ row }) => (
+        <Typography className="capitalize" color="text.primary">
+          {row.original?.floor?.floor_name || '-'}
         </Typography>
       ),
     }),
