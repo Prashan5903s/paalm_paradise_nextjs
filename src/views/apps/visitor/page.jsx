@@ -849,7 +849,7 @@ const VisitorTable = () => {
         header: 'Visit in date & time',
         cell: ({ row }) => {
           const time1 = (row.original.check_in_from_time)
-          const time2 = formatTimeTo12Hour(row.original.check_in_to_time)
+          const time2 = (row.original.check_in_to_time)
 
           return (
             <Typography>
