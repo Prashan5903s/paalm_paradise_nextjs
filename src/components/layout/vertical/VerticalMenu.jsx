@@ -159,14 +159,14 @@ const VerticalMenu = ({ dictionary, scrollMenu }) => {
                 </MenuItem>
               )}
 
-              {permissArray && permissArray?.['isUser'] && (
+              {permissArray && permissArray?.['hasAnnouncementPermission'] && (
                 <MenuItem key="my-announcement" href={`/${locale}/apps/user/notice`}>
                   <i className="tabler-receipt" style={{ marginRight: 8, fontSize: '1.2rem' }} />
                   Announcement
                 </MenuItem>
               )}
 
-              {permissArray && permissArray?.['isUser'] && (
+              {permissArray && permissArray?.['hasEventPermission'] && (
                 <MenuItem key="my-event" href={`/${locale}/apps/user/event`}>
                   <i className="tabler-calendar" style={{ marginRight: 8, fontSize: '1.2rem' }} />
                   Event
@@ -222,7 +222,7 @@ const VerticalMenu = ({ dictionary, scrollMenu }) => {
               <MenuItem href={`/${locale}/apps/bill/maintenance`}>{"Maintenance"}</MenuItem>
             </SubMenu>
           )}
-          {permissArray?.isCompany && (
+          {permissArray?.hasAnnouncementPermission && (
             <MenuItem
               key="announcement"
               href={`/${locale}/apps/announcement`}
@@ -232,7 +232,7 @@ const VerticalMenu = ({ dictionary, scrollMenu }) => {
               Announcement
             </MenuItem>
           )}
-          {permissArray?.isCompany && (
+          {permissArray?.hasEventPermission && (
             <MenuItem
               key="Events"
               href={`/${locale}/apps/event`}

@@ -220,7 +220,7 @@ const NoticeTable = ({ tableData, fetchZoneData }) => {
               iconClassName="text-textSecondary"
               options={[
 
-                ...(permissions?.hasBillingEditPermission
+                ...(permissions?.hasAnnouncementEditPermission
                   ? [
                     {
                       text: "Edit Announcement",
@@ -289,7 +289,7 @@ const NoticeTable = ({ tableData, fetchZoneData }) => {
             onChange={value => setGlobalFilter(String(value))}
             placeholder='Search Notice'
           />
-          {permissions && permissions?.['hasBillingAddPermission'] && (
+          {permissions && permissions?.['hasAnnouncementAddPermission'] && (
             <Button
               variant="contained"
               size="small"

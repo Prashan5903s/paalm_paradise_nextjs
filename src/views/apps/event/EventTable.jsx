@@ -262,7 +262,7 @@ const EventTable = ({ tableData, fetchZoneData }) => {
             "2": "Completed",
             "3": "Cancelled"
           }
-          
+
           return (
             <Typography className="capitalize" color="text.primary">
               {typeStatus?.[row.original.status]}
@@ -284,7 +284,7 @@ const EventTable = ({ tableData, fetchZoneData }) => {
               iconClassName="text-textSecondary"
               options={[
 
-                ...(permissions?.hasBillingEditPermission
+                ...(permissions?.hasEventEditPermission
                   ? [
                     {
                       text: "Edit Event",
@@ -353,7 +353,7 @@ const EventTable = ({ tableData, fetchZoneData }) => {
             onChange={value => setGlobalFilter(String(value))}
             placeholder='Search Bill'
           />
-          {permissions && permissions?.['hasBillingAddPermission'] && (
+          {permissions && permissions?.['hasEventAddPermission'] && (
             <Button
               variant="contained"
               size="small"
