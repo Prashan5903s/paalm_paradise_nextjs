@@ -848,7 +848,7 @@ const VisitorTable = () => {
       columnHelper.accessor('check_in_date', {
         header: 'Visit in date & time',
         cell: ({ row }) => {
-          const time1 = formatTimeTo12Hour(row.original.check_in_from_time)
+          const time1 = (row.original.check_in_from_time)
           const time2 = formatTimeTo12Hour(row.original.check_in_to_time)
 
           return (
