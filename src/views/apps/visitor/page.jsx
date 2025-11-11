@@ -17,6 +17,7 @@ import {
   DialogActions
 } from "@mui/material"
 
+
 import Grid from '@mui/material/Grid2'
 
 import { QRCodeCanvas } from "qrcode.react";
@@ -25,6 +26,7 @@ import utc from "dayjs/plugin/utc";
 
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
+
 import {
   LocalizationProvider,
   TimePicker,
@@ -32,6 +34,7 @@ import {
 } from "@mui/x-date-pickers";
 
 import { valibotResolver } from '@hookform/resolvers/valibot'
+
 
 import {
   object,
@@ -42,6 +45,7 @@ import {
   pipe,
   optional,
 } from 'valibot'
+
 
 import {
   createColumnHelper,
@@ -58,19 +62,26 @@ import {
 
 import { rankItem } from '@tanstack/match-sorter-utils'
 
+
 import { useForm, Controller } from 'react-hook-form'
 
+
 import { useSession } from "next-auth/react"
+
 
 import { toast } from "react-toastify"
 
 import dayjs from "dayjs"
+
+import CustomAvatar from '@core/components/mui/Avatar';
 
 import tableStyles from '@core/styles/table.module.css'
 
 import TablePaginationComponent from '@components/TablePaginationComponent'
 
 import { usePermissionList } from '@/utils/getPermission'
+
+import { getInitials } from '@/utils/getInitials';
 
 import CustomTextField from "@/@core/components/mui/TextField"
 
@@ -701,6 +712,14 @@ const VisitorTable = () => {
   const getPermissions = usePermissionList()
   const [permissions, setPermissions] = useState({})
 
+  const public_url = process.env.NEXT_PUBLIC_ASSETS_URL;
+
+  const getAvatar = ({ avatar, fullName }) => {
+    if (avatar) return <CustomAvatar src={`${public_url}/uploads/visitor/${avatar}`} size={34} />
+
+    return <CustomAvatar size={34}>{getInitials(fullName)}</CustomAvatar>
+  }
+
   useEffect(() => {
     const fetchPermissions = async () => {
       try {
@@ -828,17 +847,22 @@ const VisitorTable = () => {
         )
       },
       columnHelper.display({
-        id: 'sr_no',
-        header: 'Sr No',
-        cell: ({ row }) => <Typography>{row.index + 1}</Typography>
-      }),
-      columnHelper.accessor('visitor_name', {
-        header: 'Visitor Name',
-        cell: (info) => <Typography>{info.getValue()}</Typography>
-      }),
-      columnHelper.accessor('visitor_contact_no', {
-        header: 'Visitor No',
-        cell: (info) => <Typography>{info.getValue() || '-'}</Typography>
+        id: 'visitor',
+        header: 'Visitor',
+        cell: ({ row }) => (
+          <div className="flex items-center gap-4">
+            {getAvatar({
+              avatar: row.original.photo,
+              fullName: `${row.original.first_name} ${row.original.last_name}`
+            })}
+            <div className="flex flex-col">
+              <Typography color="text.primary" className="font-medium">
+                {`${row.original.visitor_name ?? ''}`}
+              </Typography>
+              <Typography variant="body2">{row.original.visitor_contact_no}</Typography>
+            </div>
+          </div>
+        )
       }),
       columnHelper.accessor('category.name', {
         header: 'Category',
