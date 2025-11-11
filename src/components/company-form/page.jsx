@@ -34,6 +34,7 @@ import {
   minLength,
   maxLength,
   pipe,
+  regex,
   boolean,
   check,
   optional,
@@ -126,10 +127,11 @@ const UserFormLayout = () => {
 
     phone: pipe(
       string(),
-      minLength(7, 'Phone number must be at least 7 digits'),
+      minLength(7, 'Phone number must be valid'),
       maxLength(15, 'Phone number can be a maximum of 15 digits'),
-      custom((value) => /^\d+$/.test(value), 'Phone number must contain digits only')
+      regex(/^[0-9]+$/, 'Phone number must contain only digits (0–9)')
     ),
+
     gst_no: optional(
       string([
         check(
@@ -653,8 +655,7 @@ const UserFormLayout = () => {
                   />
                 </Grid>
               )}
-              <Grid size={{ xs: 12, sm: 6 }}>
-                {/* Phone */}
+              <Grid item xs={12} sm={4}>
                 <Controller
                   name="phone"
                   control={control}
@@ -662,31 +663,26 @@ const UserFormLayout = () => {
                     <CustomTextField
                       {...field}
                       fullWidth
-                      required
                       type="tel"
-                      label="Phone"
-                      placeholder="Phone"
+                      label="Phone*"
+                      placeholder="Enter phone number"
                       error={!!errors.phone}
                       helperText={errors.phone?.message}
-                      inputProps={{ inputMode: 'numeric' }} // mobile keyboard hint
-                      onKeyDown={(e) => {
-                        const allowedKeys = ['Backspace', 'Tab', 'ArrowLeft', 'ArrowRight', 'Delete'];
-
-                        if (!/^[0-9]$/.test(e.key) && !allowedKeys.includes(e.key)) {
-                          e.preventDefault();
-                        }
+                      inputProps={{
+                        inputMode: 'numeric', // shows numeric keypad on mobile
+                        pattern: '[0-9]*' // browser hint
                       }}
-                      onPaste={(e) => {
-                        const paste = e.clipboardData.getData('text');
-
-                        if (!/^[0-9]+$/.test(paste)) {
-                          e.preventDefault();
-                        }
+                      onChange={(e) => {
+                        // remove all non-digit characters
+                        const numericValue = e.target.value.replace(/\D/g, '');
+                        
+                        field.onChange(numericValue);
                       }}
                     />
                   )}
                 />
               </Grid>
+
               <Grid size={{ xs: 12, sm: 6 }}>
                 {/* <Card className="p-4"> */}
                 <Typography variant="h6" className="mb-4">Profile Photo</Typography>

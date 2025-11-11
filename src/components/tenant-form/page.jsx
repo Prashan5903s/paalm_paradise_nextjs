@@ -42,12 +42,9 @@ import {
   minLength,
   maxLength,
   pipe,
-  boolean,
-  check,
+  regex,
   optional,
   email,
-  custom,
-  array
 } from 'valibot';
 
 import { useApi } from '../../utils/api';
@@ -111,8 +108,9 @@ const TenantFormLayout = () => {
 
     phone: pipe(
       string(),
-      minLength(1, 'Phone is required'),
-      maxLength(255, 'Phone can be a maximum of 255 characters')
+      minLength(7, 'Phone number must be valid'),
+      maxLength(15, 'Phone number can be a maximum of 15 digits'),
+      regex(/^[0-9]+$/, 'Phone number must contain only digits (0–9)')
     ),
 
     password: id
@@ -624,7 +622,7 @@ const TenantFormLayout = () => {
               />
             </Grid>
 
-            <Grid item size={{ xs: 12, sm: 4 }}>
+            <Grid item xs={12} sm={4}>
               <Controller
                 name="phone"
                 control={control}
@@ -634,9 +632,19 @@ const TenantFormLayout = () => {
                     fullWidth
                     type="tel"
                     label="Phone*"
-                    placeholder="Phone"
+                    placeholder="Enter phone number"
                     error={!!errors.phone}
                     helperText={errors.phone?.message}
+                    inputProps={{
+                      inputMode: 'numeric', // shows numeric keypad on mobile
+                      pattern: '[0-9]*' // browser hint
+                    }}
+                    onChange={(e) => {
+                      // remove all non-digit characters
+                      const numericValue = e.target.value.replace(/\D/g, '');
+                      
+                      field.onChange(numericValue);
+                    }}
                   />
                 )}
               />

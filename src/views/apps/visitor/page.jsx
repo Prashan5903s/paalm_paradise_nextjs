@@ -36,7 +36,9 @@ import { valibotResolver } from '@hookform/resolvers/valibot'
 import {
   object,
   string,
+  maxLength,
   minLength,
+  regex,
   pipe,
   optional,
 } from 'valibot'
@@ -129,7 +131,12 @@ const VisitorModal = ({
   // Validation schema (field presence only)
   const schema = object({
     visitor_name: pipe(string(), minLength(1, "Visitor name is required")),
-    visitor_contact: pipe(string(), minLength(10, "Contact no. is required")),
+    visitor_contact: pipe(
+      string(),
+      minLength(7, 'Visitor contact number must be valid'),
+      maxLength(15, 'Visitor contact number can be a maximum of 15 digits'),
+      regex(/^[0-9]+$/, 'Visitor contact number must contain only digits (0–9)')
+    ),
     checkin_date: pipe(string(), minLength(1, "Check-in date is required")),
     checkin_from_time: pipe(string(), minLength(1, "Check-in from time is required")),
     checkin_to_time: pipe(string(), minLength(1, "Check-in to time is required")),
@@ -337,10 +344,21 @@ const VisitorModal = ({
                     fullWidth
                     error={!!errors.visitor_contact}
                     helperText={errors.visitor_contact?.message}
+                    inputProps={{
+                      inputMode: 'numeric', // mobile numeric keypad
+                      pattern: '[0-9]*', // HTML pattern hint
+                    }}
+                    onChange={(e) => {
+                      // strip all non-digit characters in real-time
+                      const numericValue = e.target.value.replace(/\D/g, '');
+
+                      field.onChange(numericValue);
+                    }}
                   />
                 )}
               />
             </Grid>
+
 
             {/* Date */}
             <Grid item size={{ xs: 12, md: 6 }}>

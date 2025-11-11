@@ -209,7 +209,7 @@ const UserListTable = ({
 
   // -------------------- Avatars --------------------
   const getAvatar = ({ avatar, fullName }) => {
-    if (avatar) return <CustomAvatar src={`${public_url}/${avatar}`} size={34} />
+    if (avatar) return <CustomAvatar src={`${public_url}/uploads/images/${avatar}`} size={34} />
 
     return <CustomAvatar size={34}>{getInitials(fullName)}</CustomAvatar>
   }

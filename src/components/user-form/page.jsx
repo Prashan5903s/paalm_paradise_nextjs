@@ -43,7 +43,7 @@ import {
   maxLength,
   pipe,
   boolean,
-  check,
+  regex,
   optional,
   email,
   custom,
@@ -109,6 +109,13 @@ const UserFormLayout = () => {
       maxLength(255, 'Email can be a maximum of 255 characters')
     ),
 
+    phone: pipe(
+      string(),
+      minLength(7, 'Phone number must be valid'),
+      maxLength(15, 'Phone number can be a maximum of 15 digits'),
+      regex(/^[0-9]+$/, 'Phone number must contain only digits (0–9)')
+    ),
+
     password: id
       ? optional(string())
       : pipe(
@@ -137,12 +144,6 @@ const UserFormLayout = () => {
     city_id: pipe(string()),
     address: pipe(string(), maxLength(1000, 'Address can be a maximum of 1000 characters')),
     pincode: pipe(string(), maxLength(10, 'Pincode max length is of 10 digit')),
-
-    phone: pipe(
-      string(),
-      minLength(7, 'Phone number must be valid'),
-      maxLength(15, 'Phone number can be a maximum of 15 digits')
-    ),
 
     photo: optional(string()),
     status: boolean(),
@@ -462,7 +463,7 @@ const UserFormLayout = () => {
 
     // Safe image assignment
     if (editData.photo) {
-      setImgSrc(`${public_url}${editData.photo}`);
+      setImgSrc(`${public_url}/uploads/images/${editData.photo}`);
     } else {
       setImgSrc('/images/avatars/11.png')
     }
@@ -505,12 +506,6 @@ const UserFormLayout = () => {
       setStateData(states);
     }
   }, [countryId, createData])
-
-  useEffect(() => {
-    if (errors) {
-      console.log("Error", errors);
-    }
-  }, [errors])
 
   const submitFormData = async (values) => {
     try {
@@ -772,7 +767,7 @@ const UserFormLayout = () => {
               />
             </Grid>
 
-            <Grid item size={{ xs: 12, sm: 4 }}>
+            <Grid item xs={12} sm={4}>
               <Controller
                 name="phone"
                 control={control}
@@ -782,9 +777,19 @@ const UserFormLayout = () => {
                     fullWidth
                     type="tel"
                     label="Phone*"
-                    placeholder="Phone"
+                    placeholder="Enter phone number"
                     error={!!errors.phone}
                     helperText={errors.phone?.message}
+                    inputProps={{
+                      inputMode: 'numeric', // shows numeric keypad on mobile
+                      pattern: '[0-9]*' // browser hint
+                    }}
+                    onChange={(e) => {
+                      // remove all non-digit characters
+                      const numericValue = e.target.value.replace(/\D/g, '');
+
+                      field.onChange(numericValue);
+                    }}
                   />
                 )}
               />
