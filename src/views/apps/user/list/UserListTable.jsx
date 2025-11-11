@@ -226,9 +226,34 @@ const UserListTable = ({ userData, loadData, setIsUserCardShow, getStatsCount })
         header: 'Phone',
         cell: ({ row }) => <Typography>{row.original.phone}</Typography>
       }),
-      columnHelper.accessor('address', {
-        header: 'Address',
-        cell: ({ row }) => <Typography>{row.original.address}</Typography>
+      columnHelper.accessor('apartment_data', {
+        header: 'Apartment',
+        cell: ({ row }) => {
+          const apartments = row.original.apartment_data || [];
+
+          return (
+            <Typography variant="body2">
+              {apartments.length > 0 ? (
+                apartments.map((item, index) => {
+                  const aptNo = item.apartment_id?.apartment_no || 'N/A';
+                  const towerName = item.apartment_id?.tower_id?.name || 'N/A';
+                  const floorName = item.apartment_id?.floor_id?.floor_name || 'N/A';
+
+                  return (
+
+                    <div key={index}>
+
+                      <>{aptNo}</>, {towerName}, {floorName}
+                      <br />
+                    </div>
+                  );
+                })
+              ) : (
+                'No apartment assigned'
+              )}
+            </Typography>
+          );
+        },
       }),
       columnHelper.accessor('status', {
         header: 'Status',

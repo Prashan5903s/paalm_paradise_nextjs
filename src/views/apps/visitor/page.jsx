@@ -316,7 +316,7 @@ const VisitorModal = ({
                     >
                       {createData?.apartment?.map((item) => (
                         <MenuItem key={item._id} value={String(item._id)}>
-                          {item.apartment_no}
+                          {item.apartment_no}, {item?.tower_id?.name}, {item?.floor_id?.floor_name}
                         </MenuItem>
                       ))}
                     </TextField>

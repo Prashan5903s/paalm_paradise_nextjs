@@ -62,7 +62,9 @@ const UserList = () => {
       const data = await response.json();
 
       if (response.ok) {
-        setUserData(data?.data?.company);
+        console.log("Data", data?.data?.users);
+
+        setUserData(data?.data?.users);
       }
     } catch (error) {
       console.log('Error occured', error);
