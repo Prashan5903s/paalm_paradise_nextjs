@@ -651,7 +651,7 @@ const OTPCodeModal = ({ open, setOpenDialog, code, id, data }) => {
           sx={{ fontStyle: "italic", mt: 4, mb: 4, fontWeight: 500 }}
           color="text.primary"
         >
-          <strong>{data?.check_in_date}</strong>, <strong>{formatTimeTo12Hour(data?.check_in_from_time)}</strong> to <strong>{formatTimeTo12Hour(data?.check_in_to_time)}</strong>
+          <strong>{data?.check_in_date}</strong>, <strong>{(data?.check_in_from_time)}</strong> to <strong>{(data?.check_in_to_time)}</strong>
         </Typography>
 
         <Typography variant="body2" color="text.secondary">
