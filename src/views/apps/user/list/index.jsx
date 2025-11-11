@@ -30,6 +30,10 @@ const UserList = () => {
   const { doGet, doPost } = useApi();
   const [isUserCardShow, setIsUserCardShow] = useState(true);
 
+  const [roleData, setRoleData] = useState();
+
+  const [filterUser, setFilterUser] = useState([]);
+
   const getPermissions = usePermissionList();
   const [permissions, setPermissions] = useState({});
 
@@ -62,8 +66,8 @@ const UserList = () => {
       const data = await response.json();
 
       if (response.ok) {
-        console.log("Data", data?.data?.users);
 
+        setRoleData(data?.data?.role);
         setUserData(data?.data?.users);
       }
     } catch (error) {
@@ -110,7 +114,7 @@ const UserList = () => {
         )}
       </Grid>
       <Grid size={{ xs: 12 }}>
-        <UserListTable userData={userData} loadData={loadData} setIsUserCardShow={setIsUserCardShow} getStatsCount={getStatsCount} permissions={permissions} />
+        <UserListTable userData={userData} roleData={roleData} filterUser={filterUser} setFilterUser={setFilterUser} loadData={loadData} setIsUserCardShow={setIsUserCardShow} getStatsCount={getStatsCount} permissions={permissions} />
       </Grid>
     </Grid>
   )
