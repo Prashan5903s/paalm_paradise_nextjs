@@ -8,6 +8,7 @@ import {
   Box,
   TextField,
   Button,
+  Paper,
   Dialog,
   Checkbox,
   CardContent,
@@ -164,6 +165,7 @@ const VisitorModal = ({
   const {
     control,
     handleSubmit,
+    watch,
     reset,
     formState: { errors },
   } = useForm({
@@ -182,6 +184,31 @@ const VisitorModal = ({
       description: "",
     },
   });
+
+  const [ownerName, setOwnerName] = useState("");
+  const [ownerPhone, setOwnerPhone] = useState("");
+
+  const selectedApartmentId = watch("apartment_id");
+
+  useEffect(() => {
+    if (createData?.apartment?.length && selectedApartmentId) {
+      const selected = createData.apartment.find(
+        (item) => String(item._id) === String(selectedApartmentId)
+      );
+
+      if (selected) {
+
+        setOwnerName(selected?.assigned_to.first_name + " " + selected?.assigned_to.last_name  || "N/A");
+
+        setOwnerPhone(selected?.assigned_to?.phone || "N/A");
+      } else {
+
+        setOwnerName("");
+
+        setOwnerPhone("");
+      }
+    }
+  }, [selectedApartmentId, createData]);
 
   const onClose = () => {
     setVisitorData();
@@ -370,6 +397,42 @@ const VisitorModal = ({
               />
             </Grid>
 
+            <Grid item size={{ xs: 12 }}>
+              {selectedApartmentId && (
+                <Paper
+                  elevation={0}
+                  sx={{
+                    border: "1px solid",
+                    borderColor: "grey.400",
+                    borderRadius: 2,
+                    p: 2,
+                    maxWidth: 420,
+                  }}
+                >
+                  <Box>
+                    <Typography variant="caption" color="text.secondary">
+                      Apartment Owner Name:
+                    </Typography>
+                    <Typography variant="body1" sx={{ fontWeight: 600, mt: 0.5 }}>
+                      {ownerName}
+                    </Typography>
+                  </Box>
+
+
+                  <Box display="flex" alignItems="center" mt={1}>
+                    <i className="tebler-phone"></i>
+                    <Box>
+                      <Typography variant="caption" color="text.secondary">
+                        Apartment Owner Number:
+                      </Typography>
+                      <Typography variant="body1" sx={{ fontWeight: 600, mt: 0.5 }}>
+                        {ownerPhone}
+                      </Typography>
+                    </Box>
+                  </Box>
+                </Paper>
+              )}
+            </Grid>
 
             {/* Date */}
             <Grid item size={{ xs: 12, md: 6 }}>
