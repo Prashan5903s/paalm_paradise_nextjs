@@ -909,6 +909,7 @@ const VisitorTable = () => {
             "2": "Rejected",
             "3": "Expired",
             "4": "Accepted",
+            "5": "Rejected"
           }
 
           return row.original.visitor_status === "1" ? (
